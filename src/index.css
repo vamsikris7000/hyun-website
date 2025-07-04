@@ -8,8 +8,17 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 100% 97%;
+    --foreground: 240 10% 20%;
+    
+    /* Brand gradient colors */
+    --gradient-start: 195 100% 85%;
+    --gradient-mid: 270 50% 85%;
+    --gradient-end: 315 50% 80%;
+    
+    /* Interactive elements */
+    --accent-blue: 210 100% 65%;
+    --accent-purple: 270 50% 65%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;

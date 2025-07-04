@@ -24,6 +24,11 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				'gradient-start': 'hsl(var(--gradient-start))',
+				'gradient-mid': 'hsl(var(--gradient-mid))',
+				'gradient-end': 'hsl(var(--gradient-end))',
+				'accent-blue': 'hsl(var(--accent-blue))',
+				'accent-purple': 'hsl(var(--accent-purple))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
