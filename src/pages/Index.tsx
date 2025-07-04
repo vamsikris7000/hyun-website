@@ -27,23 +27,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end">
-      {/* Floating S elements */}
-      <div className="absolute top-20 right-32 w-12 h-12 bg-foreground/20 rounded-full flex items-center justify-center text-foreground font-semibold backdrop-blur-sm">
-        S
-      </div>
-      <div className="absolute top-80 left-20 w-12 h-12 bg-foreground/20 rounded-full flex items-center justify-center text-foreground font-semibold backdrop-blur-sm">
-        S
-      </div>
-      <div className="absolute top-80 right-32 w-12 h-12 bg-foreground/20 rounded-full flex items-center justify-center text-foreground font-semibold backdrop-blur-sm">
-        S
-      </div>
-      <div className="absolute bottom-40 left-1/4 w-12 h-12 bg-foreground/20 rounded-full flex items-center justify-center text-foreground font-semibold backdrop-blur-sm">
-        S
-      </div>
-      <div className="absolute bottom-40 right-1/4 w-12 h-12 bg-foreground/20 rounded-full flex items-center justify-center text-foreground font-semibold backdrop-blur-sm">
-        S
-      </div>
-
       {/* Main content */}
       <div className="flex flex-col items-center justify-center min-h-screen px-4 relative z-10">
         {/* Logo and branding */}
