@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
+import spectrumAiLogo from "@/assets/spectrum-ai-logo.png";
+import goCreateLogo from "@/assets/gocreate-logo.png";
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -191,13 +193,21 @@ const Index = () => {
             </motion.div>
             
             <div className="grid md:grid-cols-2 gap-12">
-              <motion.div variants={premiumVariants}>
-                <h4 className="text-2xl font-light text-foreground mb-4">SPECTRUM AI</h4>
+              <motion.div variants={premiumVariants} className="flex flex-col items-start">
+                <img 
+                  src={spectrumAiLogo} 
+                  alt="Spectrum AI" 
+                  className="h-16 mb-4 object-contain"
+                />
                 <p className="text-muted-foreground">Intelligent VOIP AI & Workflow Automation</p>
               </motion.div>
               
-              <motion.div variants={premiumVariants}>
-                <h4 className="text-2xl font-light text-foreground mb-4">GoCreate.me</h4>
+              <motion.div variants={premiumVariants} className="flex flex-col items-start">
+                <img 
+                  src={goCreateLogo} 
+                  alt="GoCreate.me" 
+                  className="h-16 mb-4 object-contain"
+                />
                 <p className="text-muted-foreground">Interactive tools and digital experiences.</p>
               </motion.div>
             </div>
