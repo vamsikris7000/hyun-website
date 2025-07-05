@@ -9,17 +9,26 @@ const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
+    initial: { opacity: 0, y: 80, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -50, scale: 0.95 },
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
   };
 
   const staggerChildren = {
     animate: {
       transition: {
-        staggerChildren: 0.2
+        staggerChildren: 0.15,
+        delayChildren: 0.1
       }
     }
+  };
+
+  const premiumVariants = {
+    initial: { opacity: 0, y: 100, rotateX: 15 },
+    animate: { opacity: 1, y: 0, rotateX: 0 },
+    exit: { opacity: 0, y: -80, rotateX: -10 },
+    transition: { duration: 1, ease: [0.16, 1, 0.3, 1] }
   };
 
   const services = [
@@ -98,15 +107,16 @@ const Index = () => {
           <motion.div
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true, margin: "-100px" }}
+            exit="exit"
+            viewport={{ once: false, margin: "-80px", amount: 0.3 }}
             variants={staggerChildren}
             className="grid lg:grid-cols-2 gap-16 items-center"
           >
-            <motion.div variants={fadeInUp}>
+            <motion.div variants={premiumVariants}>
               <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-8">ABOUT</p>
             </motion.div>
             
-            <motion.div variants={fadeInUp} className="lg:col-start-2">
+            <motion.div variants={premiumVariants} className="lg:col-start-2">
               <h3 className="text-3xl lg:text-4xl font-light text-foreground mb-6">
                 We specialize in helping businesses navigate complexity <em className="italic">with clarity.</em>
               </h3>
@@ -132,10 +142,11 @@ const Index = () => {
           <motion.div
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true, margin: "-100px" }}
+            exit="exit"
+            viewport={{ once: false, margin: "-80px", amount: 0.2 }}
             variants={staggerChildren}
           >
-            <motion.div variants={fadeInUp} className="text-center mb-16">
+            <motion.div variants={premiumVariants} className="text-center mb-16">
               <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-4">SOLUTIONS</p>
               <h3 className="text-3xl lg:text-4xl font-light text-foreground">
                 Our Areas of <em className="italic">Practice</em>
@@ -146,7 +157,7 @@ const Index = () => {
               {services.map((service, index) => (
                 <motion.div
                   key={index}
-                  variants={fadeInUp}
+                  variants={premiumVariants}
                   custom={index}
                 >
                   <Card className="p-6 h-full bg-card hover:shadow-lg transition-shadow duration-300">
@@ -171,20 +182,21 @@ const Index = () => {
           <motion.div
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true, margin: "-100px" }}
+            exit="exit"
+            viewport={{ once: false, margin: "-80px", amount: 0.3 }}
             variants={staggerChildren}
           >
-            <motion.div variants={fadeInUp} className="mb-16">
+            <motion.div variants={premiumVariants} className="mb-16">
               <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-8">PARTNERS</p>
             </motion.div>
             
             <div className="grid md:grid-cols-2 gap-12">
-              <motion.div variants={fadeInUp}>
+              <motion.div variants={premiumVariants}>
                 <h4 className="text-2xl font-light text-foreground mb-4">SPECTRUM AI</h4>
                 <p className="text-muted-foreground">Intelligent VOIP AI & Workflow Automation</p>
               </motion.div>
               
-              <motion.div variants={fadeInUp}>
+              <motion.div variants={premiumVariants}>
                 <h4 className="text-2xl font-light text-foreground mb-4">GoCreate.me</h4>
                 <p className="text-muted-foreground">Interactive tools and digital experiences.</p>
               </motion.div>
@@ -199,21 +211,22 @@ const Index = () => {
           <motion.div
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true, margin: "-100px" }}
+            exit="exit"
+            viewport={{ once: false, margin: "-80px", amount: 0.3 }}
             variants={staggerChildren}
           >
-            <motion.h3 variants={fadeInUp} className="text-3xl lg:text-4xl font-light text-foreground mb-4">
+            <motion.h3 variants={premiumVariants} className="text-3xl lg:text-4xl font-light text-foreground mb-4">
               Let's transform your challenges
             </motion.h3>
-            <motion.h4 variants={fadeInUp} className="text-3xl lg:text-4xl font-light text-foreground mb-8">
+            <motion.h4 variants={premiumVariants} className="text-3xl lg:text-4xl font-light text-foreground mb-8">
               into <em className="italic">opportunities.</em>
             </motion.h4>
             
-            <motion.p variants={fadeInUp} className="text-muted-foreground mb-8">
+            <motion.p variants={premiumVariants} className="text-muted-foreground mb-8">
               Reach out to Hyun and Associates LLC now.
             </motion.p>
             
-            <motion.div variants={fadeInUp}>
+            <motion.div variants={premiumVariants}>
               <Button 
                 onClick={() => setIsChatOpen(true)}
                 className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3"
