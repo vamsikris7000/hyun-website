@@ -1,108 +1,248 @@
 import { useState } from "react";
-import { Mic, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import Header from "@/components/Header";
+import ChatInterface from "@/components/ChatInterface";
 
 const Index = () => {
-  const [message, setMessage] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      console.log("Sending message:", message);
-      setMessage("");
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, ease: "easeOut" }
+  };
+
+  const staggerChildren = {
+    animate: {
+      transition: {
+        staggerChildren: 0.2
+      }
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSend();
+  const services = [
+    {
+      title: "Organizational Culture Transformation",
+      description: "Transform your workplace culture for better engagement and results.",
+      icon: "🏢"
+    },
+    {
+      title: "Strategic Communication Consulting",
+      description: "Develop clear communication strategies that drive business success.",
+      icon: "💬"
+    },
+    {
+      title: "Team Development & Facilitation",
+      description: "Build stronger, more effective teams through targeted development.",
+      icon: "👥"
+    },
+    {
+      title: "DEI Strategy and Implementation",
+      description: "Create inclusive environments that harness diversity for innovation.",
+      icon: "🤝"
     }
-  };
-
-  const suggestions = [
-    "What services do you offer?",
-    "How do I schedule a consultation?",
-    "..."
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end">
-      {/* Main content */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 relative z-10">
-        {/* Logo and branding */}
-        <div className="text-center mb-16">
-          <div className="mb-8">
-            <div className="text-6xl font-light text-foreground mb-2">
-              H<span className="inline-block transform scale-y-150">∧</span>
+    <div className="min-h-screen bg-background">
+      <Header onBookDemo={() => setIsChatOpen(true)} />
+      
+      {/* Hero Section */}
+      <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end pt-20">
+        <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-5xl lg:text-6xl font-light text-foreground mb-6">
+              Consulting made easy
+            </h1>
+            <h2 className="text-5xl lg:text-6xl font-light text-foreground mb-8">
+              for real strategic <em className="italic">growth.</em>
+            </h2>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <Button 
+                onClick={() => setIsChatOpen(true)}
+                className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3"
+              >
+                ✓ GET STARTED
+              </Button>
+              <Button 
+                variant="ghost"
+                className="text-foreground hover:bg-foreground/10 px-8 py-3"
+              >
+                ▶ View Demo
+              </Button>
             </div>
-            <div className="text-sm font-medium tracking-[0.3em] text-foreground/80">
-              HYUN
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="hidden lg:block"
+          >
+            {/* Placeholder for hero image/graphic */}
+            <div className="w-full h-96 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20"></div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+            className="grid lg:grid-cols-2 gap-16 items-center"
+          >
+            <motion.div variants={fadeInUp}>
+              <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-8">ABOUT</p>
+            </motion.div>
+            
+            <motion.div variants={fadeInUp} className="lg:col-start-2">
+              <h3 className="text-3xl lg:text-4xl font-light text-foreground mb-6">
+                We specialize in helping businesses navigate complexity <em className="italic">with clarity.</em>
+              </h3>
+              
+              <p className="text-muted-foreground mb-8 leading-relaxed">
+                By combining strategic insight with the power of artificial intelligence and automation, we design customized solutions that improve operations, enhance customer engagement, and drive measurable results.
+              </p>
+              
+              <Button 
+                variant="outline"
+                className="border-foreground/20 text-foreground hover:bg-foreground/5"
+              >
+                ↗ MORE ABOUT US
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Solutions Section */}
+      <section id="solutions" className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.div variants={fadeInUp} className="text-center mb-16">
+              <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-4">SOLUTIONS</p>
+              <h3 className="text-3xl lg:text-4xl font-light text-foreground">
+                Our Areas of <em className="italic">Practice</em>
+              </h3>
+            </motion.div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {services.map((service, index) => (
+                <motion.div
+                  key={index}
+                  variants={fadeInUp}
+                  custom={index}
+                >
+                  <Card className="p-6 h-full bg-card hover:shadow-lg transition-shadow duration-300">
+                    <div className="text-4xl mb-4">{service.icon}</div>
+                    <h4 className="text-lg font-medium text-foreground mb-3">
+                      {service.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {service.description}
+                    </p>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
-            <div className="text-sm font-medium tracking-[0.2em] text-foreground/80">
-              ASSOCIATES
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section id="partners" className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.div variants={fadeInUp} className="mb-16">
+              <p className="text-sm font-medium tracking-[0.3em] text-muted-foreground mb-8">PARTNERS</p>
+            </motion.div>
+            
+            <div className="grid md:grid-cols-2 gap-12">
+              <motion.div variants={fadeInUp}>
+                <h4 className="text-2xl font-light text-foreground mb-4">SPECTRUM AI</h4>
+                <p className="text-muted-foreground">Intelligent VOIP AI & Workflow Automation</p>
+              </motion.div>
+              
+              <motion.div variants={fadeInUp}>
+                <h4 className="text-2xl font-light text-foreground mb-4">GoCreate.me</h4>
+                <p className="text-muted-foreground">Interactive tools and digital experiences.</p>
+              </motion.div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.h3 variants={fadeInUp} className="text-3xl lg:text-4xl font-light text-foreground mb-4">
+              Let's transform your challenges
+            </motion.h3>
+            <motion.h4 variants={fadeInUp} className="text-3xl lg:text-4xl font-light text-foreground mb-8">
+              into <em className="italic">opportunities.</em>
+            </motion.h4>
+            
+            <motion.p variants={fadeInUp} className="text-muted-foreground mb-8">
+              Reach out to Hyun and Associates LLC now.
+            </motion.p>
+            
+            <motion.div variants={fadeInUp}>
+              <Button 
+                onClick={() => setIsChatOpen(true)}
+                className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3"
+              >
+                📞 CONTACT NOW
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer id="contact" className="py-12 bg-background border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8">
+            <a href="#home" className="text-muted-foreground hover:text-foreground transition-colors">HOME</a>
+            <a href="#solutions" className="text-muted-foreground hover:text-foreground transition-colors">SOLUTIONS</a>
+            <a href="#partners" className="text-muted-foreground hover:text-foreground transition-colors">PARTNERS</a>
+            <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">CONTACT</a>
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-light text-foreground mb-4">
-            Welcome to
-          </h1>
-          <h2 className="text-4xl md:text-5xl font-light text-foreground mb-16">
-            Hyun and Associates
-          </h2>
-        </div>
-
-        {/* Question */}
-        <div className="text-center mb-12">
-          <p className="text-lg text-foreground/90 font-light">
-            Who do I have the pleasure of{" "}
-            <span className="italic">speaking with</span>?
-          </p>
-        </div>
-
-        {/* Input field */}
-        <div className="w-full max-w-2xl mb-8">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder=""
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="w-full h-14 px-6 pr-24 text-lg bg-white/90 backdrop-blur-sm border-none rounded-full shadow-lg focus:shadow-xl transition-all duration-300 placeholder:text-foreground/50"
-            />
-            <div className="absolute right-3 top-3 flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="w-8 h-8 p-0 rounded-full hover:bg-accent-purple/20"
-              >
-                <Mic className="w-4 h-4 text-accent-purple" />
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSend}
-                className="w-8 h-8 p-0 rounded-full bg-foreground hover:bg-foreground/90 text-background"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="text-center mt-8">
+            <p className="text-2xl font-light text-muted-foreground mb-4">Hyun and Associates LLC</p>
+            <p className="text-sm text-muted-foreground">© 2024 Hyun and Associates LLC. All Rights Reserved.</p>
           </div>
         </div>
+      </footer>
 
-        {/* Suggestion buttons */}
-        <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
-          {suggestions.map((suggestion, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="px-6 py-2 text-sm bg-white/60 backdrop-blur-sm border-foreground/20 text-foreground hover:bg-white/80 rounded-full transition-all duration-300"
-              onClick={() => setMessage(suggestion)}
-            >
-              {suggestion}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <ChatInterface isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };
