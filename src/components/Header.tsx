@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import aLogo from "@/assets/A.png";
 import haLogo from "@/assets/HA.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
@@ -32,25 +33,25 @@ const Header = ({ onBookDemo }: HeaderProps) => {
 
         <div className="inline-flex items-center gap-[45px] relative flex-[0_0_auto]">
           <div className="inline-flex items-center gap-[30px] relative flex-[0_0_auto]">
-            <a href="/" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
+            <Link to="/" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
               HOME
-            </a>
+            </Link>
 
-            <a href="/solutions" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
+            <Link to="/solutions" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
               SOLUTIONS
-            </a>
+            </Link>
 
-                        <a href="/about" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
-                          ABOUT US
-                        </a>
+            <Link to="/about" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
+              ABOUT US
+            </Link>
 
-            <a href="/partners" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
+            <Link to="/partners" className="relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] text-base whitespace-nowrap hover:opacity-70 transition-opacity">
               PARTNERS
-            </a>
+            </Link>
 
-            <a href="/contact" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
+            <Link to="/contact" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
               CONTACT
-            </a>
+            </Link>
           </div>
 
           <Button 

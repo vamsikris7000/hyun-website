@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
 import aLogo from "@/assets/A.png";
@@ -232,11 +233,11 @@ const AboutUs = () => {
               <div>
                 <h3 className="font-semibold text-[#0c202b] text-lg mb-4">Quick Links</h3>
                 <ul className="space-y-2">
-                  <li><a href="#home" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Home</a></li>
-                  <li><a href="/solutions" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Solutions</a></li>
-                  <li><a href="/about" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">About Us</a></li>
-                  <li><a href="/partners" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Partners</a></li>
-                  <li><a href="/contact" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Contact</a></li>
+                  <li><Link to="/" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Home</Link></li>
+                  <li><Link to="/solutions" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Solutions</Link></li>
+                  <li><Link to="/about" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">About Us</Link></li>
+                  <li><Link to="/partners" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Partners</Link></li>
+                  <li><Link to="/contact" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Contact</Link></li>
                 </ul>
               </div>
               
