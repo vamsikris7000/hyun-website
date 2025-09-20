@@ -1,8 +1,13 @@
-import { useState } from "react";
-import { Mic, Send, X } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Mic, Send, X, Star, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+import aLogo from "@/assets/A.png";
+import hyunLogo from "@/assets/hyunandassociates.png";
+import haLogo from "@/assets/HA.png";
 
 interface ChatInterfaceProps {
   isOpen: boolean;
@@ -11,25 +16,149 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [message, setMessage] = useState("");
+  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [streamedText, setStreamedText] = useState("");
+  const [conversationId, setConversationId] = useState<string>("");
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [error, setError] = useState<string>("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      console.log("Sending message:", message);
-      setMessage("");
+  const suggestedQuestions = [
+    "What services do you offer?",
+    "How do I schedule a consultation?",
+    "Tell me about your AI solutions",
+    "What makes you different from competitors?"
+  ];
+
+  // Debounced scroll function to prevent excessive scrolling during streaming
+  const scrollToBottom = useCallback(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  }, []);
+
+  // Debounce scroll calls
+  const debouncedScroll = useCallback(() => {
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
+  }, [scrollToBottom]);
+
+  useEffect(() => {
+    debouncedScroll();
+    // Prevent background scroll when chat is open
+    if (isOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+      // Reset chat state when closed
+      setShowWelcome(true);
+      setMessage("");
+      setChat([]);
+      setStreamedText("");
+      setIsLoading(false);
+      setError("");
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [chat, streamedText, isOpen, debouncedScroll]);
+
+  const handleSend = async () => {
+    if (!message.trim() || message.length > 2000) return;
+    const userMsg = message;
+    setChat((prev) => [...prev, { role: 'user', text: userMsg }]);
+    setMessage("");
+    setIsLoading(true);
+    setStreamedText("");
+    setError("");
+    setShowWelcome(false);
+
+    try {
+      console.log('Sending request to backend...', { userMsg, conversationId });
+      const response = await fetch('http://localhost:3001/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inputs: {},
+          query: userMsg,
+          response_mode: 'streaming',
+          conversation_id: conversationId,
+          user: 'abc-123',
+          files: [
+            {
+              type: 'image',
+              transfer_method: 'remote_url',
+              url: 'https://cloud.dify.ai/logo/logo-site.png',
+            },
+          ],
+        }),
+      });
+      console.log('Response received:', response.status, response.statusText);
+      if (!response.body) throw new Error('No response body');
+      const reader = response.body.getReader();
+      let fullText = '';
+      let decoder = new TextDecoder();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        console.log('Received chunk:', chunk);
+        const lines = chunk.split('\n').filter(Boolean);
+        for (const line of lines) {
+          try {
+            // Remove 'data: ' prefix if present
+            const cleanLine = line.startsWith('data: ') ? line.slice(6) : line;
+            const data = JSON.parse(cleanLine);
+            console.log('Parsed data:', data);
+            
+            // Extract conversation ID from the response
+            if (data.conversation_id && !conversationId) {
+              setConversationId(data.conversation_id);
+            }
+            
+            if (data.event === 'agent_message' && data.answer) {
+              fullText += data.answer;
+              setStreamedText(fullText);
+            }
+            if (data.event === 'message_end') {
+              setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+              setStreamedText('');
+            }
+          } catch (err) {
+            console.log('Error parsing line:', line, err);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Chat error:', err);
+      setError('Sorry, there was an error connecting to the chat service. Please try again.');
+      setStreamedText("");
+    }
+    setIsLoading(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSend();
     }
   };
 
-  const suggestions = [
-    "What services do you offer?",
-    "How do I schedule a consultation?",
-    "Tell me about your solutions"
-  ];
+  const handleSuggestionClick = (question: string) => {
+    setMessage(question);
+    setShowWelcome(false);
+  };
+
+  // Safe HTML rendering function with sanitization
+  const renderSafeHTML = (text: string, showCursor: boolean = false) => {
+    const parsedHTML = marked.parse(text);
+    const cursorHTML = showCursor ? '<span class="animate-pulse text-[#292929]/60 ml-1">|</span>' : '';
+    const fullHTML = parsedHTML + cursorHTML;
+    return DOMPurify.sanitize(fullHTML);
+  };
+
+
 
   return (
     <AnimatePresence>
@@ -38,91 +167,239 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 bg-white"
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-4 md:inset-8 bg-gradient-to-br from-gradient-start via-gradient-mid to-gradient-end rounded-2xl overflow-hidden"
+          {/* Simplified background gradients */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#efe9c0] rounded-full blur-3xl opacity-60" />
+            <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-[#d0a4ff] rounded-full blur-3xl opacity-60" />
+            <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-[#c0e9ef] rounded-full blur-3xl opacity-60" />
+          </div>
+
+          {/* Close button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-4 right-4 z-50 text-[#292929] hover:bg-white/20 rounded-full w-10 h-10 p-0 transition-all duration-200"
           >
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-foreground/10">
-                <div className="text-center flex-1">
-                  <div className="text-2xl font-light text-foreground mb-1">
-                    H<span className="inline-block transform scale-y-150">∧</span>
-                  </div>
-                  <div className="text-xs font-medium tracking-[0.2em] text-foreground/80">
-                    HYUN ASSOCIATES
+            <X className="w-5 h-5" />
+          </Button>
+
+          {showWelcome ? (
+            /* Welcome Screen */
+            <div className="flex flex-col items-center justify-center h-full relative z-10 px-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-center max-w-4xl w-full"
+              >
+                {/* Logo */}
+                <div className="flex flex-col items-center gap-4 mb-8">
+                  <img
+                    className="w-16 h-16 mix-blend-multiply"
+                    alt="HA Logo"
+                    src={haLogo}
+                  />
+                  <img
+                    className="w-48 h-12 mix-blend-multiply"
+                    alt="Hyun and Associates logo"
+                    src={hyunLogo}
+                  />
+                </div>
+
+                <h1 className="font-normal text-[#292929] text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
+                  Welcome to
+                  <br />
+                  Hyun and Associates
+                </h1>
+
+                <p className="font-normal text-[#292929] text-xl md:text-2xl text-center leading-relaxed mb-12">
+                  <span className="font-semibold">
+                    Who do I have the pleasure{" "}
+                  </span>
+                  <span className="font-bold italic">
+                    of speaking with?
+                  </span>
+                </p>
+
+                <div className="flex flex-col w-full items-center gap-6">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSend();
+                    }}
+                    className="relative w-full max-w-2xl"
+                  >
+                    <div className="relative flex items-center bg-white/90 backdrop-blur-sm rounded-full border border-gray-200 shadow-lg">
+                      <input
+                        type="text"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Type your message here..."
+                        className="flex-1 px-6 py-4 bg-transparent text-[#292929] text-lg placeholder-gray-400 focus:outline-none rounded-full"
+                        aria-label="Chat input"
+                      />
+                      <button
+                        type="submit"
+                        className="m-2 w-10 h-10 bg-[#af71f1] rounded-full flex items-center justify-center hover:bg-[#9c5ee0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2"
+                        aria-label="Send message"
+                      >
+                        <Send className="w-5 h-5 text-white" />
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="flex flex-wrap justify-center items-center gap-3 w-full max-w-3xl">
+                    {suggestedQuestions.map((question, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestionClick(question)}
+                        className="px-4 py-2 rounded-lg border border-[#af71f1] hover:bg-[#af71f1] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2 text-sm font-normal text-[#af71f1] whitespace-nowrap"
+                        type="button"
+                      >
+                        {question}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                  className="text-foreground hover:bg-foreground/10"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
+                </motion.div>
+              </div>
+          ) : (
+            /* Chat Interface */
+            <div className="flex flex-col h-full relative z-10">
+              {/* Header with Logo */}
+              <div className="flex items-center justify-start p-4">
+                <img
+                  className="w-[104px] h-[70px] mix-blend-multiply"
+                  alt="HA Logo"
+                  src={haLogo}
+                />
               </div>
 
-              {/* Chat Content */}
-              <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-                <div className="text-center mb-8">
-                  <p className="text-lg text-foreground/90 font-light">
-                    Who do I have the pleasure of{" "}
-                    <span className="italic">speaking with</span>?
-                  </p>
-                </div>
-
-                {/* Input field */}
-                <div className="w-full max-w-2xl mb-6">
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      placeholder=""
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="w-full h-14 px-6 pr-24 text-lg bg-white/90 backdrop-blur-sm border-none rounded-full shadow-lg focus:shadow-xl transition-all duration-300 placeholder:text-foreground/50"
-                    />
-                    <div className="absolute right-3 top-3 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-8 h-8 p-0 rounded-full hover:bg-accent-purple/20"
-                      >
-                        <Mic className="w-4 h-4 text-accent-purple" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleSend}
-                        className="w-8 h-8 p-0 rounded-full bg-foreground hover:bg-foreground/90 text-background"
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Suggestion buttons */}
-                <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
-                  {suggestions.map((suggestion, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="px-6 py-2 text-sm bg-white/60 backdrop-blur-sm border-foreground/20 text-foreground hover:bg-white/80 rounded-full transition-all duration-300"
-                      onClick={() => setMessage(suggestion)}
+              {/* Chat Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="max-w-4xl mx-auto space-y-6">
+                  {chat.map((msg, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.3, delay: idx * 0.1 }}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {suggestion}
-                    </Button>
+                      {msg.role === 'user' ? (
+                        <div className="max-w-[70%] bg-[#af71f1] text-white rounded-2xl rounded-br-md px-4 py-3 shadow-lg">
+                          <p className="text-base leading-relaxed whitespace-pre-line break-words">{msg.text}</p>
+                        </div>
+                      ) : (
+                        <div className="max-w-[80%] flex items-start gap-3">
+                          <div className="w-2 h-2 bg-[#d0a4ff] rounded-full mt-2 flex-shrink-0"></div>
+                          <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 shadow-lg">
+                            <div className="text-[#292929] text-base leading-relaxed break-words">
+                              <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
                   ))}
+                  
+                  {/* Consolidated Response State - Loading, Streaming, or Error */}
+                  {(isLoading || error) && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div className="max-w-[80%] flex items-start gap-3">
+                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                          error ? 'bg-red-500' : 'bg-[#d0a4ff]'
+                        }`}></div>
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 shadow-lg">
+                          {error ? (
+                            <div className="flex items-start gap-2 text-red-600 text-base leading-relaxed">
+                              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                              <span className="break-words">{error}</span>
+                            </div>
+                          ) : streamedText ? (
+                            <div className="text-[#292929] text-base leading-relaxed break-words">
+                              <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(streamedText, true) }} />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-[#292929] text-base leading-relaxed">
+                              <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                              <span>Thinking...</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  
+                  <div ref={chatEndRef} />
+                </div>
+              </div>
+              
+              {/* Input Area - Fixed at bottom */}
+              <div className="border-t border-gray-100 p-4 bg-white/95 backdrop-blur-sm">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        placeholder="Type your message here..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
+                        onKeyPress={handleKeyPress}
+                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-full text-base placeholder:text-gray-500 text-[#292929] focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:border-transparent"
+                        disabled={isLoading}
+                      />
+                      <button
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#af71f1] transition-colors"
+                        onClick={() => console.log("Microphone clicked")}
+                        aria-label="Voice input"
+                        type="button"
+                      >
+                        <Mic className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button
+                      className="w-12 h-12 flex items-center justify-center bg-[#af71f1] rounded-full hover:bg-[#9c5ee0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleSend}
+                      disabled={isLoading || !message.trim()}
+                      aria-label="Send message"
+                      type="button"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 text-white animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5 text-white" />
+                      )}
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {suggestedQuestions.slice(0, 2).map((question, index) => (
+                      <button
+                        key={index}
+                        className="px-3 py-1.5 text-sm rounded-full border border-[#af71f1] text-[#af71f1] hover:bg-[#af71f1] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2"
+                        onClick={() => handleSuggestionClick(question)}
+                        type="button"
+                      >
+                        {question}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
