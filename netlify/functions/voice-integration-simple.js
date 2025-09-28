@@ -1,11 +1,4 @@
-// Use built-in fetch in Node.js 18+ or fallback to node-fetch
-let fetch;
-try {
-  fetch = globalThis.fetch || require('node-fetch');
-} catch (e) {
-  fetch = require('node-fetch');
-}
-
+// Simplified voice integration function without external dependencies
 exports.handler = async (event, context) => {
   // Enable CORS
   const headers = {
@@ -30,7 +23,6 @@ exports.handler = async (event, context) => {
     console.log('HTTP Method:', httpMethod);
     console.log('Path:', path);
     console.log('Query params:', queryStringParameters);
-    console.log('Body:', body);
 
     // Get environment variables
     const apiKey = process.env.VOICE_API_KEY;
@@ -54,6 +46,7 @@ exports.handler = async (event, context) => {
       
       console.log(`Calling backend: ${backendUrl}/tokens/generate?agent_name=${agentName}`);
       
+      // Use built-in fetch (Node.js 18+)
       const response = await fetch(`${backendUrl}/tokens/generate?agent_name=${agentName}`, {
         method: 'POST',
         headers: {

@@ -1,4 +1,10 @@
-const fetch = require('node-fetch');
+// Use built-in fetch in Node.js 18+ or fallback to node-fetch
+let fetch;
+try {
+  fetch = globalThis.fetch || require('node-fetch');
+} catch (e) {
+  fetch = require('node-fetch');
+}
 
 exports.handler = async (event, context) => {
   const headers = {
