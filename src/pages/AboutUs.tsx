@@ -74,8 +74,8 @@ const AboutUs = () => {
               </h2>
             </div>
 
-            <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px] max-w-4xl">
-              <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+            <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] max-w-4xl">
+              <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                 We go beyond surface-level fixes to create intelligent, scalable
                 solutions that truly move the needle. By combining
               </span>
@@ -83,7 +83,7 @@ const AboutUs = () => {
                 {" "}
                 strategic insight with the power of AI and automation
               </span>
-              <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+              <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                 , we help you optimize operations, improve customer experiences, and
                 drive long-term growth.
               </span>
@@ -110,10 +110,10 @@ const AboutUs = () => {
                       src={item.icon}
                     />
                   </div>
-                  <h3 className="font-medium text-[#292929] text-2xl tracking-[-0.48px] leading-[26.4px] mb-4">
+                  <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] mb-4">
                     {item.title}
                   </h3>
-                  <p className="font-normal text-[#292929cc] text-sm tracking-[0] leading-[22.4px]">
+                  <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
                     {item.description}
                   </p>
                 </motion.div>
@@ -132,7 +132,7 @@ const AboutUs = () => {
                   alt="Hyun Suh - CEO and President"
                   src="https://c.animaapp.com/29VIedzy/img/imgi-2-20210923-220847-1.png"
                 />
-                <p className="mt-4 font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] text-center lg:text-left">
+                <p className="mt-4 font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] text-center lg:text-left">
                   Hyun Suh - CEO and President
                 </p>
               </div>
@@ -147,40 +147,40 @@ const AboutUs = () => {
                   </h2>
                 </div>
                 
-                <div className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px] space-y-4">
+                <div className="font-normal text-black text-lg tracking-[0] leading-[28.8px] space-y-4">
                   <p>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       I'm a seasoned managerial and sales professional with almost{" "}
                     </span>
                     <span className="font-semibold">10 years</span>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       {" "}
                       of experience in team leadership and sales across various sectors. I've been recognized for effectively training staff, creating impactful sales strategies, and maintaining lasting client relations. Throughout my career, I've consistently exceeded performance goals and{" "}
                     </span>
                     <span className="font-semibold">maximized operational output</span>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       {" "}
                       with minimal resources.
                     </span>
                   </p>
                   
                   <p>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       My expertise includes financial analysis, technology solutions, statistical analysis, team collaboration and leadership, and interpersonal communication.{" "}
                     </span>
                     <span className="font-semibold">Effective administration</span>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       {" "}
                       in these areas requires strong communication, customer service skills, business acumen, systems analysis, project management, and resource management.
                     </span>
                   </p>
                   
                   <p>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       In my most recent role as{" "}
                     </span>
                     <span className="font-semibold">Sales Manager</span>
-                    <span className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       {" "}
                       at Service Corporation International, I facilitated training for new and existing staff, ensuring they were educated on best practices and equipped to exceed sales targets. I analyzed performance metrics and data reports to create optimal sales plans and identify problem areas. I also worked closely with senior leadership and interdepartmental teams to drive business forward with minimal expenditures.
                     </span>
@@ -224,7 +224,7 @@ const AboutUs = () => {
                     HYUN
                   </div>
                 </div>
-                <p className="text-[#292929cc] text-base leading-6 max-w-md">
+                <p className="text-black text-base leading-6 max-w-md">
                   We specialize in helping businesses navigate complexity with clarity, 
                   combining strategic insight with AI and automation to drive sustainable growth.
                 </p>
@@ -233,17 +233,17 @@ const AboutUs = () => {
               <div>
                 <h3 className="font-semibold text-[#0c202b] text-lg mb-4">Quick Links</h3>
                 <ul className="space-y-2">
-                  <li><Link to="/" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Home</Link></li>
-                  <li><Link to="/solutions" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Solutions</Link></li>
-                  <li><Link to="/about" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">About Us</Link></li>
-                  <li><Link to="/partners" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Partners</Link></li>
-                  <li><Link to="/contact" className="text-[#292929cc] hover:text-[#0c202b] transition-colors">Contact</Link></li>
+                  <li><Link to="/" className="text-black hover:text-[#0c202b] transition-colors">Home</Link></li>
+                  <li><Link to="/solutions" className="text-black hover:text-[#0c202b] transition-colors">Solutions</Link></li>
+                  <li><Link to="/about" className="text-black hover:text-[#0c202b] transition-colors">About Us</Link></li>
+                  <li><Link to="/partners" className="text-black hover:text-[#0c202b] transition-colors">Partners</Link></li>
+                  <li><Link to="/contact" className="text-black hover:text-[#0c202b] transition-colors">Contact</Link></li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="font-semibold text-[#0c202b] text-lg mb-4">Contact Info</h3>
-                <div className="space-y-2 text-[#292929cc]">
+                <div className="space-y-2 text-black">
                   <p>Email: info@hyunassociates.com</p>
                   <p>Phone: +1 (555) 123-4567</p>
                   <p>Address: 123 Business St, City, State 12345</p>
@@ -252,7 +252,7 @@ const AboutUs = () => {
             </div>
             
             <div className="border-t border-gray-200 mt-12 pt-8 text-center">
-              <p className="text-[#292929cc] text-sm">
+              <p className="text-black text-sm">
                 © 2024 Hyun and Associates LLC. All rights reserved.
               </p>
             </div>

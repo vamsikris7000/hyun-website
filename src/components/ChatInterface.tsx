@@ -8,6 +8,7 @@ import DOMPurify from 'dompurify';
 import aLogo from "@/assets/A.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
 import haLogo from "@/assets/HA.png";
+import fullLogo from "@/assets/FullLogo_Transparent1.png";
 
 interface ChatInterfaceProps {
   isOpen: boolean;
@@ -45,7 +46,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   }, [scrollToBottom]);
 
   useEffect(() => {
-    debouncedScroll();
     // Prevent background scroll when chat is open
     if (isOpen) {
       document.body.classList.add('overflow-hidden');
@@ -62,7 +62,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [chat, streamedText, isOpen, debouncedScroll]);
+  }, [isOpen]);
+
+  // Separate effect for scrolling
+  useEffect(() => {
+    if (chat.length > 0 || streamedText) {
+      const timeoutId = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [chat, streamedText, scrollToBottom]);
 
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
@@ -75,7 +83,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     setShowWelcome(false);
 
     try {
-      console.log('Sending request to backend...', { userMsg, conversationId });
+      console.log('Sending request to backend...', { userMsg, conversationId, isFirstMessage: !conversationId });
+      
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch('http://localhost:3001/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,7 +96,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           inputs: {},
           query: userMsg,
           response_mode: 'streaming',
-          conversation_id: conversationId,
+          conversation_id: conversationId || undefined,
           user: 'abc-123',
           files: [
             {
@@ -93,17 +106,31 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             },
           ],
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       console.log('Response received:', response.status, response.statusText);
+      
+      // Handle 404 responses by clearing conversation ID
+      if (response.status === 404) {
+        console.log('Conversation not found, clearing conversation ID');
+        setConversationId('');
+      }
+      
       if (!response.body) throw new Error('No response body');
       const reader = response.body.getReader();
       let fullText = '';
       let decoder = new TextDecoder();
+      let hasReceivedData = false;
+      
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         console.log('Received chunk:', chunk);
+        hasReceivedData = true;
+        
         const lines = chunk.split('\n').filter(Boolean);
         for (const line of lines) {
           try {
@@ -113,15 +140,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             console.log('Parsed data:', data);
             
             // Extract conversation ID from the response
-            if (data.conversation_id && !conversationId) {
+            if (data.conversation_id) {
               setConversationId(data.conversation_id);
             }
             
             if (data.event === 'agent_message' && data.answer) {
               fullText += data.answer;
               setStreamedText(fullText);
+              console.log('Streaming text updated:', fullText);
             }
             if (data.event === 'message_end') {
+              console.log('Message ended, adding to chat:', fullText);
               setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
               setStreamedText('');
             }
@@ -130,9 +159,19 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           }
         }
       }
+      
+      // Check if we received any streaming data
+      if (!hasReceivedData || !fullText.trim()) {
+        console.log('No streaming data received, this might be an API issue');
+        setError('No response received from the chat service. Please try again.');
+      }
     } catch (err) {
       console.error('Chat error:', err);
-      setError('Sorry, there was an error connecting to the chat service. Please try again.');
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('Sorry, there was an error connecting to the chat service. Please try again.');
+      }
       setStreamedText("");
     }
     setIsLoading(false);
@@ -153,7 +192,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   // Safe HTML rendering function with sanitization
   const renderSafeHTML = (text: string, showCursor: boolean = false) => {
     const parsedHTML = marked.parse(text);
-    const cursorHTML = showCursor ? '<span class="animate-pulse text-[#292929]/60 ml-1">|</span>' : '';
+    const cursorHTML = showCursor ? '<span class="animate-pulse text-black/60 ml-1">|</span>' : '';
     const fullHTML = parsedHTML + cursorHTML;
     return DOMPurify.sanitize(fullHTML);
   };
@@ -185,7 +224,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               e.stopPropagation();
               onClose();
             }}
-            className="absolute top-4 right-4 z-50 text-[#292929] hover:bg-white/20 rounded-full w-10 h-10 p-0 transition-all duration-200"
+            className="absolute top-4 right-4 z-50 text-black hover:bg-white/20 rounded-full w-10 h-10 p-0 transition-all duration-200"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -202,24 +241,19 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 {/* Logo */}
                 <div className="flex flex-col items-center gap-4 mb-8">
                   <img
-                    className="w-16 h-16 mix-blend-multiply"
-                    alt="HA Logo"
-                    src={haLogo}
-                  />
-                  <img
-                    className="w-48 h-12 mix-blend-multiply"
-                    alt="Hyun and Associates logo"
-                    src={hyunLogo}
+                    className="w-64 h-20 object-contain"
+                    alt="Hyun and Associates Full Logo"
+                    src={fullLogo}
                   />
                 </div>
 
-                <h1 className="font-normal text-[#292929] text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
+                <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
                   Welcome to
                   <br />
                   Hyun and Associates
                 </h1>
 
-                <p className="font-normal text-[#292929] text-xl md:text-2xl text-center leading-relaxed mb-12">
+                <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
                   <span className="font-semibold">
                     Who do I have the pleasure{" "}
                   </span>
@@ -242,7 +276,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type your message here..."
-                        className="flex-1 px-6 py-4 bg-transparent text-[#292929] text-lg placeholder-gray-400 focus:outline-none rounded-full"
+                        className="flex-1 px-6 py-4 bg-transparent text-black text-lg placeholder-gray-400 focus:outline-none rounded-full"
                         aria-label="Chat input"
                       />
                       <button
@@ -274,12 +308,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             /* Chat Interface */
             <div className="flex flex-col h-full relative z-10">
               {/* Header with Logo */}
-              <div className="flex items-center justify-start p-4">
+              <div className="flex items-center justify-between p-4">
                 <img
-                  className="w-[104px] h-[70px] mix-blend-multiply"
-                  alt="HA Logo"
-                  src={haLogo}
+                  className="w-48 h-16 object-contain"
+                  alt="Hyun and Associates Full Logo"
+                  src={fullLogo}
                 />
+                {conversationId && (
+                  <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    ID: {conversationId.slice(0, 8)}...
+                  </div>
+                )}
               </div>
 
               {/* Chat Messages Area */}
@@ -301,7 +340,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         <div className="max-w-[80%] flex items-start gap-3">
                           <div className="w-2 h-2 bg-[#d0a4ff] rounded-full mt-2 flex-shrink-0"></div>
                           <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 shadow-lg">
-                            <div className="text-[#292929] text-base leading-relaxed break-words">
+                            <div className="text-black text-base leading-relaxed break-words">
                               <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
                             </div>
                           </div>
@@ -328,11 +367,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                               <span className="break-words">{error}</span>
                             </div>
                           ) : streamedText ? (
-                            <div className="text-[#292929] text-base leading-relaxed break-words">
+                            <div className="text-black text-base leading-relaxed break-words">
                               <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(streamedText, true) }} />
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2 text-[#292929] text-base leading-relaxed">
+                            <div className="flex items-center gap-2 text-black text-base leading-relaxed">
                               <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                               <span>Thinking...</span>
                             </div>
@@ -357,7 +396,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
                         onKeyPress={handleKeyPress}
-                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-full text-base placeholder:text-gray-500 text-[#292929] focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-full text-base placeholder:text-gray-500 text-black focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:border-transparent"
                         disabled={isLoading}
                       />
                       <button

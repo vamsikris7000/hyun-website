@@ -27,6 +27,8 @@ const Partners = () => {
             </div>
           </div>
 
+
+
           {/* Hero Content */}
           <div className="flex flex-col w-full max-w-[1200px] items-start gap-16 px-4 lg:px-8">
             <h1 className="relative self-stretch font-semibold italic text-black text-[60px] md:text-[80px] lg:text-[90px] tracking-[0] leading-[60px] md:leading-[80px] lg:leading-[90px] font-serif">
@@ -45,7 +47,7 @@ const Partners = () => {
                   />
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
                 </div>
-                <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px] mb-6">
+                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-6">
                   Building agentic AI employees—intelligent, multitasking bots that
                   reason, decide, and take action across customer journeys. From
                   retail to healthcare, telecom to hospitality, our voice and chat
@@ -71,7 +73,7 @@ const Partners = () => {
                   />
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
                 </div>
-                <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px] mb-6">
+                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-6">
                   Building stunning, custom WordPress websites for authors—designed to
                   showcase your books, grow your email list, and connect with readers.
                   With a focus on clean design, performance, and easy management,
@@ -106,7 +108,7 @@ const Partners = () => {
               <span className="font-semibold">Interested in partnering </span>
               <span className="font-semibold italic">with us?</span>
             </h2>
-            <p className="font-normal text-[#292929cc] text-lg text-center tracking-[0] leading-[28.8px] mb-8">
+            <p className="font-normal text-black text-lg text-center tracking-[0] leading-[28.8px] mb-8">
               Let's create impactful solutions together.
             </p>
             <Button 
@@ -122,12 +124,12 @@ const Partners = () => {
         <footer className="py-12 px-4 lg:px-8 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-              <p className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
+              <p className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
                 © 2025 Hyun And Associates Llc. All Rights Reserved.
               </p>
 
               <div className="inline-flex items-center justify-center gap-2">
-                <div className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[normal]">
+                <div className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[normal]">
                   Powered by
                 </div>
                 <div className="w-[95.06px] h-[19.95px] bg-[#0c202b] rounded text-white text-xs flex items-center justify-center">

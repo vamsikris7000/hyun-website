@@ -167,7 +167,7 @@ const Solutions = () => {
 
                     {/* Title */}
                     <div className="absolute top-[108px] left-[34px] w-[255px]">
-                      <h3 className="font-medium text-[#292929] text-2xl tracking-[-0.48px] leading-[26.4px] transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                      <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                         {solution.title}
                       </h3>
                     </div>
@@ -175,7 +175,7 @@ const Solutions = () => {
                     {/* Description - only for featured card */}
                     {solution.featured && solution.description && (
                       <div className="absolute top-[113px] left-[34px] w-[271px]">
-                        <p className="font-normal text-[#292929cc] text-sm tracking-[0] leading-[22.4px]">
+                        <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
                           {solution.description}
                         </p>
                       </div>
@@ -210,7 +210,7 @@ const Solutions = () => {
               <span className="font-semibold">Ready to transform </span>
               <span className="font-semibold italic">your organization?</span>
             </h2>
-            <p className="font-normal text-[#292929cc] text-lg text-center tracking-[0] leading-[28.8px] mb-8">
+            <p className="font-normal text-black text-lg text-center tracking-[0] leading-[28.8px] mb-8">
               Let's discuss how our solutions can help you achieve your goals.
             </p>
             <Button 
@@ -226,12 +226,12 @@ const Solutions = () => {
         <footer className="py-12 px-4 lg:px-8 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-              <p className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
+              <p className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
                 © 2025 Hyun And Associates Llc. All Rights Reserved.
               </p>
 
               <div className="inline-flex items-center justify-center gap-2">
-                <div className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[normal]">
+                <div className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[normal]">
                   Powered by
                 </div>
                 <div className="w-[95.06px] h-[19.95px] bg-[#0c202b] rounded text-white text-xs flex items-center justify-center">

@@ -15,7 +15,7 @@ const Header = ({ onBookDemo }: HeaderProps) => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="absolute w-full h-[80px] top-0 left-0 bg-white shadow-[0px_4px_50px_#00000012] z-50"
+      className="absolute w-full h-[80px] top-0 left-0 bg-transparent z-50"
     >
       <div className="flex w-full max-w-[1170px] items-center justify-between relative top-[15px] left-[180px] px-4 lg:px-0">
         <div className="inline-flex items-center gap-4 relative flex-[0_0_auto]">

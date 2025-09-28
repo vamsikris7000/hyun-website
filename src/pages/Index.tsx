@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
+import VoiceChatWidget from "@/components/VoiceChatWidget";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
 import goCreateLogo from "@/assets/gocreate.png";
 import vector1 from "@/assets/vector-1.svg";
@@ -78,14 +79,14 @@ const Index = () => {
                   <div className="h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
                 </div>
               </div>
-              <h2 className="font-normal text-[#292929cc] text-2xl lg:text-3xl tracking-[0] leading-tight mb-6 font-serif">
+              <h2 className="font-normal text-black text-2xl lg:text-3xl tracking-[0] leading-tight mb-6 font-serif">
                 We specialize in helping businesses navigate complexity{" "}
                 <span className="italic">with clarity.</span>
               </h2>
             </div>
             
             <div className="flex flex-col w-full lg:w-1/2 gap-6">
-              <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+              <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                 By combining strategic insight with the power of artificial
                 intelligence and automation, we design customized solutions that
                 improve operations, enhance customer engagement, and drive measurable
@@ -104,7 +105,7 @@ const Index = () => {
         </section>
 
         {/* Solutions Section */}
-        <section id="solutions" className="py-20 px-4 lg:px-8 bg-gray-50">
+        <section id="solutions" className="py-20 px-4 lg:px-8 bg-white">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <p className="font-semibold text-[#9e9e9e] tracking-[6.40px] leading-4 text-sm mb-4">SOLUTIONS</p>
@@ -130,7 +131,7 @@ const Index = () => {
                     src={vector1}
                   />
                 </div>
-                <div className="font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                   Leadership &amp; Executive Coaching
                 </div>
               </motion.div>
@@ -149,7 +150,7 @@ const Index = () => {
                     src={vector}
                   />
                 </div>
-                <div className="font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                   Organizational Culture Transformation
                 </div>
               </motion.div>
@@ -168,7 +169,7 @@ const Index = () => {
                     src={vector2}
                   />
                 </div>
-                <div className="font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                   Strategic Communication Consulting
                 </div>
               </motion.div>
@@ -187,7 +188,7 @@ const Index = () => {
                     src={vector1}
                   />
                 </div>
-                <div className="font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                   Team Development &amp; Facilitation
                 </div>
               </motion.div>
@@ -206,7 +207,7 @@ const Index = () => {
                     src={vector4}
                   />
                 </div>
-                <div className="font-medium text-[#292929] text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mt-auto transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
                   DEI <br />
                   Strategy and Implementation
                 </div>
@@ -232,7 +233,7 @@ const Index = () => {
                   alt="Spectrum AI"
                   className="h-16 mb-4 object-contain mix-blend-darken"
                 />
-                <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                   Intelligent VOIP AI &amp; Workflow Automation
                 </p>
               </div>
@@ -243,7 +244,7 @@ const Index = () => {
                   alt="GoCreate.me"
                   className="h-16 mb-4 object-contain mix-blend-darken"
                 />
-                <p className="font-normal text-[#292929cc] text-lg tracking-[0] leading-[28.8px]">
+                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                   Interactive tools and digital experiences.
                 </p>
               </div>
@@ -267,7 +268,7 @@ const Index = () => {
               <span className="font-semibold">Let's transform your challenges into </span>
               <span className="font-semibold italic">opportunities.</span>
             </h2>
-            <p className="font-normal text-[#292929cc] text-lg text-center tracking-[0] leading-[28.8px] mb-8">
+            <p className="font-normal text-black text-lg text-center tracking-[0] leading-[28.8px] mb-8">
               Reach out to Hyun and Associates LLC now.
             </p>
             <Button 
@@ -283,12 +284,12 @@ const Index = () => {
         <footer className="py-12 px-4 lg:px-8 bg-white border-t border-gray-200">
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-              <p className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
+              <p className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[18.9px] mb-4 md:mb-0">
                 © 2025 Hyun And Associates Llc. All Rights Reserved.
               </p>
 
               <div className="inline-flex items-center justify-center gap-2">
-                <div className="opacity-55 font-medium text-[#292929] text-sm tracking-[0] leading-[normal]">
+                <div className="opacity-55 font-medium text-black text-sm tracking-[0] leading-[normal]">
                   Powered by
                 </div>
                 <div className="w-[95.06px] h-[19.95px] bg-[#0c202b] rounded text-white text-xs flex items-center justify-center">
@@ -336,6 +337,7 @@ const Index = () => {
       </div>
 
       <ChatInterface isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <VoiceChatWidget variant="standalone" />
     </div>
   );
 };

@@ -62,16 +62,7 @@ const Contact = () => {
         <Header onBookDemo={() => setIsChatOpen(true)} />
 
         {/* Hero Section */}
-        <section className="relative w-full min-h-screen flex items-center justify-center pt-32">
-          {/* Background gradients */}
-          <div className="absolute w-[1219px] h-[677px] top-[300px] right-0 opacity-50 hidden lg:block">
-            <div className="relative h-[677px]">
-              <div className="absolute w-[516px] h-[518px] top-[110px] left-[703px] bg-[#efe9c0] rounded-[258px/259px] blur-[138px]" />
-              <div className="absolute w-[614px] h-[616px] top-0 left-[279px] bg-[#d0a4ff] rounded-[307px/308px] blur-[138px]" />
-              <div className="absolute w-[614px] h-[616px] top-[61px] left-0 bg-[#c0e9ef] rounded-[307px/308px] blur-[138px]" />
-            </div>
-          </div>
-
+        <section className="relative w-full min-h-screen flex items-center justify-center pt-32 bg-white">
           {/* Hero Content */}
           <div className="flex flex-col w-full max-w-[1200px] items-start gap-16 px-4 lg:px-8">
             <h1 className="relative self-stretch font-normal text-black text-[60px] md:text-[80px] lg:text-[90px] tracking-[0] leading-[60px] md:leading-[80px] lg:leading-[90px] font-serif">
@@ -97,17 +88,8 @@ const Contact = () => {
         </section>
 
         {/* Contact Form Section */}
-        <section className="py-20 px-4 lg:px-8 relative overflow-hidden">
-          {/* Background gradients */}
-          <div className="absolute w-[1219px] h-[677px] top-0 left-0 opacity-50 hidden lg:block">
-            <div className="relative h-[677px]">
-              <div className="absolute w-[516px] h-[518px] top-[110px] left-[703px] bg-[#efe9c0] rounded-[258px/259px] blur-[138px]" />
-              <div className="absolute w-[614px] h-[616px] top-0 left-[279px] bg-[#d0a4ff] rounded-[307px/308px] blur-[138px]" />
-              <div className="absolute w-[614px] h-[616px] top-[61px] left-0 bg-[#c0e9ef] rounded-[307px/308px] blur-[138px]" />
-            </div>
-          </div>
-
-          <div className="max-w-4xl mx-auto relative z-10">
+        <section className="py-20 px-4 lg:px-8 bg-white">
+          <div className="max-w-4xl mx-auto">
             {/* Section Header */}
             <div className="flex items-center gap-4 mb-8">
               <span className="font-semibold text-[#9e9e9e] text-base tracking-[6.40px] uppercase">
@@ -125,7 +107,7 @@ const Contact = () => {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label htmlFor="firstName" className="font-normal text-[#6666669e] text-lg tracking-[0] leading-[27.9px]">
+                  <label htmlFor="firstName" className="font-normal text-gray-700 text-lg tracking-[0] leading-[27.9px]">
                     First Name *
                   </label>
                   <Input
@@ -140,7 +122,7 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="lastName" className="font-normal text-[#6666669e] text-lg tracking-[0] leading-[27.9px]">
+                  <label htmlFor="lastName" className="font-normal text-gray-700 text-lg tracking-[0] leading-[27.9px]">
                     Last Name *
                   </label>
                   <Input
@@ -156,7 +138,7 @@ const Contact = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="font-normal text-[#6666669e] text-lg tracking-[0] leading-[27.9px]">
+                <label htmlFor="email" className="font-normal text-gray-700 text-lg tracking-[0] leading-[27.9px]">
                   Email Address *
                 </label>
                 <Input
@@ -171,7 +153,7 @@ const Contact = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="message" className="font-normal text-[#6666669e] text-lg tracking-[0] leading-[27.9px]">
+                <label htmlFor="message" className="font-normal text-gray-700 text-lg tracking-[0] leading-[27.9px]">
                   Type Your Message
                 </label>
                 <Textarea
