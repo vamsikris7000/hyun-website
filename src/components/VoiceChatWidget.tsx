@@ -16,15 +16,21 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
 
   async function fetchLivekitToken(agentName = 'hyun') {
     try {
+      console.log("=== VOICE TOKEN DEBUG ===");
       console.log("Fetching token for agent:", agentName);
+      console.log("Current hostname:", window.location.hostname);
+      console.log("Current URL:", window.location.href);
       
-        const apiKey = import.meta.env.VITE_VOICE_API_KEY;
+      const apiKey = import.meta.env.VITE_VOICE_API_KEY;
       console.log("Using API key:", apiKey);
+      console.log("API key present:", !!apiKey);
       
       // Use proxy to avoid CORS issues in both development and production
       const baseUrl = window.location.hostname === 'localhost' 
         ? 'http://localhost:3001/voice'
         : '/.netlify/functions/voice-integration';
+      
+      console.log("Using base URL:", baseUrl);
       
       const endpoints = [
         {
@@ -153,6 +159,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     try {
       console.log("Triggering agent to join room:", roomName);
       
+      const apiKey = import.meta.env.VITE_VOICE_API_KEY;
       const baseUrl = window.location.hostname === 'localhost' 
         ? 'http://localhost:3001/voice'
         : '/.netlify/functions/voice-integration';
