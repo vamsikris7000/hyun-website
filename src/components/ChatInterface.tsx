@@ -89,7 +89,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      const response = await fetch('http://localhost:3001/chat', {
+      // Use Netlify Functions in production, local backend in development
+      const chatUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/chat'
+        : '/.netlify/functions/chatbot-proxy';
+      
+      const response = await fetch(chatUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -191,7 +196,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   // Safe HTML rendering function with sanitization
   const renderSafeHTML = (text: string, showCursor: boolean = false) => {
-    const parsedHTML = marked.parse(text);
+    // Configure marked to disable math rendering to avoid KaTeX quirks mode warning
+    const parsedHTML = marked.parse(text, {
+      breaks: true,
+      gfm: true,
+      // Disable math rendering to prevent KaTeX quirks mode warning
+      math: false
+    });
     const cursorHTML = showCursor ? '<span class="animate-pulse text-black/60 ml-1">|</span>' : '';
     const fullHTML = parsedHTML + cursorHTML;
     return DOMPurify.sanitize(fullHTML);
