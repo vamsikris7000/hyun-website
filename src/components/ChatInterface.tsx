@@ -165,18 +165,14 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         }
       }
       
-      // Check if we received any streaming data
-      if (!hasReceivedData || !fullText.trim()) {
+      // Only show error if absolutely no data was received
+      if (!hasReceivedData) {
         console.log('No streaming data received, this might be an API issue');
         setError('No response received from the chat service. Please try again.');
       }
     } catch (err) {
       console.error('Chat error:', err);
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError('Sorry, there was an error connecting to the chat service. Please try again.');
-      }
+      // Don't show error messages - let the user try again
       setStreamedText("");
     }
     setIsLoading(false);

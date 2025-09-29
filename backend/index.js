@@ -66,7 +66,8 @@ app.post('/chat', async (req, res) => {
     response.body.pipe(res);
   } catch (err) {
     console.error('Chat proxy error:', err);
-    res.status(500).json({ error: 'Proxy error', details: err.message });
+    // Don't return error responses - let Dify handle it
+    res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 });
 

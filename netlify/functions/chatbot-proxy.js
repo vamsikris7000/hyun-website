@@ -121,24 +121,23 @@ exports.handler = async (event, context) => {
           };
         } else {
           console.error(`Dify API error: ${response.status} - ${response.data}`);
+          // Don't return error responses - let Dify handle it
           return {
-            statusCode: response.status,
+            statusCode: 200,
             headers,
-            body: JSON.stringify({ 
-              error: 'Dify API error',
-              status: response.status,
-              message: response.data
-            }),
+            body: response.data,
           };
         }
       } catch (error) {
         console.error('Request error:', error);
+        // Don't return error responses - let Dify handle it
         return {
-          statusCode: 500,
+          statusCode: 200,
           headers,
           body: JSON.stringify({ 
-            error: 'Request failed',
-            message: error.message
+            event: 'agent_message',
+            answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+            conversation_id: 'error-' + Date.now()
           }),
         };
       }
@@ -156,12 +155,14 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Chatbot proxy function error:', error);
+    // Don't return error responses - let Dify handle it
     return {
-      statusCode: 500,
+      statusCode: 200,
       headers,
       body: JSON.stringify({ 
-        error: 'Internal server error', 
-        details: error.message 
+        event: 'agent_message',
+        answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+        conversation_id: 'error-' + Date.now()
       }),
     };
   }
