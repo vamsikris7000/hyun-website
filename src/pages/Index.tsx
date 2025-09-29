@@ -15,7 +15,7 @@ import vector from "@/assets/vector.svg";
 import vector6 from "@/assets/vector-6.svg";
 
 const Index = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true); // Set to true to show chatbot by default
   const navigate = useNavigate();
 
   return (
