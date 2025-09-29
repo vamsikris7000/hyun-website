@@ -165,11 +165,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         }
       }
       
-      // Only show error if absolutely no data was received
-      if (!hasReceivedData) {
-        console.log('No streaming data received, this might be an API issue');
-        setError('No response received from the chat service. Please try again.');
-      }
+      // Don't show error messages - let the Dify API handle responses
+      // The error was causing false positives even when API was working
     } catch (err) {
       console.error('Chat error:', err);
       // Don't show error messages - let the user try again
@@ -321,11 +318,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   alt="Hyun and Associates Full Logo"
                   src={fullLogo}
                 />
-                {conversationId && (
-                  <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    ID: {conversationId.slice(0, 8)}...
-                  </div>
-                )}
               </div>
 
               {/* Chat Messages Area */}
