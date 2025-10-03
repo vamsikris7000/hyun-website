@@ -48,11 +48,7 @@ const Partners = () => {
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
                 </div>
                 <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-6">
-                  Building agentic AI employees—intelligent, multitasking bots that
-                  reason, decide, and take action across customer journeys. From
-                  retail to healthcare, telecom to hospitality, our voice and chat
-                  agents work 24/7 to enhance satisfaction, efficiency, and
-                  cost‑savings.
+                  Xpectrum AI builds a 24/7 Digital Workforce that engages customers across phone, SMS, email, chat, and more — in a more human way. We ensure you never lose leads due to limited working hours and help you generate more revenue. Your growth is our mission.
                 </p>
                 <button 
                   onClick={() => window.open('https://xpectrum-ai.com/', '_blank')}
