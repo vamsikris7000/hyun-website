@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import aLogo from "@/assets/A.png";
 import haLogo from "@/assets/HA.png";
-import hyunLogo from "@/assets/hyunandassociates.png";
 
 interface HeaderProps {
   onBookDemo: () => void;
@@ -22,12 +21,7 @@ const Header = ({ onBookDemo }: HeaderProps) => {
           <img
             src={haLogo}
             alt="HA Logo"
-            className="w-[60px] h-[60px] relative mix-blend-multiply object-contain"
-          />
-          <img
-            src={hyunLogo}
-            alt="Hyun and Associates Logo"
-            className="w-[200px] h-[50px] relative mix-blend-multiply object-contain"
+            className="w-[60px] h-[60px] relative object-contain"
           />
         </div>
 
@@ -55,7 +49,7 @@ const Header = ({ onBookDemo }: HeaderProps) => {
           </div>
 
           <Button 
-            onClick={onBookDemo}
+            onClick={() => window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank')}
             className="px-[26px] py-[15px] bg-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded text-white font-semibold text-base hover:bg-[#0c202b]/90"
           >
             BOOK A DEMO

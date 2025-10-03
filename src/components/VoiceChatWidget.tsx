@@ -12,7 +12,16 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
   const [status, setStatus] = useState<'idle' | 'connecting' | 'connected'>('idle');
   const [room, setRoom] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [hasAutoStarted, setHasAutoStarted] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Auto-start voice call when component mounts
+  useEffect(() => {
+    if (!hasAutoStarted && status === 'idle') {
+      setHasAutoStarted(true);
+      startCall();
+    }
+  }, [hasAutoStarted, status]);
 
   async function fetchLivekitToken(agentName = 'hyun') {
     try {
@@ -205,6 +214,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     console.log("Ending call...");
     setStatus('idle');
     setIsConnected(false);
+    setHasAutoStarted(true); // Prevent auto-restart after manual end
     room.disconnect();
     onCallEnd?.();
     // Remove any attached agent audio elements
@@ -216,6 +226,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     console.log("Disconnected from room");
     setStatus('idle');
     setIsConnected(false);
+    setHasAutoStarted(true); // Prevent auto-restart after disconnect
     onCallEnd?.();
     // Remove any attached agent audio elements
     const audioElements = document.querySelectorAll('audio[data-agent-audio]');
@@ -226,7 +237,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
   let buttonContent;
   if (status === 'idle') {
     buttonContent = (
-      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base"><Phone className="w-4 h-4" /> VOICE CALL</span>
+      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base group-hover:hidden"><Phone className="w-4 h-4" /> VOICE</span>
     );
   } else if (status === 'connecting') {
     buttonContent = (
@@ -241,7 +252,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     );
   } else if (status === 'connected') {
     buttonContent = (
-      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base"><PhoneOff className="w-4 h-4" /> END CALL</span>
+      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base group-hover:hidden"><PhoneOff className="w-4 h-4" /> VOICE</span>
     );
   }
 
@@ -279,7 +290,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
       {/* Desktop version - full button */}
       <div className="hidden lg:flex fixed bottom-6 right-6 z-50 flex-col items-end gap-2">
         <button
-          className="flex items-center justify-center rounded-full px-6 h-12 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105"
+          className="group flex items-center justify-center rounded-full px-6 h-12 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
           style={{ 
             minWidth: (status === 'connected' || status === 'connecting') ? '180px' : '160px', 
             maxWidth: (status === 'connected' || status === 'connecting') ? '220px' : '200px',
@@ -291,13 +302,24 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
           aria-label={status === 'connected' ? 'End call' : 'Start voice call'}
         >
           {buttonContent}
+          {/* Hover states */}
+          {status === 'idle' && (
+            <span className="absolute inset-0 flex items-center justify-center gap-2 font-semibold tracking-wide text-white text-base bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <Phone className="w-4 h-4" /> START
+            </span>
+          )}
+          {status === 'connected' && (
+            <span className="absolute inset-0 flex items-center justify-center gap-2 font-semibold tracking-wide text-white text-base bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <PhoneOff className="w-4 h-4" /> END
+            </span>
+          )}
         </button>
       </div>
 
       {/* Mobile version - just the phone icon */}
       <div className="lg:hidden">
         <button
-          className="flex items-center justify-center rounded-full w-10 h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105"
+          className="group flex items-center justify-center rounded-full w-10 h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
           style={{ 
             backgroundColor: status === 'connected' ? '#ef4444' : '#0c202b',
             border: status === 'connected' ? '1px solid #ef4444' : '1px solid #0c202b'
@@ -316,6 +338,17 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
             </div>
           ) : (
             <Phone className="w-5 h-5" />
+          )}
+          {/* Hover states for mobile */}
+          {status === 'idle' && (
+            <span className="absolute inset-0 flex items-center justify-center bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <Phone className="w-5 h-5" />
+            </span>
+          )}
+          {status === 'connected' && (
+            <span className="absolute inset-0 flex items-center justify-center bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <PhoneOff className="w-5 h-5" />
+            </span>
           )}
         </button>
       </div>

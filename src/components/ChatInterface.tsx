@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import VoiceChatWidget from "./VoiceChatWidget";
 import aLogo from "@/assets/A.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
 import haLogo from "@/assets/HA.png";
@@ -192,9 +193,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     // Configure marked to disable math rendering to avoid KaTeX quirks mode warning
     const parsedHTML = marked.parse(text, {
       breaks: true,
-      gfm: true,
-      // Disable math rendering to prevent KaTeX quirks mode warning
-      math: false
+      gfm: true
     });
     const cursorHTML = showCursor ? '<span class="animate-pulse text-black/60 ml-1">|</span>' : '';
     const fullHTML = parsedHTML + cursorHTML;
@@ -245,16 +244,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 {/* Logo */}
                 <div className="flex flex-col items-center gap-4 mb-8">
                   <img
-                    className="w-64 h-20 object-contain"
-                    alt="Hyun and Associates Full Logo"
-                    src={fullLogo}
+                    className="w-32 h-32 object-contain"
+                    alt="Hyun and Associates Logo"
+                    src={haLogo}
                   />
                 </div>
 
                 <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
                   Welcome to
                   <br />
-                  Hyun and Associates
+                  Hyun & Associates
                 </h1>
 
                 <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
@@ -314,9 +313,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               {/* Header with Logo */}
               <div className="flex items-center justify-between p-4">
                 <img
-                  className="w-48 h-16 object-contain"
-                  alt="Hyun and Associates Full Logo"
-                  src={fullLogo}
+                  className="w-24 h-24 object-contain"
+                  alt="Hyun and Associates Logo"
+                  src={haLogo}
                 />
               </div>
 
@@ -332,13 +331,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role === 'user' ? (
-                        <div className="max-w-[70%] bg-[#af71f1] text-white rounded-2xl rounded-br-md px-4 py-3 shadow-lg">
+                        <div className="max-w-[70%] bg-white text-black rounded-2xl rounded-br-md px-4 py-3 shadow-lg border border-gray-200">
                           <p className="text-base leading-relaxed whitespace-pre-line break-words">{msg.text}</p>
                         </div>
                       ) : (
                         <div className="max-w-[80%] flex items-start gap-3">
                           <div className="w-2 h-2 bg-[#d0a4ff] rounded-full mt-2 flex-shrink-0"></div>
-                          <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 shadow-lg">
+                          <div className="bg-transparent rounded-2xl rounded-bl-md px-4 py-3">
                             <div className="text-black text-base leading-relaxed break-words">
                               <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
                             </div>
@@ -359,7 +358,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
                           error ? 'bg-red-500' : 'bg-[#d0a4ff]'
                         }`}></div>
-                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 shadow-lg">
+                        <div className="bg-transparent rounded-2xl rounded-bl-md px-4 py-3">
                           {error ? (
                             <div className="flex items-start gap-2 text-red-600 text-base leading-relaxed">
                               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -438,6 +437,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               </div>
             </div>
           )}
+          
+          {/* Voice Chat Widget - Only in chat interface */}
+          <VoiceChatWidget variant="standalone" />
         </motion.div>
       )}
     </AnimatePresence>
