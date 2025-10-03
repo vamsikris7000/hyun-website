@@ -6,84 +6,74 @@ import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
 import goCreateLogo from "@/assets/goreate.png";
-import rectangle1 from "@/assets/rectangle-20355-1.png";
-import rectangle2 from "@/assets/rectangle-20355-2.png";
-import rectangle3 from "@/assets/rectangle-20355-3.png";
-import rectangle4 from "@/assets/rectangle-20355-4.png";
-import rectangle5 from "@/assets/rectangle-20355-5.png";
-import rectangle6 from "@/assets/rectangle-20355.png";
-import vector1 from "@/assets/vector-1.svg";
-import vector2 from "@/assets/vector-2.svg";
-import vector3 from "@/assets/vector-3.svg";
-import vector4 from "@/assets/vector-4.svg";
-import vector from "@/assets/vector.svg";
+import aiIcon from "@/assets/AI Icon.jpg";
+import automationIcon from "@/assets/automation icon.jpg";
+import dataTransformationIcon from "@/assets/Data Transformation Icon.png";
+import deliverIcon from "@/assets/Deliver.jpeg";
+import agenticAIPicture from "@/assets/Agentic AI Picture.jpg";
+import automationPicture from "@/assets/Automation Picture.jpg";
+import dataTransformationPicture from "@/assets/Data Transformation Pictuare.jpg";
+import generalITPicture from "@/assets/General IT Picture.png";
 
 const Solutions = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const solutionsData = [
     {
       id: 1,
-      title: "Leadership & Executive Coaching",
-      description: null,
-      image: rectangle6,
+      title: "General IT Consulting",
+      description: "We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.",
+      image: generalITPicture,
       iconBg: "#af71f1",
       cardBg: "#fbfbfb",
       border: "#af71f1",
-      icon: null,
+      icon: deliverIcon,
       featured: true,
     },
     {
       id: 2,
-      title: "Organizational Culture Transformation",
-      description: null,
-      image: rectangle1,
+      title: "Agentic AI Solutions",
+      description: "Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.",
+      image: agenticAIPicture,
       iconBg: "#eff1ff",
       cardBg: "linear-gradient(152deg,rgba(251,251,251,1) 0%,rgba(247,239,255,1) 100%)",
       border: "transparent",
-      icon: vector,
+      icon: aiIcon,
     },
     {
       id: 3,
-      title: "Strategic Communication Consulting",
-      description: null,
-      image: rectangle3,
+      title: "Automation Solutions",
+      description: "Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.",
+      image: automationPicture,
       iconBg: "#ffefef",
       cardBg: "linear-gradient(152deg,rgba(251,251,251,1) 0%,rgba(247,239,255,1) 100%)",
       border: "transparent",
-      icon: vector2,
+      icon: automationIcon,
     },
     {
       id: 4,
-      title: "Team Development & Facilitation",
-      description: null,
-      image: rectangle2,
+      title: "Data Transformation Solutions",
+      description: "The most productive way to consolidate data and bring analytics that matters.",
+      image: dataTransformationPicture,
       iconBg: "#eff1ff",
       cardBg: "linear-gradient(152deg,rgba(251,251,251,1) 0%,rgba(247,239,255,1) 100%)",
       border: "transparent",
-      icon: vector1,
-    },
-    {
-      id: 5,
-      title: "Change Management & Transformation",
-      description: null,
-      image: rectangle4,
-      iconBg: "#f3efff",
-      cardBg: "linear-gradient(152deg,rgba(251,251,251,1) 0%,rgba(247,239,255,1) 100%)",
-      border: "transparent",
-      icon: vector3,
-    },
-    {
-      id: 6,
-      title: "DEI Strategy and Implementation",
-      description: null,
-      image: rectangle5,
-      iconBg: "#eff9ff",
-      cardBg: "linear-gradient(152deg,rgba(251,251,251,1) 0%,rgba(247,239,255,1) 100%)",
-      border: "transparent",
-      icon: vector4,
+      icon: dataTransformationIcon,
     },
   ];
+
+  const handleCardClick = (id: number) => {
+    setFlippedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <div className="bg-white w-full min-h-screen">
@@ -131,62 +121,70 @@ const Solutions = () => {
 
           <div className="max-w-7xl mx-auto relative z-10">
             {/* Solutions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto px-4">
               {solutionsData.map((solution, index) => (
                 <motion.div
                   key={solution.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="w-[370px] h-[425px] relative mx-auto"
+                  className="w-full h-[350px] relative"
                 >
                   <div 
-                    className={`w-[370px] h-[425px] rounded-lg relative transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer group ${
-                      solution.featured 
-                        ? "bg-[#fbfbfb] border border-solid border-[#af71f1] hover:border-[#9c5ee0] hover:shadow-[#af71f1]/20" 
-                        : "bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] hover:from-[#f8f8f8] hover:to-[#f0e8ff] hover:shadow-[#d0a4ff]/20"
-                    }`}
+                    className="w-full h-[350px] rounded-lg relative transition-all duration-500 ease-in-out cursor-pointer group bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] hover:from-[#f8f8f8] hover:to-[#f0e8ff] hover:shadow-[#d0a4ff]/20"
                     style={{
                       background: solution.cardBg,
                       borderColor: solution.border,
+                      transform: flippedCards.has(solution.id) ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                      transformStyle: 'preserve-3d'
                     }}
+                    onClick={() => handleCardClick(solution.id)}
                   >
-                    {/* Icon */}
-                    {solution.icon && (
-                      <div 
-                        className="absolute w-10 h-10 top-[34px] left-[34px] rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3"
-                        style={{ backgroundColor: solution.iconBg }}
-                      >
-                        <img
-                          className="w-6 h-6 transition-all duration-300 ease-in-out group-hover:brightness-110"
-                          alt="Icon"
-                          src={solution.icon}
-                        />
-                      </div>
-                    )}
+                    {/* Front of card */}
+                    <div className="absolute inset-0 w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
+                      {/* Icon */}
+                      {solution.icon && (
+                        <div 
+                          className="absolute w-10 h-10 top-[34px] left-[34px] rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3 bg-gray-100"
+                        >
+                          <img
+                            className="w-6 h-6 transition-all duration-300 ease-in-out group-hover:brightness-110"
+                            alt="Icon"
+                            src={solution.icon}
+                          />
+                        </div>
+                      )}
 
-                    {/* Title */}
-                    <div className="absolute top-[108px] left-[34px] w-[255px]">
-                      <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
-                        {solution.title}
-                      </h3>
+                      {/* Title */}
+                      <div className="absolute top-[108px] left-[34px] w-[255px]">
+                        <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                          {solution.title}
+                        </h3>
+                      </div>
+
+                      {/* Image */}
+                      <img
+                        className="absolute w-full h-[180px] top-[170px] left-0 object-cover rounded-b-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                        alt="Solution"
+                        src={solution.image}
+                      />
                     </div>
 
-                    {/* Description - only for featured card */}
-                    {solution.featured && solution.description && (
-                      <div className="absolute top-[113px] left-[34px] w-[271px]">
-                        <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
-                          {solution.description}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Image */}
-                    <img
-                      className="absolute w-[370px] h-[222px] top-[203px] left-0 object-cover rounded-b-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110"
-                      alt="Solution"
-                      src={solution.image}
-                    />
+                    {/* Back of card - Description */}
+                    <div 
+                      className="absolute inset-0 w-full h-full p-8 flex flex-col justify-center items-center text-center"
+                      style={{ 
+                        backfaceVisibility: 'hidden',
+                        transform: 'rotateY(180deg)'
+                      }}
+                    >
+                      <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] mb-4">
+                        {solution.title}
+                      </h3>
+                      <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
+                        {solution.description}
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               ))}

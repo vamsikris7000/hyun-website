@@ -7,12 +7,10 @@ import ChatInterface from "@/components/ChatInterface";
 import VoiceChatWidget from "@/components/VoiceChatWidget";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
 import goCreateLogo from "@/assets/goreate.png";
-import vector1 from "@/assets/vector-1.svg";
-import vector2 from "@/assets/vector-2.svg";
-import vector3 from "@/assets/vector-3.svg";
-import vector4 from "@/assets/vector-4.svg";
-import vector from "@/assets/vector.svg";
-import vector6 from "@/assets/vector-6.svg";
+import aiIcon from "@/assets/AI Icon.jpg";
+import automationIcon from "@/assets/automation icon.jpg";
+import dataTransformationIcon from "@/assets/Data Transformation Icon.png";
+import deliverIcon from "@/assets/Deliver.jpeg";
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true); // Set to true to show chatbot by default
@@ -125,11 +123,11 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-[#0c202b] rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
                     className="w-6 h-6"
                     alt="Icon"
-                    src={vector1}
+                    src={deliverIcon}
                   />
                 </div>
                 <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
@@ -147,11 +145,11 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-[#0c202b] rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
                     className="w-6 h-6"
                     alt="Icon"
-                    src={vector}
+                    src={aiIcon}
                   />
                 </div>
                 <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
@@ -169,11 +167,11 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-[#0c202b] rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
                     className="w-6 h-6"
                     alt="Icon"
-                    src={vector2}
+                    src={automationIcon}
                   />
                 </div>
                 <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
@@ -191,11 +189,11 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-[#0c202b] rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
                     className="w-6 h-6"
                     alt="Icon"
-                    src={vector4}
+                    src={dataTransformationIcon}
                   />
                 </div>
                 <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">

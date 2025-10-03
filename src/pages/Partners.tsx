@@ -54,13 +54,14 @@ const Partners = () => {
                   agents work 24/7 to enhance satisfaction, efficiency, and
                   cost‑savings.
                 </p>
-                <Button 
-                  variant="outline"
-                  className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit"
+                <button 
+                  onClick={() => window.open('https://xpectrum-ai.com/', '_blank')}
+                  className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit cursor-pointer transition-colors relative z-10"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <span className="text-xl">»</span>
                   VISIT WEBSITE
-                </Button>
+                </button>
               </div>
 
               {/* Partner 2 - GoCreate */}
@@ -80,13 +81,14 @@ const Partners = () => {
                   GoCreate helps writers establish a powerful online presence that works
                   as hard as they do.
                 </p>
-                <Button 
-                  variant="outline"
-                  className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit"
+                <button 
+                  onClick={() => window.open('https://gocoreate.com/', '_blank')}
+                  className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit cursor-pointer transition-colors relative z-10"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <span className="text-xl">»</span>
                   VISIT WEBSITE
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -112,10 +114,10 @@ const Partners = () => {
               Let's create impactful solutions together.
             </p>
             <Button 
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank')}
               className="bg-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded px-7 py-[15px] text-white font-semibold text-[15px] hover:bg-[#0c202b]/90"
             >
-              📞 CONTACT NOW
+              Schedule Now
             </Button>
           </div>
         </section>

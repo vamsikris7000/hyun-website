@@ -50,8 +50,8 @@ const Contact = () => {
     {
       id: 3,
       icon: "📍",
-      label: "Our Address",
-      value: "11751 38th Ave NE, USA",
+      label: "Our Location",
+      value: "Seattle, WA",
     },
   ];
 
@@ -66,8 +66,7 @@ const Contact = () => {
           {/* Hero Content */}
           <div className="flex flex-col w-full max-w-[1200px] items-start gap-16 px-4 lg:px-8">
             <h1 className="relative self-stretch font-normal text-black text-[60px] md:text-[80px] lg:text-[90px] tracking-[0] leading-[60px] md:leading-[80px] lg:leading-[90px] font-serif">
-              <span className="font-bold">Contact</span>
-              <span className="font-medium italic"> Us</span>
+              <span className="font-bold italic">Contact Us</span>
             </h1>
 
             {/* Contact Info Grid */}

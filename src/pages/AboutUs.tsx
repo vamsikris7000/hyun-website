@@ -3,37 +3,14 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
-import aLogo from "@/assets/A.png";
+import fullLogo from "@/assets/FullLogo_Transparent1.png";
+import diagnoseIcon from "@/assets/Diagnose.jpeg";
+import designIcon from "@/assets/Design.png";
+import deliverIcon from "@/assets/Deliver.jpeg";
 
 const AboutUs = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const valuePropositionItems = [
-    {
-      id: 1,
-      icon: "https://c.animaapp.com/29VIedzy/img/icon@2x.png",
-      title: "Insight-Driven Strategy",
-      description: "Identifying key challenges and uncover real opportunities for smarter business solutions.",
-    },
-    {
-      id: 2,
-      icon: "https://c.animaapp.com/29VIedzy/img/icon-1@2x.png",
-      title: "AI & Automation",
-      description: "Applying intelligent tech to boost efficiency and enhance customer interactions.",
-    },
-    {
-      id: 3,
-      icon: "https://c.animaapp.com/29VIedzy/img/icon-2@2x.png",
-      title: "Measurable Outcomes",
-      description: "Our solutions drive clear results—better performance, better ROI.",
-    },
-    {
-      id: 4,
-      icon: "https://c.animaapp.com/29VIedzy/img/icon-3@2x.png",
-      title: "Sustainable Growth",
-      description: "We build systems that scale and adapt as your business evolves.",
-    },
-  ];
 
   return (
     <div className="bg-white w-full min-h-screen">
@@ -66,9 +43,9 @@ const AboutUs = () => {
 
             <div className="flex items-center gap-4 mb-8">
               <div className="w-48 h-1 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
-              <h2 className="font-normal text-black text-3xl md:text-4xl lg:text-5xl tracking-[0] leading-tight font-serif">
-                <span className="font-semibold">We specialize in helping businesses navigate complexity</span>
-                <span className="font-semibold italic"> with clarity.</span>
+              <h2 className="font-normal text-black text-2xl md:text-3xl lg:text-4xl tracking-[0] leading-tight font-serif">
+                <span className="font-semibold">We specialize in changing the way people work so that people don't have to work</span>
+                <span className="font-semibold italic"> for technology. We leverage technology to work for people.</span>
               </h2>
             </div>
 
@@ -89,36 +66,110 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* Value Proposition Section */}
+        {/* 4-Step Process Section */}
         <section className="py-20 px-4 lg:px-8 relative overflow-hidden">
           <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center mb-16">
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <div className="w-48 h-1 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
+                <h2 className="font-normal text-black text-2xl md:text-3xl lg:text-4xl tracking-[0] leading-tight font-serif">
+                  <span className="font-semibold">We have a 4 step process that guides people in their solution.</span>
+                </h2>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {valuePropositionItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="w-10 h-10 mx-auto mb-4 flex items-center justify-center">
-                    <img
-                      className="w-full h-full object-contain"
-                      alt="Icon"
-                      src={item.icon}
-                    />
-                  </div>
-                  <h3 className="font-medium text-black text-2xl tracking-[-0.48px] leading-[26.4px] mb-4">
-                    {item.title}
-                  </h3>
-                  <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
-                    {item.description}
-                  </p>
-                </motion.div>
-              ))}
+              {/* Step 1: Diagnose */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-red-100 rounded-lg">
+                  <img
+                    className="w-8 h-8 object-contain"
+                    alt="Diagnose Icon"
+                    src={diagnoseIcon}
+                  />
+                </div>
+                <h3 className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4">
+                  Step 1: Diagnose
+                </h3>
+                <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
+                  We listen, ask questions and document every hiccup in your current processes.
+                </p>
+              </motion.div>
+
+              {/* Step 2: Design */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-blue-100 rounded-lg">
+                  <img
+                    className="w-8 h-8 object-contain"
+                    alt="Design Icon"
+                    src={designIcon}
+                  />
+                </div>
+                <h3 className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4">
+                  Step 2: Design
+                </h3>
+                <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
+                  Then we collaborate on scope, deliverables and pricing with our engineering team.
+                </p>
+              </motion.div>
+
+              {/* Step 3: Deliver */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-green-100 rounded-lg">
+                  <img
+                    className="w-8 h-8 object-contain"
+                    alt="Deliver Icon"
+                    src={deliverIcon}
+                  />
+                </div>
+                <h3 className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4">
+                  Step 3: Deliver
+                </h3>
+                <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
+                  Your tailored solution is developed, iterated and deployed with surgical precision.
+                </p>
+              </motion.div>
+
+              {/* Step 4: Direct */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-purple-100 rounded-lg">
+                  <img
+                    className="w-8 h-8 object-contain"
+                    alt="Direct Icon"
+                    src={designIcon}
+                  />
+                </div>
+                <h3 className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4">
+                  Step 4: Direct
+                </h3>
+                <p className="font-normal text-black text-sm tracking-[0] leading-[22.4px]">
+                  Embed lasting change via training, best-practice playbooks and proactive support.
+                </p>
+              </motion.div>
             </div>
           </div>
         </section>
+
 
         {/* Leadership Section */}
         <section className="py-20 px-4 lg:px-8 relative overflow-hidden">
@@ -148,59 +199,32 @@ const AboutUs = () => {
                 <div className="font-normal text-black text-lg tracking-[0] leading-[28.8px] space-y-4">
                   <p>
                     <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      I'm a seasoned managerial and sales professional with almost{" "}
+                      Hyun Suh brings over{" "}
                     </span>
-                    <span className="font-semibold">10 years</span>
+                    <span className="font-semibold">eight years of sales expertise</span>
                     <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      {" "}
-                      of experience in team leadership and sales across various sectors. I've been recognized for effectively training staff, creating impactful sales strategies, and maintaining lasting client relations. Throughout my career, I've consistently exceeded performance goals and{" "}
+                      —spanning commercial HVAC, financial services and funeral care—to his role as founder and CEO of Hyun & Associates. Four of those years were spent leading high-performing sales teams, where he earned top marks for{" "}
                     </span>
-                    <span className="font-semibold">maximized operational output</span>
+                    <span className="font-semibold">creative problem-solving</span>
                     <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      {" "}
-                      with minimal resources.
+                      . Time and again, Hyun confronted siloed workflows and interdepartmental friction by deploying low-cost, high-impact technologies that unified teams and accelerated results.
                     </span>
                   </p>
                   
                   <p>
                     <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      My expertise includes financial analysis, technology solutions, statistical analysis, team collaboration and leadership, and interpersonal communication.{" "}
+                      Today, he guides organizations through a proven{" "}
                     </span>
-                    <span className="font-semibold">Effective administration</span>
+                    <span className="font-semibold">4D framework—Diagnose, Design, Deliver, Direct</span>
+                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
+                      —to architect seamless, tech-driven workflows. His mission is to{" "}
+                    </span>
+                    <span className="font-semibold">spark disruption in the workplace</span>
                     <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                       {" "}
-                      in these areas requires strong communication, customer service skills, business acumen, systems analysis, project management, and resource management.
+                      by equipping employers and employees with cutting-edge tools and hands-on coaching, ensuring they not only adapt to change but thrive in it.
                     </span>
                   </p>
-                  
-                  <p>
-                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      In my most recent role as{" "}
-                    </span>
-                    <span className="font-semibold">Sales Manager</span>
-                    <span className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                      {" "}
-                      at Service Corporation International, I facilitated training for new and existing staff, ensuring they were educated on best practices and equipped to exceed sales targets. I analyzed performance metrics and data reports to create optimal sales plans and identify problem areas. I also worked closely with senior leadership and interdepartmental teams to drive business forward with minimal expenditures.
-                    </span>
-                  </p>
-                </div>
-                
-                <div className="mt-8">
-                  <button 
-                    onClick={() => setIsChatOpen(true)}
-                    className="px-7 py-[15px] inline-flex items-center justify-center gap-2.5 bg-[#0c202b] rounded hover:bg-[#0c202b]/90 transition-colors duration-200"
-                  >
-                    <div className="inline-flex items-center gap-1 relative flex-[0_0_auto]">
-                      <img
-                        className="relative w-6 h-6 aspect-[1]"
-                        alt="Frame"
-                        src="https://c.animaapp.com/29VIedzy/img/frame.svg"
-                      />
-                      <div className="relative w-fit font-semibold text-white text-[15px] tracking-[0] leading-[normal] whitespace-nowrap">
-                        CONTACT NOW
-                      </div>
-                    </div>
-                  </button>
                 </div>
               </div>
             </div>
@@ -214,18 +238,11 @@ const AboutUs = () => {
               <div className="col-span-1 md:col-span-2">
                 <div className="flex items-center gap-5 mb-6">
                   <img
-                    src={aLogo}
-                    alt="A Logo"
-                    className="w-[112.5px] h-[75px] aspect-[1.5] relative mix-blend-multiply object-contain"
+                    src={fullLogo}
+                    alt="Full Logo"
+                    className="w-[150px] h-[100px] aspect-[1.5] relative object-contain"
                   />
-                  <div className="relative w-[180.68px] h-[46.46px] mix-blend-multiply aspect-[3.89] bg-[#0c202b] rounded text-white flex items-center justify-center text-sm font-semibold">
-                    HYUN
-                  </div>
                 </div>
-                <p className="text-black text-base leading-6 max-w-md">
-                  We specialize in helping businesses navigate complexity with clarity, 
-                  combining strategic insight with AI and automation to drive sustainable growth.
-                </p>
               </div>
               
               <div>
@@ -242,9 +259,9 @@ const AboutUs = () => {
               <div>
                 <h3 className="font-semibold text-[#0c202b] text-lg mb-4">Contact Info</h3>
                 <div className="space-y-2 text-black">
-                  <p>Email: info@hyunassociates.com</p>
-                  <p>Phone: +1 (555) 123-4567</p>
-                  <p>Address: 123 Business St, City, State 12345</p>
+                  <p>Email: Hyun@hyunandassociatesllc.com</p>
+                  <p>Phone: 206-395-8503</p>
+                  <p>Location: Seattle, WA</p>
                 </div>
               </div>
             </div>

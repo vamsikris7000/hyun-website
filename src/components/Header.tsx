@@ -21,7 +21,7 @@ const Header = ({ onBookDemo }: HeaderProps) => {
           <img
             src={haLogo}
             alt="HA Logo"
-            className="w-[60px] h-[60px] relative object-contain"
+            className="w-[80px] h-[80px] relative object-contain"
           />
         </div>
 
