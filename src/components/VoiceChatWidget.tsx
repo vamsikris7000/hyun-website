@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Phone, PhoneOff } from "lucide-react";
+// Removed mic icons - using text only
 import * as LivekitClient from "livekit-client";
 
 interface VoiceChatWidgetProps {
@@ -8,20 +8,36 @@ interface VoiceChatWidgetProps {
   onCallEnd?: () => void;
 }
 
+// Global state to prevent multiple voice connections
+let globalVoiceConnection = null;
+let globalVoiceStatus = 'idle';
+
 const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: VoiceChatWidgetProps) => {
-  const [status, setStatus] = useState<'idle' | 'connecting' | 'connected'>('idle');
-  const [room, setRoom] = useState<any>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [hasAutoStarted, setHasAutoStarted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'connecting' | 'connected'>(globalVoiceStatus);
+  const [room, setRoom] = useState<any>(globalVoiceConnection);
+  const [isConnected, setIsConnected] = useState(!!globalVoiceConnection);
+  const [hasAutoStarted, setHasAutoStarted] = useState(!!globalVoiceConnection);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Auto-start voice call when component mounts
+  // Auto-start voice call when component mounts (only if no existing connection)
   useEffect(() => {
-    if (!hasAutoStarted && status === 'idle') {
+    if (!globalVoiceConnection && !hasAutoStarted && status === 'idle') {
       setHasAutoStarted(true);
       startCall();
+    } else if (globalVoiceConnection) {
+      // Use existing connection
+      setRoom(globalVoiceConnection);
+      setIsConnected(true);
+      setStatus('connected');
     }
   }, [hasAutoStarted, status]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Don't cleanup global connection on unmount, only on page refresh
+    };
+  }, []);
 
   async function fetchLivekitToken(agentName = 'hyun') {
     try {
@@ -107,9 +123,10 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
   }
 
   async function startCall() {
-    if (status !== 'idle') return;
+    if (status !== 'idle' || globalVoiceConnection) return;
     
     setStatus('connecting');
+    globalVoiceStatus = 'connecting';
     onCallStart?.();
     
     let token, livekitUrl;
@@ -127,12 +144,14 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
         audioCaptureDefaults: { autoGainControl: true, noiseSuppression: true },
       });
       setRoom(roomInstance);
+      globalVoiceConnection = roomInstance;
       
       await roomInstance.connect(livekitUrl, token);
       console.log("Connected to room");
       
       setIsConnected(true);
       setStatus('connected');
+      globalVoiceStatus = 'connected';
       
       await publishMicrophone(roomInstance);
       
@@ -147,7 +166,9 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     } catch (e) {
       console.error("Error in startCall:", e);
       setStatus('idle');
+      globalVoiceStatus = 'idle';
       setIsConnected(false);
+      globalVoiceConnection = null;
       onCallEnd?.();
     }
   }
@@ -213,9 +234,11 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     if (!isConnected || !room) return;
     console.log("Ending call...");
     setStatus('idle');
+    globalVoiceStatus = 'idle';
     setIsConnected(false);
     setHasAutoStarted(true); // Prevent auto-restart after manual end
     room.disconnect();
+    globalVoiceConnection = null;
     onCallEnd?.();
     // Remove any attached agent audio elements
     const audioElements = document.querySelectorAll('audio[data-agent-audio]');
@@ -225,8 +248,10 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
   function handleDisconnect() {
     console.log("Disconnected from room");
     setStatus('idle');
+    globalVoiceStatus = 'idle';
     setIsConnected(false);
     setHasAutoStarted(true); // Prevent auto-restart after disconnect
+    globalVoiceConnection = null;
     onCallEnd?.();
     // Remove any attached agent audio elements
     const audioElements = document.querySelectorAll('audio[data-agent-audio]');
@@ -237,7 +262,7 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
   let buttonContent;
   if (status === 'idle') {
     buttonContent = (
-      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base group-hover:hidden"><Phone className="w-4 h-4" /> VOICE</span>
+      <span className="font-semibold tracking-wide text-white text-base group-hover:hidden">VOICE</span>
     );
   } else if (status === 'connecting') {
     buttonContent = (
@@ -252,33 +277,33 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
     );
   } else if (status === 'connected') {
     buttonContent = (
-      <span className="flex items-center gap-2 font-semibold tracking-wide text-white text-base group-hover:hidden"><PhoneOff className="w-4 h-4" /> VOICE</span>
+      <span className="font-semibold tracking-wide text-white text-base group-hover:hidden">VOICE</span>
     );
   }
 
-  // If variant is 'chatbar', show only the phone icon (mobile style) for both desktop and mobile
+  // If variant is 'chatbar', show only the voice text (mobile style) for both desktop and mobile
   if (variant === 'chatbar') {
     return (
       <button
-        className="flex items-center justify-center rounded-full w-10 h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105"
+        className="flex items-center justify-center rounded-full h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105"
         style={{ 
+          minWidth: status === 'connecting' ? '160px' : '64px',
+          maxWidth: status === 'connecting' ? '180px' : '80px',
           backgroundColor: status === 'connected' ? '#ef4444' : '#0c202b',
           border: status === 'connected' ? '1px solid #ef4444' : '1px solid #0c202b'
         }}
         onClick={status === 'connected' ? endCall : startCall}
         disabled={status === 'connecting'}
-        aria-label={status === 'connected' ? 'End call' : 'Start voice call'}
+        aria-label={status === 'connected' ? 'End voice call' : 'Start voice call'}
       >
-        {status === 'connected' ? (
-          <PhoneOff className="w-5 h-5" />
-        ) : status === 'connecting' ? (
+        {status === 'connecting' ? (
           <div className="flex items-center justify-center space-x-1">
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
             <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
         ) : (
-          <Phone className="w-5 h-5" />
+          <span className="text-sm font-semibold">VOICE</span>
         )}
       </button>
     );
@@ -290,10 +315,10 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
       {/* Desktop version - full button */}
       <div className="hidden lg:flex fixed bottom-6 right-6 z-50 flex-col items-end gap-2">
         <button
-          className="group flex items-center justify-center rounded-full px-6 h-12 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
+          className="group flex items-center justify-center rounded-full px-4 h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
           style={{ 
-            minWidth: (status === 'connected' || status === 'connecting') ? '180px' : '160px', 
-            maxWidth: (status === 'connected' || status === 'connecting') ? '220px' : '200px',
+            minWidth: (status === 'connected' || status === 'connecting') ? '160px' : '100px', 
+            maxWidth: (status === 'connected' || status === 'connecting') ? '180px' : '120px',
             backgroundColor: status === 'connected' ? '#ef4444' : '#0c202b',
             border: status === 'connected' ? '1px solid #ef4444' : '1px solid #0c202b'
           }}
@@ -304,50 +329,50 @@ const VoiceChatWidget = ({ variant = 'standalone', onCallStart, onCallEnd }: Voi
           {buttonContent}
           {/* Hover states */}
           {status === 'idle' && (
-            <span className="absolute inset-0 flex items-center justify-center gap-2 font-semibold tracking-wide text-white text-base bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <Phone className="w-4 h-4" /> START
+            <span className="absolute inset-0 flex items-center justify-center font-semibold tracking-wide text-white text-base bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              START
             </span>
           )}
           {status === 'connected' && (
-            <span className="absolute inset-0 flex items-center justify-center gap-2 font-semibold tracking-wide text-white text-base bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <PhoneOff className="w-4 h-4" /> END
+            <span className="absolute inset-0 flex items-center justify-center font-semibold tracking-wide text-white text-base bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              END
             </span>
           )}
         </button>
       </div>
 
-      {/* Mobile version - just the phone icon */}
+      {/* Mobile version - just the voice text */}
       <div className="lg:hidden">
         <button
-          className="group flex items-center justify-center rounded-full w-10 h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
+          className="group flex items-center justify-center rounded-full h-10 transition-all shadow-lg focus:outline-none text-white font-semibold hover:scale-105 relative overflow-hidden"
           style={{ 
+            minWidth: status === 'connecting' ? '160px' : '64px',
+            maxWidth: status === 'connecting' ? '180px' : '80px',
             backgroundColor: status === 'connected' ? '#ef4444' : '#0c202b',
             border: status === 'connected' ? '1px solid #ef4444' : '1px solid #0c202b'
           }}
           onClick={status === 'connected' ? endCall : startCall}
           disabled={status === 'connecting'}
-          aria-label={status === 'connected' ? 'End call' : 'Start voice call'}
+          aria-label={status === 'connected' ? 'End voice call' : 'Start voice call'}
         >
-          {status === 'connected' ? (
-            <PhoneOff className="w-5 h-5" />
-          ) : status === 'connecting' ? (
+          {status === 'connecting' ? (
             <div className="flex items-center justify-center space-x-1">
               <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
               <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
           ) : (
-            <Phone className="w-5 h-5" />
+            <span className="text-sm font-semibold">VOICE</span>
           )}
           {/* Hover states for mobile */}
           {status === 'idle' && (
             <span className="absolute inset-0 flex items-center justify-center bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <Phone className="w-5 h-5" />
+              <span className="text-sm font-semibold">START</span>
             </span>
           )}
           {status === 'connected' && (
             <span className="absolute inset-0 flex items-center justify-center bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <PhoneOff className="w-5 h-5" />
+              <span className="text-sm font-semibold">END</span>
             </span>
           )}
         </button>

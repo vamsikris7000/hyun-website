@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Mic, Send, X, Star, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import VoiceChatWidget from "./VoiceChatWidget";
@@ -10,6 +10,42 @@ import aLogo from "@/assets/A.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
 import haLogo from "@/assets/HA.png";
 import fullLogo from "@/assets/FullLogo_Transparent1.png";
+
+// Animated Logo Component with smooth transition
+const AnimatedLogo = ({ isWelcome, className = "" }: { isWelcome: boolean; className?: string }) => {
+  return (
+    <motion.img
+      src={haLogo}
+      alt="Hyun and Associates Logo"
+      className={`object-contain ${className}`}
+      layoutId="ha-logo" // This enables layout animations between components
+      initial={false}
+      animate={{
+        scale: isWelcome ? 1 : 0.75, // Scale from 1 to 0.75 (128px to 96px)
+        opacity: 1,
+        rotate: isWelcome ? 0 : -2, // Subtle rotation for natural feel
+        y: isWelcome ? 0 : -10 // Slight upward movement
+      }}
+      transition={{
+        duration: 0.8,
+        ease: [0.4, 0, 0.2, 1], // Custom easing for smooth transition
+        layout: { 
+          duration: 0.8, 
+          ease: [0.4, 0, 0.2, 1],
+          type: "spring",
+          stiffness: 100,
+          damping: 20
+        },
+        opacity: { duration: 0.3, delay: isWelcome ? 0 : 0.1 }
+      }}
+      style={{
+        width: isWelcome ? 128 : 96,
+        height: isWelcome ? 128 : 96,
+        filter: isWelcome ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))'
+      }}
+    />
+  );
+};
 
 interface ChatInterfaceProps {
   isOpen: boolean;
@@ -24,6 +60,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [conversationId, setConversationId] = useState<string>("");
   const [showWelcome, setShowWelcome] = useState(true);
   const [error, setError] = useState<string>("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedQuestions = [
@@ -32,6 +69,36 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     "Tell me about your AI solutions",
     "What makes you different from competitors?"
   ];
+
+  // Text-to-speech function
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Stop any current speech
+      window.speechSynthesis.cancel();
+      
+      // Clean the text (remove HTML tags and special characters)
+      const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
+      
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 0.9; // Slightly slower for better comprehension
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Stop speaking function
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
 
   // Debounced scroll function to prevent excessive scrolling during streaming
   const scrollToBottom = useCallback(() => {
@@ -159,6 +226,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               console.log('Message ended, adding to chat:', fullText);
               setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
               setStreamedText('');
+              
+              // Speak the response using text-to-speech
+              speakText(fullText);
             }
           } catch (err) {
             console.log('Error parsing line:', line, err);
@@ -185,7 +255,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   const handleSuggestionClick = (question: string) => {
     setMessage(question);
-    setShowWelcome(false);
+    // Don't set showWelcome to false - keep in initial state
   };
 
   // Safe HTML rendering function with sanitization
@@ -211,6 +281,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 bg-white"
         >
+          <LayoutGroup>
           {/* Simplified background gradients */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#efe9c0] rounded-full blur-3xl opacity-60" />
@@ -243,11 +314,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               >
                 {/* Logo */}
                 <div className="flex flex-col items-center gap-4 mb-8">
-                  <img
-                    className="w-32 h-32 object-contain"
-                    alt="Hyun and Associates Logo"
-                    src={haLogo}
-                  />
+                  <AnimatedLogo isWelcome={true} />
                 </div>
 
                 <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
@@ -312,11 +379,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             <div className="flex flex-col h-full relative z-10">
               {/* Header with Logo */}
               <div className="flex items-center justify-between p-4">
-                <img
-                  className="w-24 h-24 object-contain"
-                  alt="Hyun and Associates Logo"
-                  src={haLogo}
-                />
+                <AnimatedLogo isWelcome={false} />
               </div>
 
               {/* Chat Messages Area */}
@@ -406,6 +469,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         <Mic className="w-4 h-4" />
                       </button>
                     </div>
+                    {/* Stop Speaking Button */}
+                    {isSpeaking && (
+                      <button
+                        className="w-12 h-12 flex items-center justify-center bg-red-500 rounded-full hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        onClick={stopSpeaking}
+                        aria-label="Stop speaking"
+                        type="button"
+                      >
+                        <X className="w-5 h-5 text-white" />
+                      </button>
+                    )}
+                    
                     <button
                       className="w-12 h-12 flex items-center justify-center bg-[#af71f1] rounded-full hover:bg-[#9c5ee0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleSend}
@@ -440,6 +515,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           
           {/* Voice Chat Widget - Only in chat interface */}
           <VoiceChatWidget variant="standalone" />
+          </LayoutGroup>
         </motion.div>
       )}
     </AnimatePresence>

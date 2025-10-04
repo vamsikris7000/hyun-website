@@ -49,10 +49,10 @@ const Header = ({ onBookDemo }: HeaderProps) => {
           </div>
 
           <Button 
-            onClick={() => window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank')}
+            onClick={onBookDemo}
             className="px-[26px] py-[15px] bg-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded text-white font-semibold text-base hover:bg-[#0c202b]/90"
           >
-            BOOK A DEMO
+            Back to Chat
           </Button>
         </div>
       </div>
