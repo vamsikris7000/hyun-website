@@ -85,25 +85,25 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       id: "general-it",
       title: "General IT Consulting",
       description: "We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.",
-      icon: "💻"
+      image: "/src/assets/Deliver.jpeg"
     },
     {
       id: "agentic-ai",
       title: "Agentic AI Solutions",
       description: "Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.",
-      icon: "🤖"
+      image: "/src/assets/AI Icon.jpg"
     },
     {
       id: "automation",
       title: "Automation Solutions",
       description: "Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.",
-      icon: "⚙️"
+      image: "/src/assets/automation icon.jpg"
     },
     {
       id: "data-transformation",
       title: "Data Transformation Solutions",
       description: "The most productive way to consolidate data and bring analytics that matters.",
-      icon: "📊"
+      image: "/src/assets/Data Transformation Icon.png"
     }
   ];
 
@@ -1015,8 +1015,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                 }`}
                               >
                                 <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:shadow-lg transition-shadow">
-                                  <div className="w-20 h-20 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-full flex items-center justify-center mb-4 shadow-lg">
-                                    <span className="text-4xl">{service.icon}</span>
+                                  <div className="w-16 h-16 bg-[#af71f1] rounded-lg flex items-center justify-center mb-4">
+                                    <span className="text-white font-bold text-xl">{index + 1}</span>
                                   </div>
                                   <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2">
                                     {service.title}
@@ -1034,12 +1034,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                 }`}
                               >
                                 <div className="bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg p-6 h-full flex flex-col justify-center text-white">
-                                  <div className="flex items-center justify-center mb-3">
-                                    <span className="text-3xl mr-2">{service.icon}</span>
-                                    <h3 className="font-semibold text-lg">
-                                      {service.title}
-                                    </h3>
-                                  </div>
+                                  <h3 className="font-semibold text-lg mb-3 text-center">
+                                    {service.title}
+                                  </h3>
                                   <p className="text-sm text-center leading-relaxed">
                                     {service.description}
                                   </p>
