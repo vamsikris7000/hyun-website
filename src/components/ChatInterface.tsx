@@ -341,21 +341,50 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
       
-      // Use specific voice (index 181)
+      // Function to set voice and speak
+      const speakWithVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices count:', voices.length);
+        
+        // Use specific voice (index 181 - Google US English)
+        if (voices.length > 181 && voices[181]) {
+          utterance.voice = voices[181];
+          console.log('Using voice:', voices[181].name, voices[181].lang);
+        } else {
+          // Fallback: try to find Google US English by name
+          const googleVoice = voices.find(voice => 
+            voice.name.includes('Google') && 
+            voice.name.includes('US English')
+          );
+          if (googleVoice) {
+            utterance.voice = googleVoice;
+            console.log('Using Google US English voice:', googleVoice.name);
+          } else {
+            console.log('Voice index 181 not available, using default voice');
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+          }
+        }
+        
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        
+        window.speechSynthesis.speak(utterance);
+      };
+      
+      // Check if voices are loaded, if not wait for them
       const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 181 && voices[181]) {
-        utterance.voice = voices[181];
-        console.log('Using voice:', voices[181].name, voices[181].lang);
+      if (voices.length === 0) {
+        // Voices not loaded yet, wait for them
+        window.speechSynthesis.onvoiceschanged = () => {
+          speakWithVoice();
+          // Remove the event listener after first use
+          window.speechSynthesis.onvoiceschanged = null;
+        };
       } else {
-        console.log('Voice index 181 not available, using default voice');
-        console.log('Available voices:', voices.length);
+        // Voices already loaded
+        speakWithVoice();
       }
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -452,6 +481,20 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       checkUserInfo();
     }
   }, [isOpen]);
+
+  // Preload voices when component mounts
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      // Force voice loading
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        // Create a temporary utterance to trigger voice loading
+        const tempUtterance = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(tempUtterance);
+        window.speechSynthesis.cancel();
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Prevent background scroll when chat is open
