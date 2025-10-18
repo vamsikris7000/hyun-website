@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
-import VoiceChatWidget from "@/components/VoiceChatWidget";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
 import goCreateLogo from "@/assets/goreate.png";
 import aiIcon from "@/assets/AI Icon.jpg";
@@ -278,11 +277,6 @@ const Solutions = () => {
       </div>
 
       <ChatInterface isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-      
-      {/* Voice Widget - Only show when chat is closed */}
-      {!isChatOpen && (
-        <VoiceChatWidget variant="standalone" />
-      )}
     </div>
   );
 };

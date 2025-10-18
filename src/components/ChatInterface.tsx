@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import VoiceChatWidget from "./VoiceChatWidget";
 import aLogo from "@/assets/A.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
 import haLogo from "@/assets/HA.png";
@@ -1275,7 +1274,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           )}
           
           {/* Voice Chat Widget - Only in chat interface */}
-          <VoiceChatWidget variant="standalone" />
           </LayoutGroup>
         </motion.div>
       )}

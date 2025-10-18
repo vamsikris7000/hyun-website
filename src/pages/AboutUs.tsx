@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
-import VoiceChatWidget from "@/components/VoiceChatWidget";
 import fullLogo from "@/assets/FullLogo_Transparent1.png";
 import diagnoseIcon from "@/assets/Diagnose.jpeg";
 import designIcon from "@/assets/Design.png";
@@ -276,11 +275,6 @@ const AboutUs = () => {
           </div>
         </footer>
       </div>
-      
-      {/* Voice Widget - Only show when chat is closed */}
-      {!isChatOpen && (
-        <VoiceChatWidget variant="standalone" />
-      )}
     </div>
   );
 };
