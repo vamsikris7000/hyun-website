@@ -8,6 +8,7 @@ import fullLogo from "@/assets/FullLogo_Transparent1.png";
 import diagnoseIcon from "@/assets/Diagnose.jpeg";
 import designIcon from "@/assets/Design.png";
 import deliverIcon from "@/assets/Deliver.jpeg";
+import hyunPhoto from "@/assets/hyunperson.jpg";
 
 const AboutUs = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -180,7 +181,7 @@ const AboutUs = () => {
                 <img
                   className="w-full max-w-[543px] h-auto aspect-[0.76] object-cover rounded-lg"
                   alt="Hyun Suh - CEO and President"
-                  src="https://c.animaapp.com/29VIedzy/img/imgi-2-20210923-220847-1.png"
+                  src={hyunPhoto}
                 />
                 <p className="mt-4 font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] text-center lg:text-left">
                   Hyun Suh - CEO and President

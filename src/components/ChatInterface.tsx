@@ -61,6 +61,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [error, setError] = useState<string>("");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<{name: string, isReturning: boolean} | null>(null);
+  const [showNameResponse, setShowNameResponse] = useState(false);
+  const [detectedName, setDetectedName] = useState<string>("");
+  const [showCompanyInfo, setShowCompanyInfo] = useState(false);
+  const [showServicesInfo, setShowServicesInfo] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
+  const [serviceCounts, setServiceCounts] = useState<{[key: string]: number}>({});
+  const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedQuestions = [
@@ -69,6 +79,253 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     "Tell me about your AI solutions",
     "What makes you different from competitors?"
   ];
+
+  const servicesData = [
+    {
+      id: "general-it",
+      title: "General IT Consulting",
+      description: "We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.",
+      image: "/src/assets/Deliver.jpeg"
+    },
+    {
+      id: "agentic-ai",
+      title: "Agentic AI Solutions",
+      description: "Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.",
+      image: "/src/assets/AI Icon.jpg"
+    },
+    {
+      id: "automation",
+      title: "Automation Solutions",
+      description: "Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.",
+      image: "/src/assets/automation icon.jpg"
+    },
+    {
+      id: "data-transformation",
+      title: "Data Transformation Solutions",
+      description: "The most productive way to consolidate data and bring analytics that matters.",
+      image: "/src/assets/Data Transformation Icon.png"
+    }
+  ];
+
+  // User recognition functions
+  const getUserIdentifier = () => {
+    // Create a unique identifier based on IP and browser fingerprint
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx?.fillText('user-fingerprint', 10, 10);
+    const fingerprint = canvas.toDataURL();
+    
+    // Combine with other browser characteristics
+    const browserInfo = {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      screen: `${screen.width}x${screen.height}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      fingerprint: fingerprint.slice(-20) // Last 20 chars for uniqueness
+    };
+    
+    return btoa(JSON.stringify(browserInfo)).slice(0, 32);
+  };
+
+  const saveUserInfo = (name: string) => {
+    const userIdentifier = getUserIdentifier();
+    const userData = {
+      name: name,
+      firstVisit: new Date().toISOString(),
+      lastVisit: new Date().toISOString(),
+      visitCount: 1,
+      identifier: userIdentifier
+    };
+    
+    // Check if user exists
+    const existingUser = localStorage.getItem(`hyun_user_${userIdentifier}`);
+    if (existingUser) {
+      const existingData = JSON.parse(existingUser);
+      userData.visitCount = existingData.visitCount + 1;
+      userData.firstVisit = existingData.firstVisit;
+    }
+    
+    localStorage.setItem(`hyun_user_${userIdentifier}`, JSON.stringify(userData));
+    setUserInfo({ name: name, isReturning: !!existingUser });
+  };
+
+  const checkUserInfo = () => {
+    const userIdentifier = getUserIdentifier();
+    const existingUser = localStorage.getItem(`hyun_user_${userIdentifier}`);
+    
+    if (existingUser) {
+      const userData = JSON.parse(existingUser);
+      // Update last visit
+      userData.lastVisit = new Date().toISOString();
+      localStorage.setItem(`hyun_user_${userIdentifier}`, JSON.stringify(userData));
+      
+      setUserInfo({ name: userData.name, isReturning: true });
+      return userData.name;
+    }
+    
+    setUserInfo(null);
+    return null;
+  };
+
+  const handleNameIntroduction = (name: string) => {
+    setDetectedName(name);
+    setShowNameResponse(true);
+    setShowWelcome(false);
+    
+    // Add user message to chat
+    setChat(prev => [...prev, { role: 'user', text: `My name is ${name}` }]);
+    
+    // Add pre-built response
+    const response = `It's a pleasure to meet with you ${name}. Would you like to learn more about our company, our services, schedule an appointment, or would you like to explore the website?`;
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    
+    // Speak the response
+    speakText(response);
+    
+    // Save user info
+    saveUserInfo(name);
+  };
+
+  const handleOptionClick = (option: string) => {
+    let response = "";
+    let action = "";
+    
+    switch (option) {
+      case "company":
+        response = "Hyun and Associates is a company that specialize in changing the way people work so that people don't have to work for technology. We let innovative technologies work for you. To do that, we have a four step process that guides people towards their solution.";
+        action = "company_info";
+        setShowCompanyInfo(true);
+        setShowNameResponse(false);
+        break;
+      case "services":
+        response = "With Hyun and Associates, we primarily focus on four main things, General IT Consulting, Agentic AI Solutions, Automation Solutions, and Data Transformation. Which of these options would like to learn more about?";
+        action = "services_info";
+        setShowServicesInfo(true);
+        setShowNameResponse(false);
+        break;
+      case "appointment":
+        response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+        action = "schedule_appointment";
+        break;
+      case "explore":
+        response = "Great! I'll close this chat so you can explore our website. Feel free to come back anytime if you have questions.";
+        action = "explore_website";
+        break;
+    }
+    
+    // Add user message
+    setChat(prev => [...prev, { role: 'user', text: option }]);
+    
+    // Add bot response
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    
+    // Speak the response
+    speakText(response);
+    
+    // Handle actions
+    if (action === "schedule_appointment") {
+      setTimeout(() => {
+        window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank');
+      }, 2000);
+    } else if (action === "explore_website") {
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    }
+  };
+
+  const handleServiceClick = (serviceId: string) => {
+    const service = servicesData.find(s => s.id === serviceId);
+    if (!service) return;
+
+    // Update service counts
+    setServiceCounts(prev => ({
+      ...prev,
+      [serviceId]: (prev[serviceId] || 0) + 1
+    }));
+
+    // Add to selected services
+    setSelectedServices(prev => new Set([...prev, serviceId]));
+
+    // Flip the card
+    setFlippedCards(prev => new Set([...prev, serviceId]));
+
+    // Add user message
+    setChat(prev => [...prev, { role: 'user', text: service.title }]);
+    
+    // Add bot response
+    setChat(prev => [...prev, { role: 'bot', text: service.description }]);
+    
+    // Speak the response
+    speakText(service.description);
+
+    // Show follow-up options after a delay
+    setTimeout(() => {
+      showServiceFollowUp();
+    }, 3000);
+  };
+
+  const showServiceFollowUp = () => {
+    const selectedCount = selectedServices.size;
+    const totalServices = servicesData.length;
+    const hasMultipleSelections = Object.values(serviceCounts).some(count => count > 1);
+    
+    let response = "";
+    let showScheduleButton = true;
+
+    if (hasMultipleSelections) {
+      const mostSelected = Object.entries(serviceCounts).reduce((a, b) => serviceCounts[a[0]] > serviceCounts[b[0]] ? a : b);
+      const service = servicesData.find(s => s.id === mostSelected[0]);
+      response = `Looks like you really want to learn more about ${service?.title}, would you like to talk with our consultant regarding ${service?.title}?`;
+    } else if (selectedCount === 1) {
+      const service = servicesData.find(s => selectedServices.has(s.id));
+      response = `Since you learned about ${service?.title}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
+    } else if (selectedCount > 1 && selectedCount < totalServices) {
+      const serviceNames = Array.from(selectedServices).map(id => servicesData.find(s => s.id === id)?.title).join(' and ');
+      response = `Since you learned more about ${serviceNames}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
+    } else if (selectedCount === totalServices) {
+      response = `Since you went through and learned about all of our offerings, would you like to schedule a time with our consultant?`;
+    }
+
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    speakText(response);
+  };
+
+  const handleScheduleClick = () => {
+    const response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+    setChat(prev => [...prev, { role: 'user', text: 'Schedule appointment' }]);
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    speakText(response);
+    
+    setTimeout(() => {
+      window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank');
+    }, 2000);
+  };
+
+  const handleCompanyFollowUp = () => {
+    const response = "Since you had the chance to learn more about the company, would you like to learn more about our services or would you like to schedule an appointment with our consultant?";
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    speakText(response);
+  };
+
+  const handleNoResponse = () => {
+    const response = "Is there anything more I can help you with?";
+    setChat(prev => [...prev, { role: 'user', text: 'No' }]);
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    speakText(response);
+  };
+
+  const handleYesResponse = () => {
+    const response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+    setChat(prev => [...prev, { role: 'user', text: 'Yes' }]);
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    speakText(response);
+    
+    setTimeout(() => {
+      window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank');
+    }, 2000);
+  };
 
   // Text-to-speech function
   const speakText = (text: string) => {
@@ -83,6 +340,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       utterance.rate = 0.9; // Slightly slower for better comprehension
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
+      
+      // Use specific voice (index 181)
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 181 && voices[181]) {
+        utterance.voice = voices[181];
+        console.log('Using voice:', voices[181].name, voices[181].lang);
+      } else {
+        console.log('Voice index 181 not available, using default voice');
+        console.log('Available voices:', voices.length);
+      }
       
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
@@ -100,6 +367,72 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }
   };
 
+  // Speech-to-text functions
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.error('Speech recognition not supported');
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognitionInstance = new SpeechRecognition();
+    
+    recognitionInstance.continuous = false;
+    recognitionInstance.interimResults = true;
+    recognitionInstance.lang = 'en-US';
+
+    recognitionInstance.onstart = () => {
+      setIsListening(true);
+      console.log('Speech recognition started');
+    };
+
+    recognitionInstance.onresult = (event: any) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setMessage(prev => prev + finalTranscript);
+        console.log('Final transcript:', finalTranscript);
+      } else if (interimTranscript) {
+        // Show interim results in a temporary way
+        console.log('Interim transcript:', interimTranscript);
+      }
+    };
+
+    recognitionInstance.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        alert('Microphone permission denied. Please allow microphone access and try again.');
+      }
+    };
+
+    recognitionInstance.onend = () => {
+      setIsListening(false);
+      console.log('Speech recognition ended');
+    };
+
+    setRecognition(recognitionInstance);
+    recognitionInstance.start();
+  };
+
+  const stopListening = () => {
+    if (recognition) {
+      recognition.stop();
+      setIsListening(false);
+    }
+  };
+
   // Debounced scroll function to prevent excessive scrolling during streaming
   const scrollToBottom = useCallback(() => {
     if (chatEndRef.current) {
@@ -114,6 +447,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   }, [scrollToBottom]);
 
   useEffect(() => {
+    // Check for existing user when component mounts
+    if (isOpen) {
+      checkUserInfo();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     // Prevent background scroll when chat is open
     if (isOpen) {
       document.body.classList.add('overflow-hidden');
@@ -126,11 +466,28 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setStreamedText("");
       setIsLoading(false);
       setError("");
+      setUserInfo(null);
+      setShowNameResponse(false);
+      setDetectedName("");
+      setShowCompanyInfo(false);
+      setShowServicesInfo(false);
+      setSelectedServices(new Set());
+      setServiceCounts({});
+      setFlippedCards(new Set());
+      // Stop any ongoing speech recognition
+      if (recognition) {
+        recognition.stop();
+        setIsListening(false);
+      }
     }
     return () => {
       document.body.classList.remove('overflow-hidden');
+      // Cleanup speech recognition on unmount
+      if (recognition) {
+        recognition.stop();
+      }
     };
-  }, [isOpen]);
+  }, [isOpen, recognition]);
 
   // Separate effect for scrolling
   useEffect(() => {
@@ -143,6 +500,19 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
     const userMsg = message;
+    
+    // Check if user is introducing themselves (only if we don't know them yet)
+    if (!userInfo && !showWelcome) {
+      const namePattern = /(?:my name is|i'm|i am|call me|i go by)\s+([a-zA-Z]+)/i;
+      const nameMatch = userMsg.match(namePattern);
+      if (nameMatch) {
+        const name = nameMatch[1];
+        handleNameIntroduction(name);
+        setMessage("");
+        return; // Don't proceed with normal chat flow
+      }
+    }
+    
     setChat((prev) => [...prev, { role: 'user', text: userMsg }]);
     setMessage("");
     setIsLoading(true);
@@ -317,20 +687,43 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   <AnimatedLogo isWelcome={true} />
                 </div>
 
-                <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
-                  Welcome to
-                  <br />
-                  Hyun & Associates
-                </h1>
+                {userInfo ? (
+                  // Returning user greeting
+                  <>
+                    <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
+                      Hi {userInfo.name} and welcome back to
+                      <br />
+                      Hyun & Associates
+                    </h1>
 
-                <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
-                  <span className="font-semibold">
-                    Who do I have the pleasure{" "}
-                  </span>
-                  <span className="font-bold italic">
-                    of speaking with?
-                  </span>
-                </p>
+                    <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
+                      <span className="font-semibold">
+                        where we let innovative technologies work for you.{" "}
+                      </span>
+                      <span className="font-bold italic">
+                        Would you like to learn more about the company, our services, schedule an appointment, or would you like to explore the website?
+                      </span>
+                    </p>
+                  </>
+                ) : (
+                  // New user greeting
+                  <>
+                    <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
+                      Welcome to
+                      <br />
+                      Hyun & Associates
+                    </h1>
+
+                    <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
+                      <span className="font-semibold">
+                        where we let innovative technologies work for you.{" "}
+                      </span>
+                      <span className="font-bold italic">
+                        Whom do I have the pleasure of speaking with today?
+                      </span>
+                    </p>
+                  </>
+                )}
 
                 <div className="flex flex-col w-full items-center gap-6">
                   <form
@@ -346,9 +739,21 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type your message here..."
-                        className="flex-1 px-6 py-4 bg-transparent text-black text-lg placeholder-gray-400 focus:outline-none rounded-full"
+                        className="flex-1 px-6 py-4 pr-20 bg-transparent text-black text-lg placeholder-gray-400 focus:outline-none rounded-full"
                         aria-label="Chat input"
                       />
+                      <button
+                        type="button"
+                        className={`absolute right-14 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${
+                          isListening 
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#af71f1]'
+                        }`}
+                        onClick={isListening ? stopListening : startListening}
+                        aria-label={isListening ? "Stop listening" : "Start voice input"}
+                      >
+                        <Mic className={`w-4 h-4 ${isListening ? 'animate-pulse' : ''}`} />
+                      </button>
                       <button
                         type="submit"
                         className="m-2 w-10 h-10 bg-[#af71f1] rounded-full flex items-center justify-center hover:bg-[#9c5ee0] transition-colors focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:ring-offset-2"
@@ -360,7 +765,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   </form>
 
                   <div className="flex flex-wrap justify-center items-center gap-3 w-full max-w-3xl">
-                    {suggestedQuestions.map((question, index) => (
+                    {(userInfo ? [
+                      "Tell me about your services",
+                      "Schedule a consultation",
+                      "Learn about AI solutions",
+                      "Explore the website"
+                    ] : suggestedQuestions).map((question, index) => (
                       <button
                         key={index}
                         onClick={() => handleSuggestionClick(question)}
@@ -443,6 +853,297 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   )}
                   
                   <div ref={chatEndRef} />
+                  
+                  {/* Option Buttons - Show after name introduction */}
+                  {showNameResponse && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="flex flex-wrap justify-center gap-3 mt-6"
+                    >
+                      <button
+                        onClick={() => handleOptionClick("company")}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Learn more about the company
+                      </button>
+                      <button
+                        onClick={() => handleOptionClick("services")}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Learn more about our services
+                      </button>
+                      <button
+                        onClick={() => handleOptionClick("appointment")}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Schedule an appointment
+                      </button>
+                      <button
+                        onClick={() => handleOptionClick("explore")}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Explore website
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {/* Company Info - 4 Step Process Panels */}
+                  {showCompanyInfo && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="mt-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        {/* Step 1: Diagnose */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.4 }}
+                          className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-lg border border-red-200"
+                        >
+                          <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4">
+                            <span className="text-white font-bold text-lg">1</span>
+                          </div>
+                          <h3 className="font-semibold text-lg mb-2 text-red-800">Diagnose</h3>
+                          <p className="text-sm text-red-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
+                        </motion.div>
+
+                        {/* Step 2: Design */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.5 }}
+                          className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200"
+                        >
+                          <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
+                            <span className="text-white font-bold text-lg">2</span>
+                          </div>
+                          <h3 className="font-semibold text-lg mb-2 text-blue-800">Design</h3>
+                          <p className="text-sm text-blue-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
+                        </motion.div>
+
+                        {/* Step 3: Deliver */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.6 }}
+                          className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200"
+                        >
+                          <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                            <span className="text-white font-bold text-lg">3</span>
+                          </div>
+                          <h3 className="font-semibold text-lg mb-2 text-green-800">Deliver</h3>
+                          <p className="text-sm text-green-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
+                        </motion.div>
+
+                        {/* Step 4: Direct */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.7 }}
+                          className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200"
+                        >
+                          <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                            <span className="text-white font-bold text-lg">4</span>
+                          </div>
+                          <h3 className="font-semibold text-lg mb-2 text-purple-800">Direct</h3>
+                          <p className="text-sm text-purple-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
+                        </motion.div>
+                      </div>
+
+                      {/* Company Follow-up Buttons */}
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.8 }}
+                        className="flex flex-wrap justify-center gap-3"
+                      >
+                        <button
+                          onClick={() => {
+                            handleCompanyFollowUp();
+                            setShowCompanyInfo(false);
+                            setShowNameResponse(true);
+                          }}
+                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                          Learn more about our services
+                        </button>
+                        <button
+                          onClick={handleScheduleClick}
+                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        >
+                          Schedule an appointment
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+
+                  {/* Services Info - Interactive Service Cards */}
+                  {showServicesInfo && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="mt-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        {servicesData.map((service, index) => (
+                          <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                            className="relative w-full h-48 cursor-pointer"
+                            onClick={() => handleServiceClick(service.id)}
+                          >
+                            <div 
+                              className={`w-full h-full rounded-lg transition-all duration-500 ease-in-out ${
+                                flippedCards.has(service.id) 
+                                  ? 'transform rotate-y-180' 
+                                  : 'transform rotate-y-0'
+                              }`}
+                              style={{ transformStyle: 'preserve-3d' }}
+                            >
+                              {/* Front of card */}
+                              <div 
+                                className={`absolute inset-0 w-full h-full ${
+                                  flippedCards.has(service.id) ? 'hidden' : 'block'
+                                }`}
+                              >
+                                <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:shadow-lg transition-shadow">
+                                  <div className="w-16 h-16 bg-[#af71f1] rounded-lg flex items-center justify-center mb-4">
+                                    <span className="text-white font-bold text-xl">{index + 1}</span>
+                                  </div>
+                                  <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2">
+                                    {service.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-600 text-center">
+                                    Click to learn more
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Back of card - Description */}
+                              <div 
+                                className={`absolute inset-0 w-full h-full ${
+                                  flippedCards.has(service.id) ? 'block' : 'hidden'
+                                }`}
+                              >
+                                <div className="bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg p-6 h-full flex flex-col justify-center text-white">
+                                  <h3 className="font-semibold text-lg mb-3 text-center">
+                                    {service.title}
+                                  </h3>
+                                  <p className="text-sm text-center leading-relaxed">
+                                    {service.description}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Dynamic Follow-up Buttons - Show after service interactions */}
+                  {showServicesInfo && selectedServices.size > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="flex flex-wrap justify-center gap-3 mt-4"
+                    >
+                      <button
+                        onClick={handleScheduleClick}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Schedule an appointment
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {/* Yes/No Buttons - Show after specific service follow-up responses */}
+                  {chat.length > 0 && (
+                    (() => {
+                      const lastMessage = chat[chat.length - 1]?.text;
+                      const hasMultipleSelections = Object.values(serviceCounts).some(count => count > 1);
+                      const selectedCount = selectedServices.size;
+                      const totalServices = servicesData.length;
+                      
+                      // Show Yes/No buttons for multiple selections or all services learned
+                      if (hasMultipleSelections || (selectedCount === totalServices && lastMessage?.includes("schedule a time"))) {
+                        return (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="flex flex-wrap justify-center gap-3 mt-4"
+                          >
+                            <button
+                              onClick={handleYesResponse}
+                              className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold text-sm hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                            >
+                              Yes
+                            </button>
+                            <button
+                              onClick={handleNoResponse}
+                              className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full font-semibold text-sm hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                            >
+                              No
+                            </button>
+                          </motion.div>
+                        );
+                      }
+                      return null;
+                    })()
+                  )}
+
+                  {/* Final Options - Show after "No" response */}
+                  {chat.length > 0 && chat[chat.length - 1]?.text === "Is there anything more I can help you with?" && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="flex flex-wrap justify-center gap-3 mt-4"
+                    >
+                      <button
+                        onClick={() => {
+                          setShowCompanyInfo(true);
+                          setShowServicesInfo(false);
+                          setShowNameResponse(false);
+                        }}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Learn more about the company
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowServicesInfo(true);
+                          setShowCompanyInfo(false);
+                          setShowNameResponse(false);
+                        }}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Learn more about our services
+                      </button>
+                      <button
+                        onClick={handleScheduleClick}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Schedule an appointment
+                      </button>
+                      <button
+                        onClick={() => handleOptionClick("explore")}
+                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        Explore website
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
               </div>
               
@@ -457,16 +1158,21 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
                         onKeyPress={handleKeyPress}
-                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-full text-base placeholder:text-gray-500 text-black focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:border-transparent"
+                        className="w-full px-4 py-3 pr-16 bg-gray-50 border border-gray-200 rounded-full text-base placeholder:text-gray-500 text-black focus:outline-none focus:ring-2 focus:ring-[#af71f1] focus:border-transparent"
                         disabled={isLoading}
                       />
                       <button
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#af71f1] transition-colors"
-                        onClick={() => console.log("Microphone clicked")}
-                        aria-label="Voice input"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 ${
+                          isListening 
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-[#af71f1]'
+                        }`}
+                        onClick={isListening ? stopListening : startListening}
+                        aria-label={isListening ? "Stop listening" : "Start voice input"}
                         type="button"
+                        disabled={isLoading}
                       >
-                        <Mic className="w-4 h-4" />
+                        <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
                       </button>
                     </div>
                     {/* Stop Speaking Button */}
@@ -495,6 +1201,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       )}
                     </button>
                   </div>
+                  
+                  {/* Listening Indicator */}
+                  {isListening && (
+                    <div className="flex items-center gap-2 text-red-500 text-sm mb-2">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                      <span>Listening... Speak now</span>
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-2 flex-wrap">
                     {suggestedQuestions.slice(0, 2).map((question, index) => (
