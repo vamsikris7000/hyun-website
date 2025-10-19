@@ -70,6 +70,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [serviceCounts, setServiceCounts] = useState<{[key: string]: number}>({});
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+  const [dynamicCards, setDynamicCards] = useState<Array<{id: string, title: string, description: string, type: string}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedQuestions = [
@@ -333,6 +334,204 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }, 2000);
   };
 
+  // Ultra-intelligent function to parse ANY backend response and extract service information
+  const parseResponseForServices = (text: string) => {
+    const detectedServices: Array<{id: string, title: string, description: string, type: string}> = [];
+    let remainingText = text;
+
+    // Multi-layered intelligent detection system
+    
+    // Layer 1: Advanced Pattern Recognition
+    const advancedPatterns = [
+      // Structured formats
+      /(\*\*[^*]+\*\*):\s*([^.\n]+[.!?]?)/g,
+      /([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
+      /[•\-\*]\s*([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
+      /\d+\.\s*([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
+      /(\*[^*]+\*):\s*([^.\n]+[.!?]?)/g,
+      // Natural language patterns
+      /(we|our|i|my)\s+([^,]+?)(?:,|:|\s+is|\s+are|\s+includes|\s+offers|\s+provides)/gi,
+      /(specialize|focus|expert|expertise|capability|capabilities)\s+(?:in|on|with)\s+([^.!?]+)/gi,
+      /(offer|provide|deliver|help|assist|support)\s+([^.!?]+)/gi
+    ];
+
+    // Layer 2: Contextual Intelligence
+    const contextualKeywords = [
+      // Business terms
+      'solution', 'service', 'offering', 'capability', 'expertise', 'specialization',
+      'consulting', 'advisory', 'support', 'implementation', 'deployment', 'integration',
+      'optimization', 'transformation', 'automation', 'digitalization', 'modernization',
+      // Technology terms
+      'ai', 'artificial intelligence', 'machine learning', 'data', 'analytics', 'cloud',
+      'cybersecurity', 'software', 'hardware', 'platform', 'system', 'application',
+      'database', 'network', 'infrastructure', 'architecture', 'development', 'engineering',
+      // Process terms
+      'workflow', 'process', 'methodology', 'framework', 'approach', 'strategy',
+      'management', 'administration', 'monitoring', 'maintenance', 'support', 'training'
+    ];
+
+    // Layer 3: Semantic Analysis Engine
+    const analyzeSemanticContent = (text: string) => {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
+      const detected = [];
+
+      sentences.forEach(sentence => {
+        const trimmed = sentence.trim();
+        
+        // Calculate service likelihood score
+        let serviceScore = 0;
+        
+        // Check for business/service language patterns
+        const businessPatterns = [
+          /we (provide|offer|deliver|specialize|focus|help|assist|support)/i,
+          /our (services|solutions|offerings|capabilities|expertise)/i,
+          /we can (help|assist|support|provide|deliver|implement)/i,
+          /(service|solution|offering|capability|expertise|specialization)/i,
+          /(consulting|advisory|support|implementation|deployment)/i
+        ];
+        
+        businessPatterns.forEach(pattern => {
+          if (pattern.test(trimmed)) serviceScore += 2;
+        });
+        
+        // Check for technology/business keywords
+        contextualKeywords.forEach(keyword => {
+          if (trimmed.toLowerCase().includes(keyword)) serviceScore += 1;
+        });
+        
+        // Check for action verbs that indicate services
+        const actionVerbs = ['provide', 'offer', 'deliver', 'implement', 'develop', 'create', 'build', 'design', 'optimize', 'transform', 'automate', 'integrate'];
+        actionVerbs.forEach(verb => {
+          if (trimmed.toLowerCase().includes(verb)) serviceScore += 1;
+        });
+        
+        // Check for benefit/outcome language
+        const benefitWords = ['improve', 'enhance', 'increase', 'reduce', 'optimize', 'streamline', 'accelerate', 'boost', 'maximize', 'minimize'];
+        benefitWords.forEach(word => {
+          if (trimmed.toLowerCase().includes(word)) serviceScore += 1;
+        });
+        
+        // If score is high enough, extract service information
+        if (serviceScore >= 3 && trimmed.length > 20 && trimmed.length < 300) {
+          // Extract service name intelligently
+          let serviceName = 'Service';
+          
+          // Try to extract from common patterns
+          const namePatterns = [
+            /(?:we|our|i|my)\s+([^,]+?)(?:,|:|\s+is|\s+are)/i,
+            /(?:specialize|focus|expert|expertise)\s+(?:in|on|with)\s+([^.!?]+)/i,
+            /(?:offer|provide|deliver|help|assist|support)\s+([^.!?]+)/i,
+            /([A-Z][A-Za-z\s&]+?)(?:\s+services?|\s+solutions?|\s+consulting)/i
+          ];
+          
+          for (const pattern of namePatterns) {
+            const match = trimmed.match(pattern);
+            if (match && match[1]) {
+              serviceName = match[1].trim();
+              break;
+            }
+          }
+          
+          // Clean up service name
+          serviceName = serviceName
+            .replace(/^(we|our|i|my)\s+/i, '')
+            .replace(/[.!?]+$/, '')
+            .trim();
+          
+          if (serviceName.length > 3 && serviceName.length < 60) {
+            detected.push({
+              title: serviceName,
+              description: trimmed,
+              score: serviceScore
+            });
+          }
+        }
+      });
+      
+      return detected;
+    };
+
+    // Layer 4: Pattern-based extraction
+    advancedPatterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const title = match[1].replace(/[*]/g, '').trim();
+        const description = match[2] ? match[2].trim() : match[0].trim();
+        
+        // Intelligent validation
+        const hasContextualKeywords = contextualKeywords.some(keyword => 
+          title.toLowerCase().includes(keyword) || 
+          description.toLowerCase().includes(keyword)
+        );
+        
+        const isValidLength = title.length >= 3 && title.length <= 60 && 
+                             description.length >= 10 && description.length <= 250;
+        
+        const isNotDuplicate = !detectedServices.some(service => 
+          service.title.toLowerCase() === title.toLowerCase()
+        );
+        
+        if ((hasContextualKeywords || title.length > 5) && isValidLength && isNotDuplicate) {
+          const serviceId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          detectedServices.push({
+            id: serviceId,
+            title: title,
+            description: description,
+            type: 'service'
+          });
+          
+          remainingText = remainingText.replace(match[0], '').trim();
+        }
+      }
+    });
+
+    // Layer 5: Semantic analysis for unstructured content
+    if (detectedServices.length === 0) {
+      const semanticResults = analyzeSemanticContent(text);
+      
+      semanticResults.forEach(result => {
+        const serviceId = result.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        detectedServices.push({
+          id: serviceId,
+          title: result.title,
+          description: result.description,
+          type: 'service'
+        });
+        
+        remainingText = remainingText.replace(result.description, '').trim();
+      });
+    }
+
+    // Clean up remaining text
+    remainingText = remainingText
+      .replace(/\n\s*\n/g, '\n')
+      .replace(/^\s+|\s+$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return {
+      services: detectedServices,
+      remainingText: remainingText
+    };
+  };
+
+  // Function to handle dynamic card clicks
+  const handleDynamicCardClick = (cardId: string) => {
+    const card = dynamicCards.find(c => c.id === cardId);
+    if (!card) return;
+
+    // Add user message
+    setChat(prev => [...prev, { role: 'user', text: card.title }]);
+    
+    // Add bot response with more details
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
+    const response = `${personalizedGreeting}${card.description}. Would you like to learn more about this service or explore our other offerings?`;
+    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    
+    // Speak the response
+    speakText(response);
+  };
+
   // Text-to-speech function
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -523,6 +722,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setSelectedServices(new Set());
       setServiceCounts({});
       setFlippedCards(new Set());
+      setDynamicCards([]);
       // Stop any ongoing speech recognition
       if (recognition) {
         recognition.stop();
@@ -664,14 +864,29 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               setStreamedText(fullText);
               console.log('Streaming text updated:', fullText);
             }
-            if (data.event === 'message_end') {
-              console.log('Message ended, adding to chat:', fullText);
-              setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-              setStreamedText('');
-              
-              // Speak the response using text-to-speech
-              speakText(fullText);
-            }
+              if (data.event === 'message_end') {
+                console.log('Message ended, adding to chat:', fullText);
+               
+                // Parse the response for services and create dynamic cards
+                const parsedResponse = parseResponseForServices(fullText);
+                
+                if (parsedResponse.services.length > 0) {
+                  // Add the remaining text as the bot message
+                  setChat((prev) => [...prev, { role: 'bot', text: parsedResponse.remainingText }]);
+                  
+                  // Set the dynamic cards for display
+                  setDynamicCards(parsedResponse.services);
+                  
+                  // Speak the remaining text (without the service descriptions)
+                  speakText(parsedResponse.remainingText);
+                } else {
+                  // No services detected, add full text as normal
+                  setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                  speakText(fullText);
+                }
+                
+                setStreamedText('');
+              }
           } catch (err) {
             console.log('Error parsing line:', line, err);
           }
@@ -891,6 +1106,87 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       )}
                     </motion.div>
                   ))}
+
+                  {/* Ultra-Intelligent Dynamic Service Cards from ANY Backend Response */}
+                  {dynamicCards.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="flex justify-start"
+                    >
+                      <div className="max-w-[85%] w-full">
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3, delay: 0.2 }}
+                          className="mb-4"
+                        >
+                          <div className="flex items-center gap-2 text-sm text-[#af71f1] font-medium">
+                            <div className="w-2 h-2 bg-[#af71f1] rounded-full animate-pulse"></div>
+                            <span>Intelligently detected services</span>
+                          </div>
+                        </motion.div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {dynamicCards.map((card, index) => (
+                            <motion.div
+                              key={card.id}
+                              initial={{ opacity: 0, y: 20, scale: 0.95, rotateX: -15 }}
+                              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                              transition={{ 
+                                duration: 0.5, 
+                                delay: 0.1 + index * 0.1,
+                                type: "spring",
+                                stiffness: 100,
+                                damping: 15
+                              }}
+                              className="relative w-full h-52 cursor-pointer group perspective-1000"
+                              onClick={() => handleDynamicCardClick(card.id)}
+                            >
+                              <div className="w-full h-full rounded-xl transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-2xl group-hover:-translate-y-2">
+                                <div className="bg-gradient-to-br from-white via-[#faf9ff] to-[#f0ebff] rounded-xl p-6 h-full flex flex-col justify-between border border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                                  {/* Header with icon and title */}
+                                  <div className="flex items-start gap-3 mb-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md">
+                                      <span className="text-white font-bold text-lg">{index + 1}</span>
+                                    </div>
+                                    <div className="flex-1">
+                                      <h3 className="font-bold text-lg text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300 leading-tight">
+                                        {card.title}
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Description */}
+                                  <div className="flex-1 mb-4">
+                                    <p className="text-sm text-gray-700 leading-relaxed line-clamp-4 group-hover:text-gray-800 transition-colors duration-300">
+                                      {card.description}
+                                    </p>
+                                  </div>
+                                  
+                                  {/* Interactive footer */}
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                      Click to explore
+                                    </div>
+                                    <div className="w-6 h-6 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Hover effect overlay */}
+                                  <div className="absolute inset-0 bg-gradient-to-br from-[#af71f1]/5 to-[#9c5ee0]/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                   
                   {/* Consolidated Response State - Loading, Streaming, or Error */}
                   {(isLoading || error) && (
