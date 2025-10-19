@@ -190,25 +190,28 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     let response = "";
     let action = "";
     
+    // Add personalized greeting for known users
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
+    
     switch (option) {
       case "company":
-        response = "Hyun and Associates is a company that specialize in changing the way people work so that people don't have to work for technology. We let innovative technologies work for you. To do that, we have a four step process that guides people towards their solution.";
+        response = `${personalizedGreeting}Hyun and Associates is a company that specialize in changing the way people work so that people don't have to work for technology. We let innovative technologies work for you. To do that, we have a four step process that guides people towards their solution.`;
         action = "company_info";
         setShowCompanyInfo(true);
         setShowNameResponse(false);
         break;
       case "services":
-        response = "With Hyun and Associates, we primarily focus on four main things, General IT Consulting, Agentic AI Solutions, Automation Solutions, and Data Transformation. Which of these options would like to learn more about?";
+        response = `${personalizedGreeting}With Hyun and Associates, we primarily focus on four main things, General IT Consulting, Agentic AI Solutions, Automation Solutions, and Data Transformation. Which of these options would like to learn more about?`;
         action = "services_info";
         setShowServicesInfo(true);
         setShowNameResponse(false);
         break;
       case "appointment":
-        response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+        response = `${personalizedGreeting}I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.`;
         action = "schedule_appointment";
         break;
       case "explore":
-        response = "Great! I'll close this chat so you can explore our website. Feel free to come back anytime if you have questions.";
+        response = `${personalizedGreeting}Great! I'll close this chat so you can explore our website. Feel free to come back anytime if you have questions.`;
         action = "explore_website";
         break;
     }
@@ -269,6 +272,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const selectedCount = selectedServices.size;
     const totalServices = servicesData.length;
     const hasMultipleSelections = Object.values(serviceCounts).some(count => count > 1);
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
     
     let response = "";
     let showScheduleButton = true;
@@ -276,15 +280,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     if (hasMultipleSelections) {
       const mostSelected = Object.entries(serviceCounts).reduce((a, b) => serviceCounts[a[0]] > serviceCounts[b[0]] ? a : b);
       const service = servicesData.find(s => s.id === mostSelected[0]);
-      response = `Looks like you really want to learn more about ${service?.title}, would you like to talk with our consultant regarding ${service?.title}?`;
+      response = `${personalizedGreeting}Looks like you really want to learn more about ${service?.title}, would you like to talk with our consultant regarding ${service?.title}?`;
     } else if (selectedCount === 1) {
       const service = servicesData.find(s => selectedServices.has(s.id));
-      response = `Since you learned about ${service?.title}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
+      response = `${personalizedGreeting}Since you learned about ${service?.title}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
     } else if (selectedCount > 1 && selectedCount < totalServices) {
       const serviceNames = Array.from(selectedServices).map(id => servicesData.find(s => s.id === id)?.title).join(' and ');
-      response = `Since you learned more about ${serviceNames}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
+      response = `${personalizedGreeting}Since you learned more about ${serviceNames}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
     } else if (selectedCount === totalServices) {
-      response = `Since you went through and learned about all of our offerings, would you like to schedule a time with our consultant?`;
+      response = `${personalizedGreeting}Since you went through and learned about all of our offerings, would you like to schedule a time with our consultant?`;
     }
 
     setChat(prev => [...prev, { role: 'bot', text: response }]);
@@ -292,7 +296,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   const handleScheduleClick = () => {
-    const response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
+    const response = `${personalizedGreeting}I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.`;
     setChat(prev => [...prev, { role: 'user', text: 'Schedule appointment' }]);
     setChat(prev => [...prev, { role: 'bot', text: response }]);
     speakText(response);
@@ -303,7 +308,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   const handleCompanyFollowUp = () => {
-    const response = "Since you had the chance to learn more about the company, would you like to learn more about our services or would you like to schedule an appointment with our consultant?";
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
+    const response = `${personalizedGreeting}Since you had the chance to learn more about the company, would you like to learn more about our services or would you like to schedule an appointment with our consultant?`;
     setChat(prev => [...prev, { role: 'bot', text: response }]);
     speakText(response);
   };
@@ -316,7 +322,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   const handleYesResponse = () => {
-    const response = "I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.";
+    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
+    const response = `${personalizedGreeting}I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.`;
     setChat(prev => [...prev, { role: 'user', text: 'Yes' }]);
     setChat(prev => [...prev, { role: 'bot', text: response }]);
     speakText(response);
@@ -553,6 +560,29 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         setMessage("");
         return; // Don't proceed with normal chat flow
       }
+    }
+
+    // Check for pre-built responses first (works for both known and unknown users)
+    const lowerMsg = userMsg.toLowerCase();
+    if (lowerMsg.includes('learn more about the company') || lowerMsg.includes('company')) {
+      handleOptionClick("company");
+      setMessage("");
+      return;
+    }
+    if (lowerMsg.includes('learn more about our services') || lowerMsg.includes('services')) {
+      handleOptionClick("services");
+      setMessage("");
+      return;
+    }
+    if (lowerMsg.includes('schedule') || lowerMsg.includes('appointment')) {
+      handleOptionClick("appointment");
+      setMessage("");
+      return;
+    }
+    if (lowerMsg.includes('explore') || lowerMsg.includes('website')) {
+      handleOptionClick("explore");
+      setMessage("");
+      return;
     }
     
     setChat((prev) => [...prev, { role: 'user', text: userMsg }]);
