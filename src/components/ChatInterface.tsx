@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Mic, Send, X, Star, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -71,6 +72,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [serviceCounts, setServiceCounts] = useState<{[key: string]: number}>({});
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const [dynamicCards, setDynamicCards] = useState<Array<{id: string, title: string, description: string, type: string}>>([]);
+  const [structuredContent, setStructuredContent] = useState<Array<{id: string, title: string, content: string, type: 'card'}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedQuestions = [
@@ -478,6 +480,146 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     speakText(response);
   };
 
+  // Function to parse structured content and convert to cards
+  const parseStructuredContent = (text: string) => {
+    const structuredSections: Array<{id: string, title: string, content: string, type: 'card'}> = [];
+    let remainingText = text;
+
+    // Pattern 1: Markdown headings with content (## Heading followed by content)
+    const headingPattern = /(#{1,3})\s+(.+?)(?=\n#{1,3}|\n\n|\n-|\n\*|\n\d+\.|$)/gs;
+    let match;
+    
+    while ((match = headingPattern.exec(text)) !== null) {
+      const headingLevel = match[1].length;
+      const title = match[2].trim();
+      const content = match[0].replace(match[1] + ' ' + match[2], '').trim();
+      
+      // Only process if there's substantial content after the heading
+      if (content.length > 10 && title.length > 2 && title.length < 100) {
+        const sectionId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        structuredSections.push({
+          id: sectionId,
+          title: title,
+          content: content,
+          type: 'card'
+        });
+        
+        // Remove this section from remaining text
+        remainingText = remainingText.replace(match[0], '').trim();
+      }
+    }
+
+    // Pattern 2: Bold/strong text followed by content
+    const boldPattern = /(\*\*|__)(.+?)\1\s*([^\n]+(?:\n(?!\*\*|__)[^\n]+)*)/g;
+    while ((match = boldPattern.exec(text)) !== null) {
+      const title = match[2].trim();
+      const content = match[3].trim();
+      
+      if (content.length > 10 && title.length > 2 && title.length < 100) {
+        const sectionId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        structuredSections.push({
+          id: sectionId,
+          title: title,
+          content: content,
+          type: 'card'
+        });
+        
+        remainingText = remainingText.replace(match[0], '').trim();
+      }
+    }
+
+    // Pattern 3: Lines that look like section headers (all caps or title case)
+    const sectionHeaderPattern = /^([A-Z][A-Za-z\s&]+):\s*([^\n]+(?:\n(?!^[A-Z][A-Za-z\s&]+:)[^\n]+)*)/gm;
+    while ((match = sectionHeaderPattern.exec(text)) !== null) {
+      const title = match[1].trim();
+      const content = match[2].trim();
+      
+      if (content.length > 10 && title.length > 2 && title.length < 100) {
+        const sectionId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        structuredSections.push({
+          id: sectionId,
+          title: title,
+          content: content,
+          type: 'card'
+        });
+        
+        remainingText = remainingText.replace(match[0], '').trim();
+      }
+    }
+
+    // Clean up remaining text
+    remainingText = remainingText
+      .replace(/\n\s*\n/g, '\n')
+      .replace(/^\s+|\s+$/g, '')
+      .replace(/\s+/g, ' ');
+
+    return {
+      sections: structuredSections,
+      remainingText: remainingText
+    };
+  };
+
+  // Function to render structured content as cards
+  const renderStructuredContent = (sections: Array<{id: string, title: string, content: string, type: 'card'}>) => {
+    return sections.map((section, index) => (
+      <motion.div
+        key={section.id}
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ 
+          duration: 0.5, 
+          delay: 0.1 + index * 0.1,
+          type: "spring",
+          stiffness: 100,
+          damping: 15
+        }}
+        className="flex justify-start mb-4"
+      >
+        <div className="max-w-[85%] w-full">
+          <Card className="bg-gradient-to-br from-white to-[#faf9ff] border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-300 shadow-lg hover:shadow-xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold text-[#0c202b] flex items-center gap-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] rounded-full"></div>
+                {section.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-sm text-gray-700 leading-relaxed">
+                {section.content.split('\n').map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  if (trimmedLine.startsWith('-') || trimmedLine.startsWith('•') || trimmedLine.startsWith('*')) {
+                    return (
+                      <div key={lineIndex} className="flex items-start gap-2 mb-2">
+                        <div className="w-1.5 h-1.5 bg-[#af71f1] rounded-full mt-2 flex-shrink-0"></div>
+                        <span>{trimmedLine.substring(1).trim()}</span>
+                      </div>
+                    );
+                  } else if (trimmedLine.match(/^\d+\./)) {
+                    return (
+                      <div key={lineIndex} className="flex items-start gap-2 mb-2">
+                        <div className="w-5 h-5 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] rounded-full flex items-center justify-center text-xs text-white font-semibold flex-shrink-0 mt-0.5">
+                          {trimmedLine.match(/^\d+/)?.[0]}
+                        </div>
+                        <span>{trimmedLine.replace(/^\d+\.\s*/, '').trim()}</span>
+                      </div>
+                    );
+                  } else if (trimmedLine.length > 0) {
+                    return (
+                      <p key={lineIndex} className="mb-2 last:mb-0">
+                        {trimmedLine}
+                      </p>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
+    ));
+  };
+
   // Text-to-speech function
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -669,6 +811,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setServiceCounts({});
       setFlippedCards(new Set());
       setDynamicCards([]);
+      setStructuredContent([]);
       // Stop any ongoing speech recognition
       if (recognition) {
         recognition.stop();
@@ -813,22 +956,48 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               if (data.event === 'message_end') {
                 console.log('Message ended, adding to chat:', fullText);
                
-                // Parse the response for services and create dynamic cards
-                const parsedResponse = parseResponseForServices(fullText);
+                // First, parse for structured content (headings, sections)
+                const structuredParsed = parseStructuredContent(fullText);
                 
-                if (parsedResponse.services.length > 0) {
+                if (structuredParsed.sections.length > 0) {
                   // Add the remaining text as the bot message
-                  setChat((prev) => [...prev, { role: 'bot', text: parsedResponse.remainingText }]);
+                  setChat((prev) => [...prev, { role: 'bot', text: structuredParsed.remainingText }]);
                   
-                  // Set the dynamic cards for display
-                  setDynamicCards(parsedResponse.services);
+                  // Set the structured content for display
+                  setStructuredContent(structuredParsed.sections);
                   
-                  // Speak the remaining text (without the service descriptions)
-                  speakText(parsedResponse.remainingText);
+                  // Then parse for services in the remaining text
+                  const serviceParsed = parseResponseForServices(structuredParsed.remainingText);
+                  if (serviceParsed.services.length > 0) {
+                    setDynamicCards(serviceParsed.services);
+                    // Update chat with service-remaining text
+                    setChat((prev) => {
+                      const newChat = [...prev];
+                      newChat[newChat.length - 1] = { role: 'bot', text: serviceParsed.remainingText };
+                      return newChat;
+                    });
+                    speakText(serviceParsed.remainingText);
+                  } else {
+                    speakText(structuredParsed.remainingText);
+                  }
                 } else {
-                  // No services detected, add full text as normal
-                  setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-                  speakText(fullText);
+                  // No structured content, parse for services
+                  const parsedResponse = parseResponseForServices(fullText);
+                  
+                  if (parsedResponse.services.length > 0) {
+                    // Add the remaining text as the bot message
+                    setChat((prev) => [...prev, { role: 'bot', text: parsedResponse.remainingText }]);
+                    
+                    // Set the dynamic cards for display
+                    setDynamicCards(parsedResponse.services);
+                    
+                    // Speak the remaining text (without the service descriptions)
+                    speakText(parsedResponse.remainingText);
+                  } else {
+                    // No services detected, add full text as normal
+                    setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                    speakText(fullText);
+                  }
                 }
                 
                 setStreamedText('');
@@ -1052,6 +1221,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       )}
                     </motion.div>
                   ))}
+
+                  {/* Structured Content Cards (Headings, Sections) */}
+                  {structuredContent.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="w-full"
+                    >
+                      {renderStructuredContent(structuredContent)}
+                    </motion.div>
+                  )}
 
                   {/* Dynamic Service Cards from Backend Responses */}
                   {dynamicCards.length > 0 && (
