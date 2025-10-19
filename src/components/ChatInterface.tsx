@@ -630,7 +630,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.rate = 0.9; // Slightly slower for better comprehension
+      utterance.rate = 1.1; // Slightly faster for better engagement
       utterance.pitch = 1.0;
       utterance.volume = 0.8;
       
