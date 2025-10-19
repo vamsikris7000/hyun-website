@@ -334,144 +334,55 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }, 2000);
   };
 
-  // Ultra-intelligent function to parse ANY backend response and extract service information
+  // Intelligent function to parse backend responses and extract service information
   const parseResponseForServices = (text: string) => {
     const detectedServices: Array<{id: string, title: string, description: string, type: string}> = [];
     let remainingText = text;
 
-    // Multi-layered intelligent detection system
-    
-    // Layer 1: Advanced Pattern Recognition
-    const advancedPatterns = [
-      // Structured formats
+    // Smart pattern detection for service-like structures
+    const servicePatterns = [
+      // Pattern 1: Bold titles with colons (e.g., **Service Name:** description)
       /(\*\*[^*]+\*\*):\s*([^.\n]+[.!?]?)/g,
+      // Pattern 2: Regular titles with colons (e.g., Service Name: description)
       /([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
+      // Pattern 3: Bullet points with titles (e.g., • Service Name: description)
       /[•\-\*]\s*([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
+      // Pattern 4: Numbered lists (e.g., 1. Service Name: description)
       /\d+\.\s*([A-Z][A-Za-z\s&]+):\s*([^.\n]+[.!?]?)/g,
-      /(\*[^*]+\*):\s*([^.\n]+[.!?]?)/g,
-      // Natural language patterns
-      /(we|our|i|my)\s+([^,]+?)(?:,|:|\s+is|\s+are|\s+includes|\s+offers|\s+provides)/gi,
-      /(specialize|focus|expert|expertise|capability|capabilities)\s+(?:in|on|with)\s+([^.!?]+)/gi,
-      /(offer|provide|deliver|help|assist|support)\s+([^.!?]+)/gi
+      // Pattern 5: Italic titles (e.g., *Service Name*: description)
+      /(\*[^*]+\*):\s*([^.\n]+[.!?]?)/g
     ];
 
-    // Layer 2: Contextual Intelligence
-    const contextualKeywords = [
-      // Business terms
-      'solution', 'service', 'offering', 'capability', 'expertise', 'specialization',
-      'consulting', 'advisory', 'support', 'implementation', 'deployment', 'integration',
-      'optimization', 'transformation', 'automation', 'digitalization', 'modernization',
-      // Technology terms
-      'ai', 'artificial intelligence', 'machine learning', 'data', 'analytics', 'cloud',
-      'cybersecurity', 'software', 'hardware', 'platform', 'system', 'application',
-      'database', 'network', 'infrastructure', 'architecture', 'development', 'engineering',
-      // Process terms
-      'workflow', 'process', 'methodology', 'framework', 'approach', 'strategy',
-      'management', 'administration', 'monitoring', 'maintenance', 'support', 'training'
+    // Service-related keywords to validate if detected text is actually a service
+    const serviceIndicators = [
+      'ai', 'artificial intelligence', 'automation', 'data', 'processing', 'transformation',
+      'consulting', 'solutions', 'services', 'technology', 'digital', 'cloud', 'cybersecurity',
+      'machine learning', 'analytics', 'optimization', 'workflow', 'business', 'process',
+      'software', 'hardware', 'integration', 'implementation', 'deployment', 'management'
     ];
 
-    // Layer 3: Semantic Analysis Engine
-    const analyzeSemanticContent = (text: string) => {
-      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
-      const detected = [];
-
-      sentences.forEach(sentence => {
-        const trimmed = sentence.trim();
-        
-        // Calculate service likelihood score
-        let serviceScore = 0;
-        
-        // Check for business/service language patterns
-        const businessPatterns = [
-          /we (provide|offer|deliver|specialize|focus|help|assist|support)/i,
-          /our (services|solutions|offerings|capabilities|expertise)/i,
-          /we can (help|assist|support|provide|deliver|implement)/i,
-          /(service|solution|offering|capability|expertise|specialization)/i,
-          /(consulting|advisory|support|implementation|deployment)/i
-        ];
-        
-        businessPatterns.forEach(pattern => {
-          if (pattern.test(trimmed)) serviceScore += 2;
-        });
-        
-        // Check for technology/business keywords
-        contextualKeywords.forEach(keyword => {
-          if (trimmed.toLowerCase().includes(keyword)) serviceScore += 1;
-        });
-        
-        // Check for action verbs that indicate services
-        const actionVerbs = ['provide', 'offer', 'deliver', 'implement', 'develop', 'create', 'build', 'design', 'optimize', 'transform', 'automate', 'integrate'];
-        actionVerbs.forEach(verb => {
-          if (trimmed.toLowerCase().includes(verb)) serviceScore += 1;
-        });
-        
-        // Check for benefit/outcome language
-        const benefitWords = ['improve', 'enhance', 'increase', 'reduce', 'optimize', 'streamline', 'accelerate', 'boost', 'maximize', 'minimize'];
-        benefitWords.forEach(word => {
-          if (trimmed.toLowerCase().includes(word)) serviceScore += 1;
-        });
-        
-        // If score is high enough, extract service information
-        if (serviceScore >= 3 && trimmed.length > 20 && trimmed.length < 300) {
-          // Extract service name intelligently
-          let serviceName = 'Service';
-          
-          // Try to extract from common patterns
-          const namePatterns = [
-            /(?:we|our|i|my)\s+([^,]+?)(?:,|:|\s+is|\s+are)/i,
-            /(?:specialize|focus|expert|expertise)\s+(?:in|on|with)\s+([^.!?]+)/i,
-            /(?:offer|provide|deliver|help|assist|support)\s+([^.!?]+)/i,
-            /([A-Z][A-Za-z\s&]+?)(?:\s+services?|\s+solutions?|\s+consulting)/i
-          ];
-          
-          for (const pattern of namePatterns) {
-            const match = trimmed.match(pattern);
-            if (match && match[1]) {
-              serviceName = match[1].trim();
-              break;
-            }
-          }
-          
-          // Clean up service name
-          serviceName = serviceName
-            .replace(/^(we|our|i|my)\s+/i, '')
-            .replace(/[.!?]+$/, '')
-            .trim();
-          
-          if (serviceName.length > 3 && serviceName.length < 60) {
-            detected.push({
-              title: serviceName,
-              description: trimmed,
-              score: serviceScore
-            });
-          }
-        }
-      });
-      
-      return detected;
-    };
-
-    // Layer 4: Pattern-based extraction
-    advancedPatterns.forEach(pattern => {
+    servicePatterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(text)) !== null) {
         const title = match[1].replace(/[*]/g, '').trim();
-        const description = match[2] ? match[2].trim() : match[0].trim();
+        const description = match[2].trim();
         
-        // Intelligent validation
-        const hasContextualKeywords = contextualKeywords.some(keyword => 
-          title.toLowerCase().includes(keyword) || 
-          description.toLowerCase().includes(keyword)
+        // Validate if this looks like a service
+        const isService = serviceIndicators.some(indicator => 
+          title.toLowerCase().includes(indicator) || 
+          description.toLowerCase().includes(indicator)
         );
         
-        const isValidLength = title.length >= 3 && title.length <= 60 && 
-                             description.length >= 10 && description.length <= 250;
+        // Additional validation: title should be 3-50 characters, description 15-200 characters
+        const isValidLength = title.length >= 3 && title.length <= 50 && 
+                             description.length >= 15 && description.length <= 200;
         
+        // Check if it's not already detected
         const isNotDuplicate = !detectedServices.some(service => 
           service.title.toLowerCase() === title.toLowerCase()
         );
         
-        if ((hasContextualKeywords || title.length > 5) && isValidLength && isNotDuplicate) {
+        if (isService && isValidLength && isNotDuplicate) {
           const serviceId = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
           detectedServices.push({
             id: serviceId,
@@ -480,34 +391,69 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             type: 'service'
           });
           
+          // Remove this service from remaining text
           remainingText = remainingText.replace(match[0], '').trim();
         }
       }
     });
 
-    // Layer 5: Semantic analysis for unstructured content
-    if (detectedServices.length === 0) {
-      const semanticResults = analyzeSemanticContent(text);
-      
-      semanticResults.forEach(result => {
-        const serviceId = result.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        detectedServices.push({
-          id: serviceId,
-          title: result.title,
-          description: result.description,
-          type: 'service'
-        });
-        
-        remainingText = remainingText.replace(result.description, '').trim();
-      });
-    }
-
     // Clean up remaining text
     remainingText = remainingText
       .replace(/\n\s*\n/g, '\n')
       .replace(/^\s+|\s+$/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+      .replace(/\s+/g, ' ');
+
+    // Advanced semantic analysis for better detection
+    const semanticAnalysis = (text: string) => {
+      // Look for sentences that describe capabilities or services
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+      
+      sentences.forEach(sentence => {
+        const trimmed = sentence.trim();
+        
+        // Look for service-like patterns in sentences
+        const servicePatterns = [
+          /we (provide|offer|deliver|specialize in|focus on|help with)/i,
+          /our (services|solutions|offerings|capabilities)/i,
+          /we can (help|assist|support|provide|deliver)/i,
+          /(service|solution|offering|capability|expertise)/i
+        ];
+        
+        const hasServicePattern = servicePatterns.some(pattern => pattern.test(trimmed));
+        const hasServiceKeywords = serviceIndicators.some(indicator => 
+          trimmed.toLowerCase().includes(indicator)
+        );
+        
+        if (hasServicePattern && hasServiceKeywords && trimmed.length > 30 && trimmed.length < 200) {
+          // Extract potential service name from the sentence
+          const nameMatch = trimmed.match(/^(we|our)\s+([^,]+)/i);
+          const serviceName = nameMatch ? nameMatch[2].trim() : 'Service';
+          
+          const serviceId = serviceName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          
+          // Check if not already detected
+          const isNotDuplicate = !detectedServices.some(service => 
+            service.title.toLowerCase() === serviceName.toLowerCase()
+          );
+          
+          if (isNotDuplicate && serviceName.length > 3 && serviceName.length < 50) {
+            detectedServices.push({
+              id: serviceId,
+              title: serviceName,
+              description: trimmed,
+              type: 'service'
+            });
+            
+            remainingText = remainingText.replace(trimmed, '').trim();
+          }
+        }
+      });
+    };
+
+    // Run semantic analysis if no services detected by patterns
+    if (detectedServices.length === 0) {
+      semanticAnalysis(text);
+    }
 
     return {
       services: detectedServices,
@@ -1107,7 +1053,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   ))}
 
-                  {/* Ultra-Intelligent Dynamic Service Cards from ANY Backend Response */}
+                  {/* Dynamic Service Cards from Backend Responses */}
                   {dynamicCards.length > 0 && (
                     <motion.div 
                       initial={{ opacity: 0, y: 20 }}
@@ -1115,70 +1061,31 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       transition={{ duration: 0.5, delay: 0.3 }}
                       className="flex justify-start"
                     >
-                      <div className="max-w-[85%] w-full">
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: 0.2 }}
-                          className="mb-4"
-                        >
-                          <div className="flex items-center gap-2 text-sm text-[#af71f1] font-medium">
-                            <div className="w-2 h-2 bg-[#af71f1] rounded-full animate-pulse"></div>
-                            <span>Intelligently detected services</span>
-                          </div>
-                        </motion.div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="max-w-[80%] w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {dynamicCards.map((card, index) => (
                             <motion.div
                               key={card.id}
-                              initial={{ opacity: 0, y: 20, scale: 0.95, rotateX: -15 }}
-                              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                              transition={{ 
-                                duration: 0.5, 
-                                delay: 0.1 + index * 0.1,
-                                type: "spring",
-                                stiffness: 100,
-                                damping: 15
-                              }}
-                              className="relative w-full h-52 cursor-pointer group perspective-1000"
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
+                              className="relative w-full h-48 cursor-pointer group"
                               onClick={() => handleDynamicCardClick(card.id)}
                             >
-                              <div className="w-full h-full rounded-xl transition-all duration-500 ease-out group-hover:scale-105 group-hover:shadow-2xl group-hover:-translate-y-2">
-                                <div className="bg-gradient-to-br from-white via-[#faf9ff] to-[#f0ebff] rounded-xl p-6 h-full flex flex-col justify-between border border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-500 shadow-lg group-hover:shadow-xl">
-                                  {/* Header with icon and title */}
-                                  <div className="flex items-start gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md">
-                                      <span className="text-white font-bold text-lg">{index + 1}</span>
-                                    </div>
-                                    <div className="flex-1">
-                                      <h3 className="font-bold text-lg text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300 leading-tight">
-                                        {card.title}
-                                      </h3>
-                                    </div>
+                              <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
+                                <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
+                                  <div className="w-16 h-16 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <span className="text-white font-bold text-xl">{index + 1}</span>
                                   </div>
-                                  
-                                  {/* Description */}
-                                  <div className="flex-1 mb-4">
-                                    <p className="text-sm text-gray-700 leading-relaxed line-clamp-4 group-hover:text-gray-800 transition-colors duration-300">
-                                      {card.description}
-                                    </p>
+                                  <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2 group-hover:text-[#af71f1] transition-colors duration-300">
+                                    {card.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-600 text-center leading-relaxed">
+                                    {card.description}
+                                  </p>
+                                  <div className="mt-3 text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    Click to learn more
                                   </div>
-                                  
-                                  {/* Interactive footer */}
-                                  <div className="flex items-center justify-between">
-                                    <div className="text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                      Click to explore
-                                    </div>
-                                    <div className="w-6 h-6 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                      </svg>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Hover effect overlay */}
-                                  <div className="absolute inset-0 bg-gradient-to-br from-[#af71f1]/5 to-[#9c5ee0]/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 </div>
                               </div>
                             </motion.div>
