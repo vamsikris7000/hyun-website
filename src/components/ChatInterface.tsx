@@ -70,6 +70,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [dynamicCards, setDynamicCards] = useState<Array<{id: string, title: string, description: string, type: string}>>([]);
   const [structuredContent, setStructuredContent] = useState<Array<{id: string, title: string, content: string, type: 'card'}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const suggestedQuestions = [
     "What services do you offer?",
@@ -515,10 +516,31 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       }
 
       if (finalTranscript) {
-        setMessage(prev => prev + finalTranscript);
-        console.log('Final transcript:', finalTranscript);
+        setMessage(prev => {
+          const newMessage = prev + finalTranscript;
+          console.log('Final transcript:', finalTranscript);
+          
+          // Clear any existing timeout
+          if (autoSendTimeoutRef.current) {
+            clearTimeout(autoSendTimeoutRef.current);
+          }
+          
+          // Set new timeout for auto-send after 2.5 seconds of silence
+          autoSendTimeoutRef.current = setTimeout(() => {
+            if (newMessage.trim() && isListening) {
+              setMessage(newMessage);
+              setTimeout(() => handleSend(), 100); // Small delay to ensure state is updated
+            }
+          }, 2500);
+          
+          return newMessage;
+        });
       } else if (interimTranscript) {
-        // Show interim results in a temporary way
+        // Clear timeout when interim results are detected (user is still speaking)
+        if (autoSendTimeoutRef.current) {
+          clearTimeout(autoSendTimeoutRef.current);
+          autoSendTimeoutRef.current = null;
+        }
         console.log('Interim transcript:', interimTranscript);
       }
     };
@@ -553,6 +575,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     if (recognition) {
       recognition.stop();
       setIsListening(false);
+    }
+    // Clear any pending auto-send timeout
+    if (autoSendTimeoutRef.current) {
+      clearTimeout(autoSendTimeoutRef.current);
+      autoSendTimeoutRef.current = null;
     }
   };
 
@@ -616,6 +643,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setDynamicCards([]);
       // Stop any ongoing speech recognition
       stopListening();
+      // Clear any pending auto-send timeout
+      if (autoSendTimeoutRef.current) {
+        clearTimeout(autoSendTimeoutRef.current);
+        autoSendTimeoutRef.current = null;
+      }
     }
     return () => {
       document.body.classList.remove('overflow-hidden');
