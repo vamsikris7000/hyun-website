@@ -61,7 +61,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [error, setError] = useState<string>("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(true);
   const [recognition, setRecognition] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<{name: string, isReturning: boolean} | null>(null);
   const [showNameResponse, setShowNameResponse] = useState(false);
@@ -627,6 +627,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       return () => clearTimeout(timeoutId);
     }
   }, [chat, streamedText, scrollToBottom]);
+
+  // Start listening automatically when component mounts
+  useEffect(() => {
+    if (isOpen && isListening) {
+      startListening();
+    }
+  }, [isOpen, isListening]);
 
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
@@ -1301,16 +1308,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   </div>
                   
                   {/* Listening Indicator */}
-                  {isListening && (
-                    <div className="flex items-center gap-2 text-red-500 text-sm mb-2">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                      </div>
-                      <span>Listening... Speak now</span>
-                    </div>
-                  )}
                   
                   <div className="flex items-center gap-2 flex-wrap">
                     {suggestedQuestions.slice(0, 2).map((question, index) => (
