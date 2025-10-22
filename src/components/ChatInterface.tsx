@@ -634,12 +634,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }
   }, [chat, streamedText, scrollToBottom]);
 
-  // Start listening automatically when component mounts
+  // Start listening automatically when chat first opens
   useEffect(() => {
-    if (isOpen && isListening) {
+    if (isOpen) {
       startListening();
     }
-  }, [isOpen, isListening]);
+  }, [isOpen]);
 
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
