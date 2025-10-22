@@ -1277,6 +1277,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       </div>
                     </motion.div>
                   )}
+
                   
                   {/* Consolidated Response State - Loading, Streaming, or Error */}
                   {(isLoading || error) && (
