@@ -356,10 +356,80 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   // Function to handle card clicks
   const handleCardClick = async (title: string) => {
     const question = `Can you explain brief about ${title}?`;
-    setMessage(question);
-    // Clear the message input after setting it
-    setTimeout(() => setMessage(""), 100);
-    await handleSend();
+    
+    // Add user message to chat
+    setChat((prev) => [...prev, { role: 'user', text: question }]);
+    setMessage("");
+    setIsLoading(true);
+    setStreamedText("");
+    setError("");
+    setShowWelcome(false);
+
+    try {
+      console.log('Sending card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
+      
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: question,
+          conversation_id: conversationId || null,
+          is_first_message: !conversationId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      let fullText = '';
+      let newConversationId = conversationId;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.event === 'conversation_id') {
+                newConversationId = data.conversation_id;
+                setConversationId(newConversationId);
+              } else if (data.event === 'message_start') {
+                console.log('Message started');
+              } else if (data.event === 'message_stream') {
+                fullText += data.answer;
+                setStreamedText(fullText);
+              } else if (data.event === 'message_end') {
+                console.log('Message ended, adding to chat:', fullText);
+                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                speakText(fullText);
+                setStreamedText("");
+              }
+            } catch (parseError) {
+              console.error('Error parsing SSE data:', parseError);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Function to render structured content as cards
