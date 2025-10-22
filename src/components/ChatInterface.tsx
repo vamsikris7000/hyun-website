@@ -1310,8 +1310,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
                   
-                  <div ref={chatEndRef} />
-                  
                   {/* Option Buttons - Show after name introduction */}
                   {showNameResponse && (
                     <motion.div 
@@ -1524,6 +1522,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
 
+                  {/* Chat End Reference - Always at the very bottom */}
+                  <div ref={chatEndRef} />
 
                 </div>
               </div>
