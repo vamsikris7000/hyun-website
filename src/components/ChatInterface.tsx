@@ -187,6 +187,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     
     // Save user info
     saveUserInfo(name);
+    
+    // Scroll to bottom after adding messages
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
   };
 
   const handleOptionClick = (option: string) => {
@@ -227,6 +232,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     
     // Speak the response
     speakText(response);
+    
+    // Scroll to bottom after adding messages
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
     
     // Handle actions
     if (action === "schedule_appointment") {
@@ -460,6 +470,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     
     // Speak the response
     speakText(response);
+    
+    // Scroll to bottom after adding messages
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
   };
 
   // Function to parse structured content and convert to cards
@@ -740,7 +755,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   // Debounced scroll function to prevent excessive scrolling during streaming
   const scrollToBottom = useCallback(() => {
     if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    // Fallback: scroll the chat container to bottom
+    const chatContainer = document.querySelector('.chat-messages');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   }, []);
 
