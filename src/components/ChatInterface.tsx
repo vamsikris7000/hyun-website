@@ -920,8 +920,24 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   // Safe HTML rendering function with sanitization
   const renderSafeHTML = (text: string, showCursor: boolean = false) => {
+    // Clean up unwanted formatting from text
+    let cleanedText = text
+      // Remove bold markdown (**text**)
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      // Remove numbered lists (1. 2. 3. 4. 5. 6.)
+      .replace(/\d+\.\s*/g, '')
+      // Remove colons at the end of sentences
+      .replace(/:\s*$/gm, '')
+      // Remove colons followed by newlines
+      .replace(/:\s*\n/g, '\n')
+      // Clean up multiple spaces
+      .replace(/\s+/g, ' ')
+      // Clean up multiple newlines
+      .replace(/\n\s*\n/g, '\n')
+      .trim();
+    
     // Configure marked to disable math rendering to avoid KaTeX quirks mode warning
-    const parsedHTML = marked.parse(text, {
+    const parsedHTML = marked.parse(cleanedText, {
       breaks: true,
       gfm: true
     });
