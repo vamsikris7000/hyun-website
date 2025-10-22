@@ -492,7 +492,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognitionInstance = new SpeechRecognition();
     
-    recognitionInstance.continuous = false;
+    recognitionInstance.continuous = true;
     recognitionInstance.interimResults = true;
     recognitionInstance.lang = 'en-US';
 
@@ -532,8 +532,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     };
 
     recognitionInstance.onend = () => {
-      setIsListening(false);
       console.log('Speech recognition ended');
+      // Restart listening automatically if chat is still open
+      if (isOpen) {
+        setTimeout(() => {
+          if (isOpen) {
+            startListening();
+          }
+        }, 100);
+      } else {
+        setIsListening(false);
+      }
     };
 
     setRecognition(recognitionInstance);
@@ -606,10 +615,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setStructuredContent([]);
       setDynamicCards([]);
       // Stop any ongoing speech recognition
-      if (recognition) {
-        recognition.stop();
-        setIsListening(false);
-      }
+      stopListening();
     }
     return () => {
       document.body.classList.remove('overflow-hidden');
