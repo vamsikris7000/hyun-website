@@ -1222,65 +1222,53 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             <div className="text-black text-base leading-relaxed break-words">
                               <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
                             </div>
+                            
+                            {/* Add cards as part of the bot message */}
+                            {idx === chat.length - 1 && structuredContent.length > 0 && (
+                              <div className="mt-4">
+                                {renderStructuredContent(structuredContent)}
+                              </div>
+                            )}
+                            
+                            {idx === chat.length - 1 && dynamicCards.length > 0 && (
+                              <div className="mt-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {dynamicCards.map((card, cardIndex) => (
+                                    <motion.div
+                                      key={card.id}
+                                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                                      transition={{ duration: 0.4, delay: 0.1 + cardIndex * 0.1 }}
+                                      className="relative w-full h-48 cursor-pointer group"
+                                      onClick={() => handleDynamicCardClick(card.id)}
+                                    >
+                                      <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
+                                        <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
+                                          <div className="w-16 h-16 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                            <span className="text-white font-bold text-xl">{cardIndex + 1}</span>
+                                          </div>
+                                          <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2 group-hover:text-[#af71f1] transition-colors duration-300">
+                                            {card.title}
+                                          </h3>
+                                          <p className="text-sm text-gray-600 text-center leading-relaxed">
+                                            {card.description}
+                                          </p>
+                                          <div className="mt-3 text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            Click to learn more
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
                     </motion.div>
                   ))}
 
-                  {/* Structured Content Cards (Headings, Sections) */}
-                  {structuredContent.length > 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="w-full"
-                    >
-                      {renderStructuredContent(structuredContent)}
-                    </motion.div>
-                  )}
-
-                  {/* Dynamic Service Cards from Backend Responses */}
-                  {dynamicCards.length > 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="flex justify-start"
-                    >
-                      <div className="max-w-[80%] w-full">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {dynamicCards.map((card, index) => (
-                            <motion.div
-                              key={card.id}
-                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
-                              className="relative w-full h-48 cursor-pointer group"
-                              onClick={() => handleDynamicCardClick(card.id)}
-                            >
-                              <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
-                                <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
-                                  <div className="w-16 h-16 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="text-white font-bold text-xl">{index + 1}</span>
-                                  </div>
-                                  <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2 group-hover:text-[#af71f1] transition-colors duration-300">
-                                    {card.title}
-                                  </h3>
-                                  <p className="text-sm text-gray-600 text-center leading-relaxed">
-                                    {card.description}
-                                  </p>
-                                  <div className="mt-3 text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    Click to learn more
-                                  </div>
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
 
                   
                   {/* Consolidated Response State - Loading, Streaming, or Error */}
