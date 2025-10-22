@@ -353,6 +353,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     };
   };
 
+  // Function to handle card clicks
+  const handleCardClick = async (title: string) => {
+    const question = `Can you explain brief about ${title}?`;
+    setMessage(question);
+    // Clear the message input after setting it
+    setTimeout(() => setMessage(""), 100);
+    await handleSend();
+  };
+
   // Function to render structured content as cards
   const renderStructuredContent = (sections: Array<{id: string, title: string, content: string, type: 'card'}>) => {
     return sections.map((section, index) => (
@@ -370,7 +379,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         className="flex justify-start mb-4"
       >
         <div className="max-w-[85%] w-full">
-          <Card className="bg-gradient-to-br from-white to-[#faf9ff] border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card 
+            className="bg-gradient-to-br from-white to-[#faf9ff] border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer hover:scale-105"
+            onClick={() => handleCardClick(section.title)}
+          >
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-semibold text-[#0c202b] flex items-center gap-2">
                 <div className="w-2 h-2 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] rounded-full"></div>
