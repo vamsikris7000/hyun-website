@@ -317,24 +317,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     speakText(response);
   };
 
-  const handleNoResponse = () => {
-    const response = "Is there anything more I can help you with?";
-    setChat(prev => [...prev, { role: 'user', text: 'No' }]);
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
-    speakText(response);
-  };
-
-  const handleYesResponse = () => {
-    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
-    const response = `${personalizedGreeting}I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.`;
-    setChat(prev => [...prev, { role: 'user', text: 'Yes' }]);
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
-    speakText(response);
-    
-    setTimeout(() => {
-      window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank');
-    }, 2000);
-  };
 
   // Intelligent function to parse backend responses and extract service information
   const parseResponseForServices = (text: string) => {
@@ -1522,84 +1504,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
 
-                  {/* Yes/No Buttons - Show after specific service follow-up responses */}
-                  {chat.length > 0 && (
-                    (() => {
-                      const lastMessage = chat[chat.length - 1]?.text;
-                      const hasMultipleSelections = Object.values(serviceCounts).some(count => count > 1);
-                      const selectedCount = selectedServices.size;
-                      const totalServices = servicesData.length;
-                      
-                      // Show Yes/No buttons for multiple selections or all services learned
-                      if (hasMultipleSelections || (selectedCount === totalServices && lastMessage?.includes("schedule a time"))) {
-                        return (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
-                            className="flex flex-wrap justify-center gap-3 mt-4"
-                          >
-                            <button
-                              onClick={handleYesResponse}
-                              className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold text-sm hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                            >
-                              Yes
-                            </button>
-                            <button
-                              onClick={handleNoResponse}
-                              className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full font-semibold text-sm hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                            >
-                              No
-                            </button>
-                          </motion.div>
-                        );
-                      }
-                      return null;
-                    })()
-                  )}
 
-                  {/* Final Options - Show after "No" response */}
-                  {chat.length > 0 && chat[chat.length - 1]?.text === "Is there anything more I can help you with?" && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="flex flex-wrap justify-center gap-3 mt-4"
-                    >
-                      <button
-                        onClick={() => {
-                          setShowCompanyInfo(true);
-                          setShowServicesInfo(false);
-                          setShowNameResponse(false);
-                        }}
-                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Learn more about the company
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowServicesInfo(true);
-                          setShowCompanyInfo(false);
-                          setShowNameResponse(false);
-                        }}
-                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Learn more about our services
-                      </button>
-                      <button
-                        onClick={handleScheduleClick}
-                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Schedule an appointment
-                      </button>
-                      <button
-                        onClick={() => handleOptionClick("explore")}
-                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Explore website
-                      </button>
-                    </motion.div>
-                  )}
                 </div>
               </div>
               
