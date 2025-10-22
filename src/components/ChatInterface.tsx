@@ -368,17 +368,27 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     try {
       console.log('Sending card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
       
-      const response = await fetch('/api/chat', {
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      // Use Netlify Functions in production, local backend in development
+      const chatUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/chat'
+        : '/.netlify/functions/chatbot-proxy';
+      
+      const response = await fetch(chatUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: question,
           conversation_id: conversationId || null,
           is_first_message: !conversationId
         }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
