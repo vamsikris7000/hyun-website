@@ -71,6 +71,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [structuredContent, setStructuredContent] = useState<Array<{id: string, title: string, content: string, type: 'card'}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const manuallyStoppedRef = useRef<boolean>(false);
 
   const suggestedQuestions = [
     "What services do you offer?",
@@ -489,6 +490,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
       return;
     }
+    
+    // Clear manual stop flag when starting
+    manuallyStoppedRef.current = false;
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognitionInstance = new SpeechRecognition();
@@ -555,10 +559,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
     recognitionInstance.onend = () => {
       console.log('Speech recognition ended');
-      // Restart listening automatically if chat is still open
-      if (isOpen) {
+      // Only restart listening automatically if not manually stopped and chat is still open
+      if (isOpen && !manuallyStoppedRef.current) {
         setTimeout(() => {
-          if (isOpen) {
+          if (isOpen && !manuallyStoppedRef.current) {
             startListening();
           }
         }, 100);
@@ -576,6 +580,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       recognition.stop();
       setIsListening(false);
     }
+    // Mark as manually stopped
+    manuallyStoppedRef.current = true;
     // Clear any pending auto-send timeout
     if (autoSendTimeoutRef.current) {
       clearTimeout(autoSendTimeoutRef.current);
