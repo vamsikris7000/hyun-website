@@ -67,10 +67,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [showNameResponse, setShowNameResponse] = useState(false);
   const [detectedName, setDetectedName] = useState<string>("");
   const [showCompanyInfo, setShowCompanyInfo] = useState(false);
-  const [showServicesInfo, setShowServicesInfo] = useState(false);
-  const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
-  const [serviceCounts, setServiceCounts] = useState<{[key: string]: number}>({});
-  const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const [dynamicCards, setDynamicCards] = useState<Array<{id: string, title: string, description: string, type: string}>>([]);
   const [structuredContent, setStructuredContent] = useState<Array<{id: string, title: string, content: string, type: 'card'}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -82,32 +78,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     "What makes you different from competitors?"
   ];
 
-  const servicesData = [
-    {
-      id: "general-it",
-      title: "General IT Consulting",
-      description: "We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.",
-      image: "/src/assets/Deliver.jpeg"
-    },
-    {
-      id: "agentic-ai",
-      title: "Agentic AI Solutions",
-      description: "Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.",
-      image: "/src/assets/AI Icon.jpg"
-    },
-    {
-      id: "automation",
-      title: "Automation Solutions",
-      description: "Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.",
-      image: "/src/assets/automation icon.jpg"
-    },
-    {
-      id: "data-transformation",
-      title: "Data Transformation Solutions",
-      description: "The most productive way to consolidate data and bring analytics that matters.",
-      image: "/src/assets/Data Transformation Icon.png"
-    }
-  ];
 
   // User recognition functions
   const getUserIdentifier = () => {
@@ -211,7 +181,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       case "services":
         response = `${personalizedGreeting}With Hyun and Associates, we primarily focus on four main things, General IT Consulting, Agentic AI Solutions, Automation Solutions, and Data Transformation. Which of these options would like to learn more about?`;
         action = "services_info";
-        setShowServicesInfo(true);
         setShowNameResponse(false);
         break;
       case "appointment":
@@ -250,63 +219,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }
   };
 
-  const handleServiceClick = (serviceId: string) => {
-    const service = servicesData.find(s => s.id === serviceId);
-    if (!service) return;
 
-    // Update service counts
-    setServiceCounts(prev => ({
-      ...prev,
-      [serviceId]: (prev[serviceId] || 0) + 1
-    }));
-
-    // Add to selected services
-    setSelectedServices(prev => new Set([...prev, serviceId]));
-
-    // Flip the card
-    setFlippedCards(prev => new Set([...prev, serviceId]));
-
-    // Add user message
-    setChat(prev => [...prev, { role: 'user', text: service.title }]);
-    
-    // Add bot response
-    setChat(prev => [...prev, { role: 'bot', text: service.description }]);
-    
-    // Speak the response
-    speakText(service.description);
-
-    // Show follow-up options after a delay
-    setTimeout(() => {
-      showServiceFollowUp();
-    }, 3000);
-  };
-
-  const showServiceFollowUp = () => {
-    const selectedCount = selectedServices.size;
-    const totalServices = servicesData.length;
-    const hasMultipleSelections = Object.values(serviceCounts).some(count => count > 1);
-    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
-    
-    let response = "";
-    let showScheduleButton = true;
-
-    if (hasMultipleSelections) {
-      const mostSelected = Object.entries(serviceCounts).reduce((a, b) => serviceCounts[a[0]] > serviceCounts[b[0]] ? a : b);
-      const service = servicesData.find(s => s.id === mostSelected[0]);
-      response = `${personalizedGreeting}Looks like you really want to learn more about ${service?.title}, would you like to talk with our consultant regarding ${service?.title}?`;
-    } else if (selectedCount === 1) {
-      const service = servicesData.find(s => selectedServices.has(s.id));
-      response = `${personalizedGreeting}Since you learned about ${service?.title}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
-    } else if (selectedCount > 1 && selectedCount < totalServices) {
-      const serviceNames = Array.from(selectedServices).map(id => servicesData.find(s => s.id === id)?.title).join(' and ');
-      response = `${personalizedGreeting}Since you learned more about ${serviceNames}, you can respond by saying the other offering or if you want to schedule an appointment, say schedule appointment.`;
-    } else if (selectedCount === totalServices) {
-      response = `${personalizedGreeting}Since you went through and learned about all of our offerings, would you like to schedule a time with our consultant?`;
-    }
-
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
-    speakText(response);
-  };
 
   const handleScheduleClick = () => {
     const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
@@ -690,10 +603,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setShowNameResponse(false);
       setDetectedName("");
       setShowCompanyInfo(false);
-      setShowServicesInfo(false);
-      setSelectedServices(new Set());
-      setServiceCounts({});
-      setFlippedCards(new Set());
       setStructuredContent([]);
       setDynamicCards([]);
       // Stop any ongoing speech recognition
@@ -1329,89 +1238,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
 
-                  {/* Services Info - Interactive Service Cards */}
-                  {showServicesInfo && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="mt-6"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        {servicesData.map((service, index) => (
-                          <motion.div
-                            key={service.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                            className="relative w-full h-48 cursor-pointer"
-                            onClick={() => handleServiceClick(service.id)}
-                          >
-                            <div 
-                              className={`w-full h-full rounded-lg transition-all duration-500 ease-in-out ${
-                                flippedCards.has(service.id) 
-                                  ? 'transform rotate-y-180' 
-                                  : 'transform rotate-y-0'
-                              }`}
-                              style={{ transformStyle: 'preserve-3d' }}
-                            >
-                              {/* Front of card */}
-                              <div 
-                                className={`absolute inset-0 w-full h-full ${
-                                  flippedCards.has(service.id) ? 'hidden' : 'block'
-                                }`}
-                              >
-                                <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:shadow-lg transition-shadow">
-                                  <div className="w-16 h-16 bg-[#af71f1] rounded-lg flex items-center justify-center mb-4">
-                                    <span className="text-white font-bold text-xl">{index + 1}</span>
-                                  </div>
-                                  <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2">
-                                    {service.title}
-                                  </h3>
-                                  <p className="text-sm text-gray-600 text-center">
-                                    Click to learn more
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Back of card - Description */}
-                              <div 
-                                className={`absolute inset-0 w-full h-full ${
-                                  flippedCards.has(service.id) ? 'block' : 'hidden'
-                                }`}
-                              >
-                                <div className="bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg p-6 h-full flex flex-col justify-center text-white">
-                                  <h3 className="font-semibold text-lg mb-3 text-center">
-                                    {service.title}
-                                  </h3>
-                                  <p className="text-sm text-center leading-relaxed">
-                                    {service.description}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Dynamic Follow-up Buttons - Show after service interactions */}
-                  {showServicesInfo && selectedServices.size > 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="flex flex-wrap justify-center gap-3 mt-4"
-                    >
-                      <button
-                        onClick={handleScheduleClick}
-                        className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Schedule an appointment
-                      </button>
-                    </motion.div>
-                  )}
 
                   {/* Chat End Reference - Always at the very bottom */}
                   <div ref={chatEndRef} />
