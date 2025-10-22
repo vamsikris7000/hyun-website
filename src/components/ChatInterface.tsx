@@ -506,73 +506,88 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     ));
   };
 
-  // Text-to-speech function
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // Stop any current speech
-      window.speechSynthesis.cancel();
+  // ElevenLabs Text-to-speech function
+  const speakText = async (text: string) => {
+    if (!text.trim()) return;
+    
+    try {
+      setIsSpeaking(true);
       
-      // Clean the text (remove HTML tags and special characters)
+      // Clean the text
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.rate = 1.1; // Slightly faster for better engagement
-      utterance.pitch = 1.0;
-      utterance.volume = 0.8;
-      
-      // Function to set voice and speak
-      const speakWithVoice = () => {
-        const voices = window.speechSynthesis.getVoices();
-        console.log('Available voices count:', voices.length);
-        
-        // Use specific voice (index 181 - Google US English)
-        if (voices.length > 181 && voices[181]) {
-          utterance.voice = voices[181];
-          console.log('Using voice:', voices[181].name, voices[181].lang);
-        } else {
-          // Fallback: try to find Google US English by name
-          const googleVoice = voices.find(voice => 
-            voice.name.includes('Google') && 
-            voice.name.includes('US English')
-          );
-          if (googleVoice) {
-            utterance.voice = googleVoice;
-            console.log('Using Google US English voice:', googleVoice.name);
-          } else {
-            console.log('Voice index 181 not available, using default voice');
-            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+      // ElevenLabs API call
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/c1uwEpPUcC16tq1udqxk`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4722'
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5
           }
-        }
-        
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
-        
-        window.speechSynthesis.speak(utterance);
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API error: ${response.status}`);
+      }
+
+      // Get the audio blob
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl); // Clean up
       };
       
-      // Check if voices are loaded, if not wait for them
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) {
-        // Voices not loaded yet, wait for them
-        window.speechSynthesis.onvoiceschanged = () => {
-          speakWithVoice();
-          // Remove the event listener after first use
-          window.speechSynthesis.onvoiceschanged = null;
-        };
-      } else {
-        // Voices already loaded
-        speakWithVoice();
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl); // Clean up
+        console.error('Audio playback error');
+      };
+      
+      await audio.play();
+      
+    } catch (error) {
+      console.error('ElevenLabs TTS error:', error);
+      setIsSpeaking(false);
+      
+      // Fallback to browser TTS if ElevenLabs fails
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
       }
     }
   };
 
   // Stop speaking function
   const stopSpeaking = () => {
+    // Stop browser TTS
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
     }
+    
+    // Stop any playing audio elements
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+    
+      setIsSpeaking(false);
   };
 
   // Speech-to-text functions
@@ -893,8 +908,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               setStreamedText(fullText);
               console.log('Streaming text updated:', fullText);
             }
-              if (data.event === 'message_end') {
-                console.log('Message ended, adding to chat:', fullText);
+            if (data.event === 'message_end') {
+              console.log('Message ended, adding to chat:', fullText);
                
                 // First, parse for structured content (headings, sections)
                 const structuredParsed = parseStructuredContent(fullText);
@@ -936,12 +951,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   } else {
                     // No services detected, add full text as normal
                     setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-                    speakText(fullText);
+              speakText(fullText);
                   }
                 }
                 
                 setStreamedText('');
-              }
+            }
           } catch (err) {
             console.log('Error parsing line:', line, err);
           }
@@ -1066,20 +1081,20 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 ) : (
                   // New user greeting
                   <>
-                    <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
-                      Welcome to
-                      <br />
-                      Hyun & Associates
-                    </h1>
+                <h1 className="font-normal text-black text-4xl md:text-5xl lg:text-6xl text-center leading-tight mb-6">
+                  Welcome to
+                  <br />
+                  Hyun & Associates
+                </h1>
 
-                    <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
-                      <span className="font-semibold">
+                <p className="font-normal text-black text-xl md:text-2xl text-center leading-relaxed mb-12">
+                  <span className="font-semibold">
                         where we let innovative technologies work for you.{" "}
-                      </span>
-                      <span className="font-bold italic">
+                  </span>
+                  <span className="font-bold italic">
                         Whom do I have the pleasure of speaking with today?
-                      </span>
-                    </p>
+                  </span>
+                </p>
                   </>
                 )}
 
