@@ -282,13 +282,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const service = servicesData.find(s => s.id === serviceId);
     if (!service) return;
 
-    // Add user message
-    setChat(prev => [...prev, { role: 'user', text: service.title }]);
-    
-    // Add bot response with service details
-    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
-    const response = `${personalizedGreeting}${service.description} Would you like to schedule an appointment on how we can incorporate this in your workspace or would you like to learn more about our other services?`;
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
+    // Set the question in the message input instead of auto-sending
+    const question = `Can you explain brief about ${service.title}?`;
+    setMessage(question);
     
     // Update selected services
     const newSelectedServices = new Set(selectedServices);
@@ -301,12 +297,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       [serviceId]: (prev[serviceId] || 0) + 1
     }));
     
-    // Speak the response
-    speakText(response);
-    
-    // Scroll to bottom
+    // Focus on the input field
     setTimeout(() => {
-      scrollToBottom();
+      const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
+      }
     }, 100);
   };
 
@@ -336,7 +332,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   // Function to handle dynamic card clicks
-  const handleDynamicCardClick = async (cardId: string) => {
+  const handleDynamicCardClick = (cardId: string) => {
     const card = dynamicCards.find(c => c.id === cardId);
     if (!card) return;
 
@@ -344,93 +340,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const question = `Can you explain brief about ${card.title}?`;
     console.log('Generated question:', question);
     
-    // Add user message to chat
-    setChat((prev) => [...prev, { role: 'user', text: question }]);
-    setMessage("");
-    setIsLoading(true);
-    setStreamedText("");
-    setError("");
-    setShowWelcome(false);
-
-    try {
-      console.log('Sending dynamic card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
-      
-      // Use Netlify Functions in production, local backend in development
-      const chatUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001/chat'
-        : '/.netlify/functions/chatbot-proxy';
-      
-      console.log('Backend URL:', chatUrl);
-      
-      // Add timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
-      const response = await fetch(chatUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inputs: {},
-          query: question,
-          response_mode: 'streaming',
-          conversation_id: conversationId || undefined,
-          user: 'user'
-        }),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    // Set the question in the message input instead of auto-sending
+    setMessage(question);
+    
+    // Focus on the input field
+    setTimeout(() => {
+      const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
       }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body');
-      }
-
-      let fullText = '';
-      let newConversationId = conversationId;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.event === 'conversation_id') {
-                newConversationId = data.conversation_id;
-                setConversationId(newConversationId);
-              } else if (data.event === 'message_start') {
-                console.log('Message started');
-              } else if (data.event === 'message_stream' || data.event === 'agent_message') {
-                fullText += data.answer;
-                setStreamedText(fullText);
-              } else if (data.event === 'message_end') {
-                console.log('Message ended, adding to chat:', fullText);
-                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-                speakText(fullText);
-                setStreamedText("");
-              }
-            } catch (parseError) {
-              console.error('Error parsing SSE data:', parseError);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    }, 100);
   };
 
   // Function to parse structured content and convert to cards
@@ -513,98 +432,21 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   // Function to handle card clicks
-  const handleCardClick = async (title: string) => {
+  const handleCardClick = (title: string) => {
     console.log('Card clicked:', title);
     const question = `Can you explain brief about ${title}?`;
     console.log('Generated question:', question);
     
-    // Add user message to chat
-    setChat((prev) => [...prev, { role: 'user', text: question }]);
-    setMessage("");
-    setIsLoading(true);
-    setStreamedText("");
-    setError("");
-    setShowWelcome(false);
-
-    try {
-      console.log('Sending card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
-      
-      // Use Netlify Functions in production, local backend in development
-      const chatUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001/chat'
-        : '/.netlify/functions/chatbot-proxy';
-      
-      console.log('Backend URL:', chatUrl);
-      
-      // Add timeout to prevent hanging
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
-      const response = await fetch(chatUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inputs: {},
-          query: question,
-          response_mode: 'streaming',
-          conversation_id: conversationId || undefined,
-          user: 'user'
-        }),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    // Set the question in the message input instead of auto-sending
+    setMessage(question);
+    
+    // Focus on the input field
+    setTimeout(() => {
+      const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (inputElement) {
+        inputElement.focus();
       }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body');
-      }
-
-      let fullText = '';
-      let newConversationId = conversationId;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.event === 'conversation_id') {
-                newConversationId = data.conversation_id;
-                setConversationId(newConversationId);
-              } else if (data.event === 'message_start') {
-                console.log('Message started');
-              } else if (data.event === 'message_stream' || data.event === 'agent_message') {
-                fullText += data.answer;
-                setStreamedText(fullText);
-              } else if (data.event === 'message_end') {
-                console.log('Message ended, adding to chat:', fullText);
-                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-                speakText(fullText);
-                setStreamedText("");
-              }
-            } catch (parseError) {
-              console.error('Error parsing SSE data:', parseError);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    }, 100);
   };
 
   // Function to render structured content as cards
@@ -1565,12 +1407,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         >
                           Learn more about our services
                         </button>
-                        <button
-                          onClick={handleScheduleClick}
-                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          Schedule an appointment
-                        </button>
                       </motion.div>
                     </motion.div>
                   )}
@@ -1630,13 +1466,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           }}
                           className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
-                          {selectedServices.size === servicesData.length ? 'Schedule an appointment' : 'Learn more about our other services'}
-                        </button>
-                        <button
-                          onClick={handleScheduleClick}
-                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          Schedule an appointment
+                          Learn more about our other services
                         </button>
                       </motion.div>
                     </motion.div>
