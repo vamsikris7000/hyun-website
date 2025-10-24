@@ -17,11 +17,17 @@ const Index = () => {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const navigate = useNavigate();
 
+  // Handle card click to toggle expansion
+  const handleCardClick = (cardIndex: number) => {
+    setExpandedCard(expandedCard === cardIndex ? null : cardIndex);
+  };
+
   // Handle hash changes to control chat visibility
   useEffect(() => {
     const handleHashChange = () => {
       if (window.location.hash === '#home') {
         setIsChatOpen(false); // Close chat when navigating to home
+        setExpandedCard(null); // Reset all cards to collapsed state
       }
     };
 
@@ -141,7 +147,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                onClick={() => setExpandedCard(expandedCard === 1 ? null : 1)}
+                onClick={() => handleCardClick(1)}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
@@ -180,7 +186,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                onClick={() => setExpandedCard(expandedCard === 2 ? null : 2)}
+                onClick={() => handleCardClick(2)}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
@@ -219,7 +225,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                onClick={() => setExpandedCard(expandedCard === 3 ? null : 3)}
+                onClick={() => handleCardClick(3)}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
@@ -258,7 +264,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                onClick={() => setExpandedCard(expandedCard === 4 ? null : 4)}
+                onClick={() => handleCardClick(4)}
                 className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
