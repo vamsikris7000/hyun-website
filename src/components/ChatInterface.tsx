@@ -914,13 +914,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                   // Add the remaining text as the bot message
                   setChat((prev) => [...prev, { role: 'bot', text: structuredParsed.remainingText }]);
                   
-                  // Set the structured content for display
-                  setStructuredContent(structuredParsed.sections);
+                  // Set the structured content for display (only if new content found)
+                  if (structuredParsed.sections.length > 0) {
+                    setStructuredContent(structuredParsed.sections);
+                  }
                   
                   // Then parse for services in the remaining text
                   const serviceParsed = parseResponseForServices(structuredParsed.remainingText);
                   if (serviceParsed.services.length > 0) {
-                    setDynamicCards(serviceParsed.services);
+                    setDynamicCards(prev => [...prev, ...serviceParsed.services]);
                     // Update chat with service-remaining text
                     setChat((prev) => {
                       const newChat = [...prev];
@@ -939,8 +941,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     // Add the remaining text as the bot message
                     setChat((prev) => [...prev, { role: 'bot', text: parsedResponse.remainingText }]);
                     
-                    // Set the dynamic cards for display
-                    setDynamicCards(parsedResponse.services);
+                    // Set the dynamic cards for display (append new cards)
+                    setDynamicCards(prev => [...prev, ...parsedResponse.services]);
                     
                     // Speak the remaining text (without the service descriptions)
                     speakText(parsedResponse.remainingText);
@@ -1185,13 +1187,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             </div>
                             
                             {/* Add cards as part of the bot message */}
-                            {idx === chat.length - 1 && structuredContent.length > 0 && (
+                            {structuredContent.length > 0 && (
                               <div className="mt-4">
                                 {renderStructuredContent(structuredContent)}
                               </div>
                             )}
                             
-                            {idx === chat.length - 1 && dynamicCards.length > 0 && (
+                            {dynamicCards.length > 0 && (
                               <div className="mt-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {dynamicCards.map((card, cardIndex) => (
