@@ -465,7 +465,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         }}
         className="flex justify-start mb-4"
       >
-        <div className="max-w-[85%] w-full">
+        <div className="w-full">
           <Card 
             className="bg-gradient-to-br from-white to-[#faf9ff] border-[#e0d4ff] hover:border-[#af71f1] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer hover:scale-105"
             onClick={() => handleCardClick(section.title)}
@@ -1211,14 +1211,14 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             
                             {/* Add cards as part of the bot message */}
                             {structuredContent.length > 0 && (
-                              <div className="mt-4">
+                              <div className="mt-4 max-w-4xl">
                                 {renderStructuredContent(structuredContent)}
                               </div>
                             )}
                             
                             {dynamicCards.length > 0 && (
                               <div className="mt-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 max-w-4xl">
                                   {dynamicCards.map((card, cardIndex) => (
                                     <motion.div
                                       key={card.id}
