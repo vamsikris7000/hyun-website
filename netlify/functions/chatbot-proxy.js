@@ -115,9 +115,7 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             headers: {
               ...headers,
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-              'Connection': 'keep-alive',
+              'Content-Type': 'application/json'
             },
             body: response.data,
           };
@@ -126,12 +124,7 @@ exports.handler = async (event, context) => {
           // Don't return error responses - let Dify handle it
           return {
             statusCode: 200,
-            headers: {
-              ...headers,
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-              'Connection': 'keep-alive',
-            },
+            headers,
             body: response.data,
           };
         }
@@ -140,13 +133,12 @@ exports.handler = async (event, context) => {
         // Don't return error responses - let Dify handle it
         return {
           statusCode: 200,
-          headers: {
-            ...headers,
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-          body: `data: {"event": "agent_message", "answer": "I apologize, but I'm having trouble processing your request right now. Please try again.", "conversation_id": "error-${Date.now()}"}\n\n`,
+          headers,
+          body: JSON.stringify({ 
+            event: 'agent_message',
+            answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+            conversation_id: 'error-' + Date.now()
+          }),
         };
       }
     }
@@ -166,13 +158,12 @@ exports.handler = async (event, context) => {
     // Don't return error responses - let Dify handle it
     return {
       statusCode: 200,
-      headers: {
-        ...headers,
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-      body: `data: {"event": "agent_message", "answer": "I apologize, but I'm having trouble processing your request right now. Please try again.", "conversation_id": "error-${Date.now()}"}\n\n`,
+      headers,
+      body: JSON.stringify({ 
+        event: 'agent_message',
+        answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+        conversation_id: 'error-' + Date.now()
+      }),
     };
   }
 };
