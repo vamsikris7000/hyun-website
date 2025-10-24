@@ -74,10 +74,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const manuallyStoppedRef = useRef<boolean>(false);
 
   const suggestedQuestions = [
-    "What services do you offer?",
+    "What makes you different from competitors?",
     "How do I schedule a consultation?",
-    "Tell me about your AI solutions",
-    "What makes you different from competitors?"
+    "About the Company",
+    "What services do you offer?"
   ];
 
 
@@ -1070,7 +1070,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   const handleSuggestionClick = (question: string) => {
     setMessage(question);
-    // Don't set showWelcome to false - keep in initial state
+    // Automatically send the message after setting it
+    setTimeout(() => {
+      handleSend();
+    }, 100); // Small delay to ensure message is set
   };
 
   // Safe HTML rendering function with sanitization
