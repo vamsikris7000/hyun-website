@@ -253,25 +253,97 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
   // Function to handle dynamic card clicks
-  const handleDynamicCardClick = (cardId: string) => {
+  const handleDynamicCardClick = async (cardId: string) => {
     const card = dynamicCards.find(c => c.id === cardId);
     if (!card) return;
 
-    // Add user message
-    setChat(prev => [...prev, { role: 'user', text: card.title }]);
+    console.log('Dynamic card clicked:', card.title);
+    const question = `Can you explain brief about ${card.title}?`;
+    console.log('Generated question:', question);
     
-    // Add bot response with more details
-    const personalizedGreeting = userInfo ? `${userInfo.name}, ` : "";
-    const response = `${personalizedGreeting}${card.description}. Would you like to learn more about this service or explore our other offerings?`;
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
-    
-    // Speak the response
-    speakText(response);
-    
-    // Scroll to bottom after adding messages
-    setTimeout(() => {
-      scrollToBottom();
-    }, 100);
+    // Add user message to chat
+    setChat((prev) => [...prev, { role: 'user', text: question }]);
+    setMessage("");
+    setIsLoading(true);
+    setStreamedText("");
+    setError("");
+    setShowWelcome(false);
+
+    try {
+      console.log('Sending dynamic card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
+      
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      // Use Netlify Functions in production, local backend in development
+      const chatUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/chat'
+        : '/.netlify/functions/chatbot-proxy';
+      
+      const response = await fetch(chatUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: question,
+          conversation_id: conversationId || null,
+          is_first_message: !conversationId
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      let fullText = '';
+      let newConversationId = conversationId;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.event === 'conversation_id') {
+                newConversationId = data.conversation_id;
+                setConversationId(newConversationId);
+              } else if (data.event === 'message_start') {
+                console.log('Message started');
+              } else if (data.event === 'message_stream') {
+                fullText += data.answer;
+                setStreamedText(fullText);
+              } else if (data.event === 'message_end') {
+                console.log('Message ended, adding to chat:', fullText);
+                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                speakText(fullText);
+                setStreamedText("");
+              }
+            } catch (parseError) {
+              console.error('Error parsing SSE data:', parseError);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Function to parse structured content and convert to cards
@@ -355,7 +427,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   // Function to handle card clicks
   const handleCardClick = async (title: string) => {
+    console.log('Card clicked:', title);
     const question = `Can you explain brief about ${title}?`;
+    console.log('Generated question:', question);
     
     // Add user message to chat
     setChat((prev) => [...prev, { role: 'user', text: question }]);
@@ -517,7 +591,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
       // ElevenLabs API call
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/c1uwEpPUcC16tq1udqxk`, {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/ys3XeJJA4ArWMhRpcX1D`, {
         method: 'POST',
         headers: {
           'Accept': 'audio/mpeg',
