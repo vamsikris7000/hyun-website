@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
-import goCreateLogo from "@/assets/goreate.png";
 
 const Partners = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -60,32 +59,6 @@ const Partners = () => {
                 </button>
               </div>
 
-              {/* Partner 2 - GoCreate */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={goCreateLogo}
-                    alt="GoCreate"
-                    className="h-12 object-contain mix-blend-darken"
-                  />
-                  <div className="flex-1 h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
-                </div>
-                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-6">
-                  Building stunning, custom WordPress websites for authors—designed to
-                  showcase your books, grow your email list, and connect with readers.
-                  With a focus on clean design, performance, and easy management,
-                  GoCreate helps writers establish a powerful online presence that works
-                  as hard as they do.
-                </p>
-                <button 
-                  onClick={() => window.open('https://gocoreate.com/', '_blank')}
-                  className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit cursor-pointer transition-colors relative z-10"
-                  style={{ pointerEvents: 'auto' }}
-                >
-                  <span className="text-xl">»</span>
-                  VISIT WEBSITE
-                </button>
-              </div>
             </div>
           </div>
         </section>
@@ -163,11 +136,6 @@ const Partners = () => {
                 className="w-[259.24px] h-[55.06px] aspect-[4.71] mix-blend-multiply"
                 alt="Spectrum AI"
                 src={spectrumAiLogo}
-              />
-              <img
-                className="h-[55.06px] w-auto object-contain mix-blend-multiply"
-                alt="GoCreate"
-                src={goCreateLogo}
               />
             </div>
           </div>

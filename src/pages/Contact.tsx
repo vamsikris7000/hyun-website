@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
-import goCreateLogo from "@/assets/goreate.png";
 
 const Contact = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -220,11 +219,6 @@ const Contact = () => {
                 className="w-[259.24px] h-[55.06px] aspect-[4.71] mix-blend-multiply"
                 alt="Spectrum AI"
                 src={spectrumAiLogo}
-              />
-              <img
-                className="h-[55.06px] w-auto object-contain mix-blend-multiply"
-                alt="GoCreate"
-                src={goCreateLogo}
               />
             </div>
           </div>

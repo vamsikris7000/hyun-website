@@ -5,7 +5,6 @@ import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ChatInterface from "@/components/ChatInterface";
 import spectrumAiLogo from "@/assets/xpectrumai.png";
-import goCreateLogo from "@/assets/goreate.png";
 import aiIcon from "@/assets/AI Icon.jpg";
 import automationIcon from "@/assets/automation icon.jpg";
 import dataTransformationIcon from "@/assets/Data Transformation Icon.png";
@@ -216,7 +215,7 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="flex flex-col md:flex-row items-center justify-center gap-16 md:gap-32">
+            <div className="flex flex-col items-center justify-center">
               <div className="flex flex-col items-center text-center max-w-xs">
                 <img
                   src={spectrumAiLogo}
@@ -225,17 +224,6 @@ const Index = () => {
                 />
                 <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
                   Intelligent VOIP AI &amp; Workflow Automation
-                </p>
-              </div>
-              
-              <div className="flex flex-col items-center text-center max-w-xs">
-                <img
-                  src={goCreateLogo}
-                  alt="GoCreate.me"
-                  className="h-16 mb-4 object-contain mix-blend-darken"
-                />
-                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                  Interactive tools and digital experiences.
                 </p>
               </div>
             </div>
@@ -314,11 +302,6 @@ const Index = () => {
                 className="w-[259.24px] h-[55.06px] aspect-[4.71] mix-blend-multiply"
                 alt="Spectrum AI"
                 src={spectrumAiLogo}
-              />
-              <img
-                className="h-[55.06px] w-auto object-contain mix-blend-multiply"
-                alt="GoCreate"
-                src={goCreateLogo}
               />
             </div>
           </div>
