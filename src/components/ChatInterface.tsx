@@ -831,10 +831,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     setStreamedText("");
     setError("");
     setShowWelcome(false);
-    
-    // Clear previous cards and structured content when starting new conversation
-    setStructuredContent([]);
-    setDynamicCards([]);
 
     try {
       console.log('Sending request to backend...', { userMsg, conversationId, isFirstMessage: !conversationId });
