@@ -327,7 +327,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 setConversationId(newConversationId);
               } else if (data.event === 'message_start') {
                 console.log('Message started');
-              } else if (data.event === 'message_stream') {
+              } else if (data.event === 'message_stream' || data.event === 'agent_message') {
                 fullText += data.answer;
                 setStreamedText(fullText);
               } else if (data.event === 'message_end') {
@@ -501,7 +501,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 setConversationId(newConversationId);
               } else if (data.event === 'message_start') {
                 console.log('Message started');
-              } else if (data.event === 'message_stream') {
+              } else if (data.event === 'message_stream' || data.event === 'agent_message') {
                 fullText += data.answer;
                 setStreamedText(fullText);
               } else if (data.event === 'message_end') {
