@@ -27,7 +27,7 @@ const Header = ({ onBookDemo }: HeaderProps) => {
 
         <div className="inline-flex items-center gap-[45px] relative flex-[0_0_auto]">
           <div className="inline-flex items-center gap-[30px] relative flex-[0_0_auto]">
-            <Link to="/" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
+            <Link to="/#home" className="text-base relative w-fit mt-[-1.00px] font-medium text-[#0c202b] tracking-[0] leading-[normal] whitespace-nowrap hover:opacity-70 transition-opacity">
               HOME
             </Link>
 

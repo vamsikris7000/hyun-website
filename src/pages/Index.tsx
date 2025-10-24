@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
@@ -11,9 +11,30 @@ import dataTransformationIcon from "@/assets/Data Transformation Icon.png";
 import deliverIcon from "@/assets/Deliver.jpeg";
 
 const Index = () => {
-  const [isChatOpen, setIsChatOpen] = useState(true); // Set to true to show chatbot by default
+  // Check if this is an initial visit (no hash) or navigation (with hash)
+  const isInitialVisit = !window.location.hash;
+  const [isChatOpen, setIsChatOpen] = useState(isInitialVisit); // Only open chat on initial visit
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  // Handle hash changes to control chat visibility
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#home') {
+        setIsChatOpen(false); // Close chat when navigating to home
+      }
+    };
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Check initial hash
+    handleHashChange();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   return (
     <div className="bg-white w-full min-h-screen">
