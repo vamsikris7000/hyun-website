@@ -12,6 +12,7 @@ import deliverIcon from "@/assets/Deliver.jpeg";
 
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(true); // Set to true to show chatbot by default
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const navigate = useNavigate();
 
   return (
@@ -119,21 +120,38 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
+                onClick={() => setExpandedCard(expandedCard === 1 ? null : 1)}
+                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
-                    className="w-6 h-6"
+                    className="w-10 h-10"
                     alt="Icon"
                     src={deliverIcon}
                   />
                 </div>
-                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-semibold text-black text-2xl tracking-[-0.40px] leading-[28px] mb-6 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px] text-center">
                   General IT Consulting
                 </div>
-                <div className="font-normal text-black text-sm tracking-[0] leading-[20px] mt-auto">
-                  We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.
-                </div>
+                <motion.div 
+                  initial={false}
+                  animate={{ 
+                    opacity: expandedCard === 1 ? 1 : 0,
+                    height: expandedCard === 1 ? "auto" : 0,
+                    marginTop: expandedCard === 1 ? 0 : -20
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="font-normal text-black text-base tracking-[0] leading-[24px] text-center">
+                    We help businesses, entrepreneurs, or employees utilize unique hardware or software solutions to help drive efficiency and productivity.
+                  </div>
+                </motion.div>
+                {expandedCard !== 1 && (
+                  <div className="mt-auto text-center">
+                    <div className="text-sm text-gray-500 font-medium">Click to learn more</div>
+                  </div>
+                )}
               </motion.div>
 
               {/* Agentic AI Solutions */}
@@ -141,21 +159,38 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
+                onClick={() => setExpandedCard(expandedCard === 2 ? null : 2)}
+                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
-                    className="w-6 h-6"
+                    className="w-10 h-10"
                     alt="Icon"
                     src={aiIcon}
                   />
                 </div>
-                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-semibold text-black text-2xl tracking-[-0.40px] leading-[28px] mb-6 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px] text-center">
                   Agentic AI Solutions
                 </div>
-                <div className="font-normal text-black text-sm tracking-[0] leading-[20px] mt-auto">
-                  Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.
-                </div>
+                <motion.div 
+                  initial={false}
+                  animate={{ 
+                    opacity: expandedCard === 2 ? 1 : 0,
+                    height: expandedCard === 2 ? "auto" : 0,
+                    marginTop: expandedCard === 2 ? 0 : -20
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="font-normal text-black text-base tracking-[0] leading-[24px] text-center">
+                    Our premier solution that incorporates a unique and custom AI experience that can execute tasks so that you don't have to.
+                  </div>
+                </motion.div>
+                {expandedCard !== 2 && (
+                  <div className="mt-auto text-center">
+                    <div className="text-sm text-gray-500 font-medium">Click to learn more</div>
+                  </div>
+                )}
               </motion.div>
 
               {/* Automation Solutions */}
@@ -163,21 +198,38 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
+                onClick={() => setExpandedCard(expandedCard === 3 ? null : 3)}
+                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
-                    className="w-6 h-6"
+                    className="w-10 h-10"
                     alt="Icon"
                     src={automationIcon}
                   />
                 </div>
-                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-semibold text-black text-2xl tracking-[-0.40px] leading-[28px] mb-6 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px] text-center">
                   Automation Solutions
                 </div>
-                <div className="font-normal text-black text-sm tracking-[0] leading-[20px] mt-auto">
-                  Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.
-                </div>
+                <motion.div 
+                  initial={false}
+                  animate={{ 
+                    opacity: expandedCard === 3 ? 1 : 0,
+                    height: expandedCard === 3 ? "auto" : 0,
+                    marginTop: expandedCard === 3 ? 0 : -20
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="font-normal text-black text-base tracking-[0] leading-[24px] text-center">
+                    Our most cost effective solution. If you have a repetitious tasks, we can incorporate robotic processes to execute them for you.
+                  </div>
+                </motion.div>
+                {expandedCard !== 3 && (
+                  <div className="mt-auto text-center">
+                    <div className="text-sm text-gray-500 font-medium">Click to learn more</div>
+                  </div>
+                )}
               </motion.div>
 
               {/* Data Transformation Solutions */}
@@ -185,21 +237,38 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-110 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-2 cursor-pointer group"
+                onClick={() => setExpandedCard(expandedCard === 4 ? null : 4)}
+                className="relative w-full h-[348px] bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 flex flex-col transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-[#d0a4ff]/30 hover:bg-gradient-to-br hover:from-[#f0f0f0] hover:to-[#e8d5ff] hover:-translate-y-1 cursor-pointer group"
               >
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-8 transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-3">
                   <img
-                    className="w-6 h-6"
+                    className="w-10 h-10"
                     alt="Icon"
                     src={dataTransformationIcon}
                   />
                 </div>
-                <div className="font-medium text-black text-xl tracking-[-0.40px] leading-[22.0px] mb-4 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px]">
+                <div className="font-semibold text-black text-2xl tracking-[-0.40px] leading-[28px] mb-6 transition-all duration-300 ease-in-out group-hover:text-[#0c202b] group-hover:translate-y-[-2px] text-center">
                   Data Transformation Solutions
                 </div>
-                <div className="font-normal text-black text-sm tracking-[0] leading-[20px] mt-auto">
-                  The most productive way to consolidate data and bring analytics that matters.
-                </div>
+                <motion.div 
+                  initial={false}
+                  animate={{ 
+                    opacity: expandedCard === 4 ? 1 : 0,
+                    height: expandedCard === 4 ? "auto" : 0,
+                    marginTop: expandedCard === 4 ? 0 : -20
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="font-normal text-black text-base tracking-[0] leading-[24px] text-center">
+                    The most productive way to consolidate data and bring analytics that matters.
+                  </div>
+                </motion.div>
+                {expandedCard !== 4 && (
+                  <div className="mt-auto text-center">
+                    <div className="text-sm text-gray-500 font-medium">Click to learn more</div>
+                  </div>
+                )}
               </motion.div>
             </div>
           </div>
