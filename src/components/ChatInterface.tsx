@@ -271,6 +271,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
     try {
       console.log('Sending dynamic card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
+      console.log('Backend URL:', chatUrl);
       
       // Add timeout to prevent hanging
       const controller = new AbortController();
@@ -441,6 +442,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
     try {
       console.log('Sending card question to backend...', { question, conversationId, isFirstMessage: !conversationId });
+      console.log('Backend URL:', chatUrl);
       
       // Add timeout to prevent hanging
       const controller = new AbortController();
