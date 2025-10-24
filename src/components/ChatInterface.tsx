@@ -598,13 +598,21 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       // Clean the text
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
+      // Get ElevenLabs configuration from environment variables
+      const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+      const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
+      
+      if (!elevenLabsApiKey || !elevenLabsVoiceId) {
+        throw new Error('ElevenLabs API key or voice ID not configured');
+      }
+      
       // ElevenLabs API call
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/ys3XeJJA4ArWMhRpcX1D`, {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
         method: 'POST',
         headers: {
           'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4722'
+          'xi-api-key': elevenLabsApiKey
         },
         body: JSON.stringify({
           text: cleanText,

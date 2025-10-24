@@ -5,6 +5,10 @@
 Create a `.env` file in the project root directory with the following variables:
 
 ```env
+# ElevenLabs TTS Configuration
+VITE_ELEVENLABS_API_KEY=sk_56f583478e6968182f45b2f095be38530f452ed1afee4721
+VITE_ELEVENLABS_VOICE_ID=ys3XeJJA4ArWMhRpcX1D
+
 # Voice API Configuration
 VOICE_API_BASE_URL=https://d3sgivh2kmd3c8.cloudfront.net
 VOICE_API_KEY=xpectrum-ai@123
