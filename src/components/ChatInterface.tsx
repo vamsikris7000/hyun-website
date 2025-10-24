@@ -1070,6 +1070,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   const handleSuggestionClick = (question: string) => {
     setMessage(question);
+    setShowWelcome(false); // Hide welcome screen and show chat interface
     // Automatically send the message after setting it
     setTimeout(() => {
       handleSend();
