@@ -85,30 +85,54 @@ exports.handler = async (event, context) => {
 
     if (!apiKey || !apiUrl) {
       console.error('Missing environment variables for chatbot');
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Missing chatbot API configuration' }),
-      };
+      console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('DIFY') || key.includes('API')));
+      
+      // Use fallback values if environment variables are not set
+      const fallbackApiKey = 'app-qXbGcG3BX32wyKAIQP9Vlnol';
+      const fallbackApiUrl = 'https://demos.xpectrum-ai.com/v1';
+      
+      console.log('Using fallback API configuration');
+      console.log('Fallback API Key:', fallbackApiKey);
+      console.log('Fallback API URL:', fallbackApiUrl);
+      
+      // Continue with fallback values instead of returning error
+      const finalApiKey = apiKey || fallbackApiKey;
+      const finalApiUrl = apiUrl || fallbackApiUrl;
+      
+      console.log('Final API Key:', finalApiKey);
+      console.log('Final API URL:', finalApiUrl);
     }
 
     if (httpMethod === 'POST') {
       const requestBody = JSON.parse(body || '{}');
-      const requestUrl = `${apiUrl}/chat-messages`;
+      const finalApiKey = apiKey || 'app-qXbGcG3BX32wyKAIQP9Vlnol';
+      const finalApiUrl = apiUrl || 'https://demos.xpectrum-ai.com/v1';
+      const requestUrl = `${finalApiUrl}/chat-messages`;
       
       console.log(`Calling Dify API: ${requestUrl}`);
       
       try {
+        console.log('Request details:', {
+          url: requestUrl,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${finalApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+
         const response = await makeRequest(requestUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${finalApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(requestBody)
         });
 
         console.log(`Dify API response status: ${response.status}`);
+        console.log(`Dify API response data: ${response.data.substring(0, 200)}...`);
 
         if (response.status >= 200 && response.status < 300) {
           return {
@@ -121,19 +145,34 @@ exports.handler = async (event, context) => {
           };
         } else {
           console.error(`Dify API error: ${response.status} - ${response.data}`);
-          // Don't return error responses - let Dify handle it
+          // Return a proper error response instead of the API error
           return {
             statusCode: 200,
-            headers,
-            body: response.data,
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              event: 'agent_message',
+              answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
+              conversation_id: 'error-' + Date.now()
+            }),
           };
         }
       } catch (error) {
         console.error('Request error:', error);
-        // Don't return error responses - let Dify handle it
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
         return {
           statusCode: 200,
-          headers,
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ 
             event: 'agent_message',
             answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
@@ -155,10 +194,18 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Chatbot proxy function error:', error);
-    // Don't return error responses - let Dify handle it
+    console.error('Function error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
     return {
       statusCode: 200,
-      headers,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ 
         event: 'agent_message',
         answer: 'I apologize, but I\'m having trouble processing your request right now. Please try again.',
