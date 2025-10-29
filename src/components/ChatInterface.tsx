@@ -1356,7 +1356,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       transition={{ duration: 0.5, delay: 0.3 }}
                       className="mt-6"
                     >
-                      <div className="grid grid-cols-1 gap-4 mb-6 max-w-4xl">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {servicesData.map((service, index) => (
                           <motion.div
                             key={service.id}
