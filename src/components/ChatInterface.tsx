@@ -60,16 +60,37 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string }[]>([]);
+  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string }[]>(() => {
+    // Load chat from sessionStorage on component mount
+    if (typeof window !== 'undefined') {
+      const savedChat = sessionStorage.getItem('hyun-chat-history');
+      return savedChat ? JSON.parse(savedChat) : [];
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [streamedText, setStreamedText] = useState("");
   const [conversationId, setConversationId] = useState<string>("");
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    // Don't show welcome if there's existing chat history
+    if (typeof window !== 'undefined') {
+      const savedChat = sessionStorage.getItem('hyun-chat-history');
+      return !savedChat || JSON.parse(savedChat).length === 0;
+    }
+    return true;
+  });
   const [error, setError] = useState<string>("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(true);
   const [recognition, setRecognition] = useState<any>(null);
-  const [userInfo, setUserInfo] = useState<{name: string, isReturning: boolean} | null>(null);
+  const [userInfo, setUserInfo] = useState<{name: string, isReturning: boolean} | null>(() => {
+    // Load user info from sessionStorage on component mount
+    if (typeof window !== 'undefined') {
+      const savedUserInfo = sessionStorage.getItem('hyun-user-info');
+      return savedUserInfo ? JSON.parse(savedUserInfo) : null;
+    }
+    return null;
+  });
   const [showNameResponse, setShowNameResponse] = useState(false);
   const [detectedName, setDetectedName] = useState<string>("");
   const [showCompanyInfo, setShowCompanyInfo] = useState(false);
@@ -81,6 +102,20 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const manuallyStoppedRef = useRef<boolean>(false);
+
+  // Save chat to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && chat.length > 0) {
+      sessionStorage.setItem('hyun-chat-history', JSON.stringify(chat));
+    }
+  }, [chat]);
+
+  // Save user info to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && userInfo) {
+      sessionStorage.setItem('hyun-user-info', JSON.stringify(userInfo));
+    }
+  }, [userInfo]);
 
   const suggestedQuestions = [
     "What makes you different from competitors?",
@@ -756,6 +791,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setServiceCounts({});
       setFlippedCards(new Set());
       setStructuredContent([]);
+      // Clear sessionStorage when chat is manually reset
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('hyun-chat-history');
+        sessionStorage.removeItem('hyun-user-info');
+      }
       // Stop any ongoing speech recognition
       stopListening();
       // Clear any pending auto-send timeout
