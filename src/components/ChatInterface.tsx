@@ -1414,7 +1414,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                 {!flippedCards.has(service.id) ? (
                                   // Front of card - Title and emoji
                                   <>
-                                    <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                                      service.id === 'general-it' ? 'bg-red-100' :
+                                      service.id === 'agentic-ai' ? 'bg-blue-100' :
+                                      service.id === 'automation' ? 'bg-green-100' :
+                                      'bg-purple-100'
+                                    }`}>
                                       <img
                                         className="w-8 h-8 object-contain"
                                         alt={`${service.title} Icon`}
