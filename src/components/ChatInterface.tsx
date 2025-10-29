@@ -60,7 +60,7 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string }[]>(() => {
+  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string, type?: 'service-cards' }[]>(() => {
     // Load chat from sessionStorage on component mount
     if (typeof window !== 'undefined') {
       const savedChat = sessionStorage.getItem('hyun-chat-history');
@@ -259,6 +259,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         action = "services_info";
         setShowServicesInfo(true);
         setShowNameResponse(false);
+        // Add service cards as a special message
+        setChat(prev => [...prev, { role: 'bot', text: response }]);
+        setChat(prev => [...prev, { role: 'bot', text: '', type: 'service-cards' }]);
+        speakText(response);
         break;
       case "appointment":
         response = `${personalizedGreeting}I'd be happy to help you schedule an appointment. Let me redirect you to our booking system.`;
@@ -273,11 +277,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     // Add user message
     setChat(prev => [...prev, { role: 'user', text: option }]);
     
-    // Add bot response
-    setChat(prev => [...prev, { role: 'bot', text: response }]);
-    
-    // Speak the response
-    speakText(response);
+    // Add bot response (skip for services as it's handled specially)
+    if (option !== "services") {
+      setChat(prev => [...prev, { role: 'bot', text: response }]);
+      speakText(response);
+    }
     
     // Scroll to bottom after adding messages
     setTimeout(() => {
@@ -459,9 +463,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       if ('speechSynthesis' in window && isListening) {
         console.log('Falling back to browser TTS');
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
         
         // Try to use Google US English voice (index 181)
         const voices = speechSynthesis.getVoices();
@@ -469,8 +473,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
           utterance.voice = voices[181];
           console.log('Using Google US English voice');
         }
-        
-        window.speechSynthesis.speak(utterance);
+      
+      window.speechSynthesis.speak(utterance);
       }
     }
   };
@@ -1055,11 +1059,75 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         <div className="max-w-[80%] flex items-start gap-3">
                           <div className="w-2 h-2 bg-[#d0a4ff] rounded-full mt-2 flex-shrink-0"></div>
                           <div className="bg-transparent rounded-2xl rounded-bl-md px-4 py-3">
-                            <div className="text-black text-base leading-relaxed break-words">
-                              <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
-                            </div>
-                            
-                            
+                            {msg.type === 'service-cards' ? (
+                              // Render service cards
+                              <div className="mt-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                  {servicesData.map((service, index) => (
+                                    <motion.div
+                                      key={service.id}
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+                                      className="relative w-full h-64 cursor-pointer group"
+                                      onClick={() => handleServiceClick(service.id)}
+                                    >
+                                      <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
+                                        <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-start items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
+                                          <div className="mt-8">
+                                            {!flippedCards.has(service.id) ? (
+                                              // Front of card - Title and icon
+                                              <>
+                                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                                                  service.id === 'general-it' ? 'bg-red-100' :
+                                                  service.id === 'agentic-ai' ? 'bg-blue-100' :
+                                                  service.id === 'automation' ? 'bg-green-100' :
+                                                  'bg-purple-100'
+                                                }`}>
+                                                  <img
+                                                    className="w-8 h-8 object-contain"
+                                                    alt={`${service.title} Icon`}
+                                                    src={service.icon}
+                                                  />
+                                                </div>
+                                                <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
+                                                  {service.title}
+                                                </h3>
+                                              </>
+                                            ) : (
+                                              // Back of card - Description
+                                              <p className="text-sm text-gray-700 text-center leading-relaxed">
+                                                {service.description}
+                                              </p>
+                                            )}
+                                          </div>
+                                          {selectedServices.has(service.id) && (
+                                            <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                              <span className="text-white text-xs">✓</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                                
+                                {/* Schedule Appointment Button */}
+                                <div className="flex justify-center mt-6">
+                                  <button
+                                    onClick={handleScheduleClick}
+                                    className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                  >
+                                    Schedule an appointment
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              // Normal text message
+                              <div className="text-black text-base leading-relaxed break-words">
+                                <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1238,80 +1306,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
 
-                  {/* Services Info - Service Cards */}
-                  {showServicesInfo && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="mt-6"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {servicesData.map((service, index) => (
-                          <motion.div
-                            key={service.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-                            className="relative w-full h-64 cursor-pointer group"
-                            onClick={() => handleServiceClick(service.id)}
-                          >
-                            <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
-                              <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-start items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
-                                <div className="mt-8">
-                                  {!flippedCards.has(service.id) ? (
-                                    // Front of card - Title and emoji
-                                    <>
-                                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
-                                        service.id === 'general-it' ? 'bg-red-100' :
-                                        service.id === 'agentic-ai' ? 'bg-blue-100' :
-                                        service.id === 'automation' ? 'bg-green-100' :
-                                        'bg-purple-100'
-                                      }`}>
-                                        <img
-                                          className="w-8 h-8 object-contain"
-                                          alt={`${service.title} Icon`}
-                                          src={service.icon}
-                                        />
-                                      </div>
-                                      <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
-                                        {service.title}
-                                      </h3>
-                                    </>
-                                  ) : (
-                                    // Back of card - Description
-                                    <p className="text-sm text-gray-700 text-center leading-relaxed">
-                                      {service.description}
-                                    </p>
-                                  )}
-                                </div>
-                                {selectedServices.has(service.id) && (
-                                  <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white text-xs">✓</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* Service Follow-up Buttons */}
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.8 }}
-                        className="flex flex-wrap justify-center gap-3"
-                      >
-                        <button
-                          onClick={handleScheduleClick}
-                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          Schedule an appointment
-                        </button>
-                      </motion.div>
-                    </motion.div>
-                  )}
 
                   {/* Chat End Reference - Always at the very bottom */}
                   <div ref={chatEndRef} />
