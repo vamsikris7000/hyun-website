@@ -398,9 +398,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       // Clean the text
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
-      // Get ElevenLabs configuration from environment variables
-      const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-      const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID;
+      // Get ElevenLabs configuration from environment variables or use defaults
+      const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY || 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
+      const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID || 'c1uwEpPUcC16tq1udqxk';
+      
+      console.log('Using ElevenLabs Voice ID:', elevenLabsVoiceId);
+      console.log('API Key available:', !!elevenLabsApiKey);
       
       if (!elevenLabsApiKey || !elevenLabsVoiceId) {
         throw new Error('ElevenLabs API key or voice ID not configured');
@@ -454,11 +457,20 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       
       // Fallback to browser TTS if ElevenLabs fails (only if mic is listening)
       if ('speechSynthesis' in window && isListening) {
+        console.log('Falling back to browser TTS');
         const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        
+        // Try to use Google US English voice (index 181)
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 181) {
+          utterance.voice = voices[181];
+          console.log('Using Google US English voice');
+        }
+        
+        window.speechSynthesis.speak(utterance);
       }
     }
   };
