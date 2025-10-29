@@ -60,7 +60,7 @@ interface ChatInterfaceProps {
 
 const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [message, setMessage] = useState("");
-  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string, type?: 'service-cards' }[]>(() => {
+  const [chat, setChat] = useState<{ role: 'user' | 'bot', text: string, type?: 'service-cards' | 'company-cards' }[]>(() => {
     // Load chat from sessionStorage on component mount
     if (typeof window !== 'undefined') {
       const savedChat = sessionStorage.getItem('hyun-chat-history');
@@ -253,6 +253,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         action = "company_info";
         setShowCompanyInfo(true);
         setShowNameResponse(false);
+        // Add company cards as a special message
+        setChat(prev => [...prev, { role: 'bot', text: response }]);
+        setChat(prev => [...prev, { role: 'bot', text: '', type: 'company-cards' }]);
+        speakText(response);
         break;
       case "services":
         response = `${personalizedGreeting}With Hyun and Associates, we primarily focus on four main things, General IT Consulting, Agentic AI Solutions, Automation Solutions, and Data Transformation. Which of these options would like to learn more about?`;
@@ -277,8 +281,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     // Add user message
     setChat(prev => [...prev, { role: 'user', text: option }]);
     
-    // Add bot response (skip for services as it's handled specially)
-    if (option !== "services") {
+    // Add bot response (skip for services and company as they're handled specially)
+    if (option !== "services" && option !== "company") {
       setChat(prev => [...prev, { role: 'bot', text: response }]);
       speakText(response);
     }
@@ -1122,11 +1126,102 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                   </button>
                                 </div>
                               </div>
+                            ) : msg.type === 'company-cards' ? (
+                              // Render company cards (4-step process)
+                              <div className="mt-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                  {/* Step 1: Diagnose */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                  >
+                                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                                      <img
+                                        className="w-8 h-8 object-contain"
+                                        alt="Diagnose Icon"
+                                        src={diagnoseIcon}
+                                      />
+                                    </div>
+                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Diagnose</h3>
+                                    <p className="text-sm text-gray-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
+                                  </motion.div>
+
+                                  {/* Step 2: Design */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.5 }}
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                  >
+                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                      <img
+                                        className="w-8 h-8 object-contain"
+                                        alt="Design Icon"
+                                        src={designIcon}
+                                      />
+                                    </div>
+                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Design</h3>
+                                    <p className="text-sm text-gray-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
+                                  </motion.div>
+
+                                  {/* Step 3: Deliver */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.6 }}
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                  >
+                                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                                      <img
+                                        className="w-8 h-8 object-contain"
+                                        alt="Deliver Icon"
+                                        src={deliverIcon}
+                                      />
+                                    </div>
+                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Deliver</h3>
+                                    <p className="text-sm text-gray-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
+                                  </motion.div>
+
+                                  {/* Step 4: Direct */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.7 }}
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                  >
+                                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                                      <img
+                                        className="w-8 h-8 object-contain"
+                                        alt="Direct Icon"
+                                        src={designIcon}
+                                      />
+                                    </div>
+                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Direct</h3>
+                                    <p className="text-sm text-gray-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
+                                  </motion.div>
+                                </div>
+
+                                {/* Company Follow-up Buttons */}
+                                <div className="flex flex-wrap justify-center gap-3">
+                                  <button
+                                    onClick={() => {
+                                      handleCompanyFollowUp();
+                                      setShowCompanyInfo(false);
+                                      setShowNameResponse(true);
+                                    }}
+                                    className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                  >
+                                    Learn more about our services
+                                  </button>
+                                </div>
+                              </div>
                             ) : (
                               // Normal text message
-                              <div className="text-black text-base leading-relaxed break-words">
-                                <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
-                              </div>
+                            <div className="text-black text-base leading-relaxed break-words">
+                              <span dangerouslySetInnerHTML={{ __html: renderSafeHTML(msg.text) }} />
+                            </div>
                             )}
                           </div>
                         </div>
@@ -1203,108 +1298,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     </motion.div>
                   )}
 
-                  {/* Company Info - 4 Step Process Panels */}
-                  {showCompanyInfo && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="mt-6"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {/* Step 1: Diagnose */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.4 }}
-                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
-                        >
-                          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                            <img
-                              className="w-8 h-8 object-contain"
-                              alt="Diagnose Icon"
-                              src={diagnoseIcon}
-                            />
-                          </div>
-                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Diagnose</h3>
-                          <p className="text-sm text-gray-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
-                        </motion.div>
-
-                        {/* Step 2: Design */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.5 }}
-                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
-                        >
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                            <img
-                              className="w-8 h-8 object-contain"
-                              alt="Design Icon"
-                              src={designIcon}
-                            />
-                          </div>
-                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Design</h3>
-                          <p className="text-sm text-gray-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
-                        </motion.div>
-
-                        {/* Step 3: Deliver */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.6 }}
-                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
-                        >
-                          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                            <img
-                              className="w-8 h-8 object-contain"
-                              alt="Deliver Icon"
-                              src={deliverIcon}
-                            />
-                          </div>
-                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Deliver</h3>
-                          <p className="text-sm text-gray-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
-                        </motion.div>
-
-                        {/* Step 4: Direct */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.7 }}
-                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
-                        >
-                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <img
-                              className="w-8 h-8 object-contain"
-                              alt="Direct Icon"
-                              src={designIcon}
-                            />
-                          </div>
-                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Direct</h3>
-                          <p className="text-sm text-gray-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
-                        </motion.div>
-                      </div>
-
-                      {/* Company Follow-up Buttons */}
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.8 }}
-                        className="flex flex-wrap justify-center gap-3"
-                      >
-                        <button
-                          onClick={() => {
-                            handleCompanyFollowUp();
-                            setShowCompanyInfo(false);
-                            setShowNameResponse(true);
-                          }}
-                          className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                        >
-                          Learn more about our services
-                        </button>
-                      </motion.div>
-                    </motion.div>
-                  )}
 
 
                   {/* Chat End Reference - Always at the very bottom */}
