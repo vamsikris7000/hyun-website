@@ -491,6 +491,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const speakText = async (text: string) => {
     if (!text.trim()) return;
     
+    // Only speak if microphone is listening
+    if (!isListening) {
+      console.log('TTS disabled - microphone is off');
+      return;
+    }
+    
     try {
       setIsSpeaking(true);
       
@@ -551,8 +557,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       console.error('ElevenLabs TTS error:', error);
       setIsSpeaking(false);
       
-      // Fallback to browser TTS if ElevenLabs fails
-      if ('speechSynthesis' in window) {
+      // Fallback to browser TTS if ElevenLabs fails (only if mic is listening)
+      if ('speechSynthesis' in window && isListening) {
         const utterance = new SpeechSynthesisUtterance(text);
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
@@ -683,6 +689,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       clearTimeout(autoSendTimeoutRef.current);
       autoSendTimeoutRef.current = null;
     }
+    // Stop any ongoing TTS when microphone is turned off
+    stopSpeaking();
   };
 
   // Debounced scroll function to prevent excessive scrolling during streaming
