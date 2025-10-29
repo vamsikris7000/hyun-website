@@ -1262,7 +1262,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           transition={{ duration: 0.5, delay: 0.4 }}
                           className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                             <img
                               className="w-8 h-8 object-contain"
                               alt="Diagnose Icon"
@@ -1280,7 +1280,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           transition={{ duration: 0.5, delay: 0.5 }}
                           className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                             <img
                               className="w-8 h-8 object-contain"
                               alt="Design Icon"
@@ -1298,7 +1298,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           transition={{ duration: 0.5, delay: 0.6 }}
                           className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                             <img
                               className="w-8 h-8 object-contain"
                               alt="Deliver Icon"
@@ -1316,7 +1316,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           transition={{ duration: 0.5, delay: 0.7 }}
                           className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                             <img
                               className="w-8 h-8 object-contain"
                               alt="Direct Icon"
