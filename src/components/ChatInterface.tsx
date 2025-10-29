@@ -1363,7 +1363,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-                            className="relative w-full h-48 cursor-pointer group"
+                            className="relative w-full h-64 cursor-pointer group"
                             onClick={() => handleServiceClick(service.id)}
                           >
                             <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
@@ -1403,11 +1403,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         className="flex flex-wrap justify-center gap-3"
                       >
                         <button
-                          onClick={() => {
-                            handleServiceFollowUp();
-                            setShowServicesInfo(false);
-                            setShowNameResponse(true);
-                          }}
+                          onClick={handleScheduleClick}
                           className="px-6 py-3 bg-gradient-to-r from-[#af71f1] to-[#9c5ee0] text-white rounded-full font-semibold text-sm hover:from-[#9c5ee0] hover:to-[#8b4dd1] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
                           Schedule an appointment
