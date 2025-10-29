@@ -10,6 +10,9 @@ import aLogo from "@/assets/A.png";
 import hyunLogo from "@/assets/hyunandassociates.png";
 import haLogo from "@/assets/HA.png";
 import fullLogo from "@/assets/FullLogo_Transparent1.png";
+import diagnoseIcon from "@/assets/Diagnose.jpeg";
+import designIcon from "@/assets/Design.png";
+import deliverIcon from "@/assets/Deliver.jpeg";
 
 // Animated Logo Component with smooth transition
 const AnimatedLogo = ({ isWelcome, className = "" }: { isWelcome: boolean; className?: string }) => {
@@ -1249,13 +1252,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.4 }}
-                          className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-lg border border-red-200"
+                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mb-4">
-                            <span className="text-white font-bold text-lg">1</span>
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                            <img
+                              className="w-8 h-8 object-contain"
+                              alt="Diagnose Icon"
+                              src={diagnoseIcon}
+                            />
                           </div>
-                          <h3 className="font-semibold text-lg mb-2 text-red-800">Diagnose</h3>
-                          <p className="text-sm text-red-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
+                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Diagnose</h3>
+                          <p className="text-sm text-gray-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
                         </motion.div>
 
                         {/* Step 2: Design */}
@@ -1263,13 +1270,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.5 }}
-                          className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200"
+                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
-                            <span className="text-white font-bold text-lg">2</span>
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                            <img
+                              className="w-8 h-8 object-contain"
+                              alt="Design Icon"
+                              src={designIcon}
+                            />
                           </div>
-                          <h3 className="font-semibold text-lg mb-2 text-blue-800">Design</h3>
-                          <p className="text-sm text-blue-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
+                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Design</h3>
+                          <p className="text-sm text-gray-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
                         </motion.div>
 
                         {/* Step 3: Deliver */}
@@ -1277,13 +1288,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.6 }}
-                          className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200"
+                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
-                            <span className="text-white font-bold text-lg">3</span>
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                            <img
+                              className="w-8 h-8 object-contain"
+                              alt="Deliver Icon"
+                              src={deliverIcon}
+                            />
                           </div>
-                          <h3 className="font-semibold text-lg mb-2 text-green-800">Deliver</h3>
-                          <p className="text-sm text-green-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
+                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Deliver</h3>
+                          <p className="text-sm text-gray-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
                         </motion.div>
 
                         {/* Step 4: Direct */}
@@ -1291,13 +1306,17 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: 0.7 }}
-                          className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200"
+                          className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                         >
-                          <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-                            <span className="text-white font-bold text-lg">4</span>
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4">
+                            <img
+                              className="w-8 h-8 object-contain"
+                              alt="Direct Icon"
+                              src={designIcon}
+                            />
                           </div>
-                          <h3 className="font-semibold text-lg mb-2 text-purple-800">Direct</h3>
-                          <p className="text-sm text-purple-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
+                          <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Direct</h3>
+                          <p className="text-sm text-gray-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
                         </motion.div>
                       </div>
 
