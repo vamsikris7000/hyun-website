@@ -13,6 +13,9 @@ import fullLogo from "@/assets/FullLogo_Transparent1.png";
 import diagnoseIcon from "@/assets/Diagnose.jpeg";
 import designIcon from "@/assets/Design.png";
 import deliverIcon from "@/assets/Deliver.jpeg";
+import aiIcon from "@/assets/AI Icon.jpg";
+import automationIcon from "@/assets/automation icon.jpg";
+import dataTransformationIcon from "@/assets/Data Transformation Icon.png";
 
 // Animated Logo Component with smooth transition
 const AnimatedLogo = ({ isWelcome, className = "" }: { isWelcome: boolean; className?: string }) => {
@@ -92,28 +95,28 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       title: "General IT Consulting",
       keywords: ["IT", "Consulting"],
       description: "We help with utilizing unique hardware and software solutions to drive efficiency and productivity.",
-      icon: "💻"
+      icon: deliverIcon
     },
     {
       id: "agentic-ai",
       title: "Agentic AI Solutions",
       keywords: ["Agentic", "AI"],
       description: "Our premier custom solution that execute tasks for you so that you don't have to.",
-      icon: "🤖"
+      icon: aiIcon
     },
     {
       id: "automation",
       title: "Automation Solutions",
       keywords: ["Automation"],
       description: "Simple and cost effective way to execute repetitious tasks.",
-      icon: "⚙️"
+      icon: automationIcon
     },
     {
       id: "data-transformation",
       title: "Data Transformation Services",
       keywords: ["Data", "Transformation"],
       description: "The most productive way to bring data and analytics that matters.",
-      icon: "📊"
+      icon: dataTransformationIcon
     }
   ];
 
@@ -1372,7 +1375,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                   // Front of card - Title and emoji
                                   <>
                                     <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                                      <span className="text-white font-bold text-xl">{service.icon}</span>
+                                      <img
+                                        className="w-8 h-8 object-contain"
+                                        alt={`${service.title} Icon`}
+                                        src={service.icon}
+                                      />
                                     </div>
                                     <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
                                       {service.title}
