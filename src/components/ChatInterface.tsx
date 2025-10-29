@@ -1046,7 +1046,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
               {/* Chat Messages Area */}
               <div className="flex-1 overflow-y-auto p-4">
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="max-w-6xl mx-auto space-y-6">
                   {chat.map((msg, idx) => (
                     <motion.div
                       key={idx}
@@ -1066,35 +1066,35 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             {msg.type === 'service-cards' ? (
                               // Render service cards
                               <div className="mt-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div className="grid grid-cols-4 gap-3 mb-6">
                                   {servicesData.map((service, index) => (
                                     <motion.div
                                       key={service.id}
                                       initial={{ opacity: 0, y: 20 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-                                      className="relative w-full h-64 cursor-pointer group"
+                                      className="relative w-full h-72 cursor-pointer group"
                                       onClick={() => handleServiceClick(service.id)}
                                     >
                                       <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
-                                        <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-start items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
+                                        <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-8 h-full flex flex-col justify-start items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
                                           <div className="mt-8">
                                             {!flippedCards.has(service.id) ? (
                                               // Front of card - Title and icon
                                               <>
-                                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                                                <div className={`w-16 h-16 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 ${
                                                   service.id === 'general-it' ? 'bg-red-100' :
                                                   service.id === 'agentic-ai' ? 'bg-blue-100' :
                                                   service.id === 'automation' ? 'bg-green-100' :
                                                   'bg-purple-100'
                                                 }`}>
                                                   <img
-                                                    className="w-8 h-8 object-contain"
+                                                    className="w-10 h-10 object-contain"
                                                     alt={`${service.title} Icon`}
                                                     src={service.icon}
                                                   />
                                                 </div>
-                                                <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
+                                                <h3 className="font-semibold text-xl text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
                                                   {service.title}
                                                 </h3>
                                               </>
@@ -1129,22 +1129,22 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             ) : msg.type === 'company-cards' ? (
                               // Render company cards (4-step process)
                               <div className="mt-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div className="grid grid-cols-4 gap-3 mb-6">
                                   {/* Step 1: Diagnose */}
                                   <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 }}
-                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-8 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                                   >
-                                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                                       <img
-                                        className="w-8 h-8 object-contain"
+                                        className="w-10 h-10 object-contain"
                                         alt="Diagnose Icon"
                                         src={diagnoseIcon}
                                       />
                                     </div>
-                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Diagnose</h3>
+                                    <h3 className="font-semibold text-xl mb-3 text-[#0c202b]">Diagnose</h3>
                                     <p className="text-sm text-gray-700">Our initial consultation is to listen, ask questions, and document every hiccup in your current processes, making sure that there is a problem we can handle.</p>
                                   </motion.div>
 
@@ -1153,16 +1153,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-8 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                                   >
-                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                                       <img
-                                        className="w-8 h-8 object-contain"
+                                        className="w-10 h-10 object-contain"
                                         alt="Design Icon"
                                         src={designIcon}
                                       />
                                     </div>
-                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Design</h3>
+                                    <h3 className="font-semibold text-xl mb-3 text-[#0c202b]">Design</h3>
                                     <p className="text-sm text-gray-700">This stage, we collaborate on the scope of how the work should be handling things, the deliverables of our services, and pricing to fit within a particular budget.</p>
                                   </motion.div>
 
@@ -1171,16 +1171,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.6 }}
-                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-8 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                                   >
-                                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                                       <img
-                                        className="w-8 h-8 object-contain"
+                                        className="w-10 h-10 object-contain"
                                         alt="Deliver Icon"
                                         src={deliverIcon}
                                       />
                                     </div>
-                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Deliver</h3>
+                                    <h3 className="font-semibold text-xl mb-3 text-[#0c202b]">Deliver</h3>
                                     <p className="text-sm text-gray-700">That means, we execute on developing, iterating, and deploying the solution and your team so that it works for you and your company.</p>
                                   </motion.div>
 
@@ -1189,16 +1189,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.7 }}
-                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-6 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
+                                    className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] p-8 rounded-lg border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300"
                                   >
-                                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                                       <img
-                                        className="w-8 h-8 object-contain"
+                                        className="w-10 h-10 object-contain"
                                         alt="Direct Icon"
                                         src={designIcon}
                                       />
                                     </div>
-                                    <h3 className="font-semibold text-lg mb-2 text-[#0c202b]">Direct</h3>
+                                    <h3 className="font-semibold text-xl mb-3 text-[#0c202b]">Direct</h3>
                                     <p className="text-sm text-gray-700">Direct is the most critical stage as this pertains to embedding lasting change by training, understanding best practices, and to provided proactive support.</p>
                                   </motion.div>
                                 </div>
