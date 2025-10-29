@@ -71,7 +71,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
   const [serviceCounts, setServiceCounts] = useState<{[key: string]: number}>({});
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
-  const [dynamicCards, setDynamicCards] = useState<Array<{id: string, title: string, description: string, type: string}>>([]);
   const [structuredContent, setStructuredContent] = useState<Array<{id: string, title: string, content: string, type: 'card'}>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -322,35 +321,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
 
-  // Intelligent function to parse backend responses and extract service information
-  const parseResponseForServices = (text: string) => {
-    // Disable automatic service card generation
-    return {
-      services: [],
-      remainingText: text
-    };
-  };
 
-  // Function to handle dynamic card clicks
-  const handleDynamicCardClick = (cardId: string) => {
-    const card = dynamicCards.find(c => c.id === cardId);
-    if (!card) return;
-
-    console.log('Dynamic card clicked:', card.title);
-    const question = `Can you explain brief about ${card.title}?`;
-    console.log('Generated question:', question);
-    
-    // Set the question in the message input instead of auto-sending
-    setMessage(question);
-    
-    // Focus on the input field
-    setTimeout(() => {
-      const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
-      if (inputElement) {
-        inputElement.focus();
-      }
-    }, 100);
-  };
 
   // Function to parse structured content and convert to cards
   const parseStructuredContent = (text: string) => {
@@ -772,7 +743,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setServiceCounts({});
       setFlippedCards(new Set());
       setStructuredContent([]);
-      setDynamicCards([]);
       // Stop any ongoing speech recognition
       stopListening();
       // Clear any pending auto-send timeout
@@ -938,38 +908,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                     setStructuredContent(structuredParsed.sections);
                   }
                   
-                  // Then parse for services in the remaining text
-                  const serviceParsed = parseResponseForServices(structuredParsed.remainingText);
-                  if (serviceParsed.services.length > 0) {
-                    setDynamicCards(prev => [...prev, ...serviceParsed.services]);
-                    // Update chat with service-remaining text
-                    setChat((prev) => {
-                      const newChat = [...prev];
-                      newChat[newChat.length - 1] = { role: 'bot', text: serviceParsed.remainingText };
-                      return newChat;
-                    });
-                    speakText(serviceParsed.remainingText);
-                  } else {
-                    speakText(structuredParsed.remainingText);
-                  }
+                  // Just speak the remaining text
+                  speakText(structuredParsed.remainingText);
                 } else {
-                  // No structured content, parse for services
-                  const parsedResponse = parseResponseForServices(fullText);
-                  
-                  if (parsedResponse.services.length > 0) {
-                    // Add the remaining text as the bot message
-                    setChat((prev) => [...prev, { role: 'bot', text: parsedResponse.remainingText }]);
-                    
-                    // Set the dynamic cards for display (append new cards)
-                    setDynamicCards(prev => [...prev, ...parsedResponse.services]);
-                    
-                    // Speak the remaining text (without the service descriptions)
-                    speakText(parsedResponse.remainingText);
-                  } else {
-                    // No services detected, add full text as normal
-                    setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                  // No structured content, add full text as normal
+                  setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
               speakText(fullText);
-                  }
                 }
                 
                 setStreamedText('');
@@ -1216,39 +1160,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                               </div>
                             )}
                             
-                            {dynamicCards.length > 0 && (
-                              <div className="mt-4">
-                                <div className="grid grid-cols-1 gap-4 max-w-4xl">
-                                  {dynamicCards.map((card, cardIndex) => (
-                                    <motion.div
-                                      key={card.id}
-                                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                                      transition={{ duration: 0.4, delay: 0.1 + cardIndex * 0.1 }}
-                                      className="relative w-full h-48 cursor-pointer group"
-                                      onClick={() => handleDynamicCardClick(card.id)}
-                                    >
-                                      <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
-                                        <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
-                                          <div className="w-16 h-16 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                            <span className="text-white font-bold text-xl">{cardIndex + 1}</span>
-                                          </div>
-                                          <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2 group-hover:text-[#af71f1] transition-colors duration-300">
-                                            {card.title}
-                                          </h3>
-                                          <p className="text-sm text-gray-600 text-center leading-relaxed">
-                                            {card.description}
-                                          </p>
-                                          <div className="mt-3 text-xs text-[#af71f1] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            Click to learn more
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
