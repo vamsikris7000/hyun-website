@@ -1410,32 +1410,34 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                             onClick={() => handleServiceClick(service.id)}
                           >
                             <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
-                              <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
-                                {!flippedCards.has(service.id) ? (
-                                  // Front of card - Title and emoji
-                                  <>
-                                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
-                                      service.id === 'general-it' ? 'bg-red-100' :
-                                      service.id === 'agentic-ai' ? 'bg-blue-100' :
-                                      service.id === 'automation' ? 'bg-green-100' :
-                                      'bg-purple-100'
-                                    }`}>
-                                      <img
-                                        className="w-8 h-8 object-contain"
-                                        alt={`${service.title} Icon`}
-                                        src={service.icon}
-                                      />
-                                    </div>
-                                    <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
-                                      {service.title}
-                                    </h3>
-                                  </>
-                                ) : (
-                                  // Back of card - Description
-                                  <p className="text-sm text-gray-700 text-center leading-relaxed">
-                                    {service.description}
-                                  </p>
-                                )}
+                              <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-start items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
+                                <div className="mt-8">
+                                  {!flippedCards.has(service.id) ? (
+                                    // Front of card - Title and emoji
+                                    <>
+                                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${
+                                        service.id === 'general-it' ? 'bg-red-100' :
+                                        service.id === 'agentic-ai' ? 'bg-blue-100' :
+                                        service.id === 'automation' ? 'bg-green-100' :
+                                        'bg-purple-100'
+                                      }`}>
+                                        <img
+                                          className="w-8 h-8 object-contain"
+                                          alt={`${service.title} Icon`}
+                                          src={service.icon}
+                                        />
+                                      </div>
+                                      <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
+                                        {service.title}
+                                      </h3>
+                                    </>
+                                  ) : (
+                                    // Back of card - Description
+                                    <p className="text-sm text-gray-700 text-center leading-relaxed">
+                                      {service.description}
+                                    </p>
+                                  )}
+                                </div>
                                 {selectedServices.has(service.id) && (
                                   <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs">✓</span>
