@@ -412,6 +412,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       
       console.log('Using ElevenLabs Voice ID:', elevenLabsVoiceId);
       console.log('API Key available:', !!elevenLabsApiKey);
+      console.log('Environment check - VITE_ELEVENLABS_API_KEY:', import.meta.env.VITE_ELEVENLABS_API_KEY);
+      console.log('Environment check - VITE_ELEVENLABS_VOICE_ID:', import.meta.env.VITE_ELEVENLABS_VOICE_ID);
       
       if (!elevenLabsApiKey || !elevenLabsVoiceId) {
         throw new Error('ElevenLabs API key or voice ID not configured');
