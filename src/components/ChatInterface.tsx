@@ -284,28 +284,27 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const service = servicesData.find(s => s.id === serviceId);
     if (!service) return;
 
-    // Set the question in the message input instead of auto-sending
-    const question = `Can you explain brief about ${service.title}?`;
-    setMessage(question);
+    // Toggle flip state for the card
+    setFlippedCards(prev => {
+      const newFlipped = new Set(prev);
+      if (newFlipped.has(serviceId)) {
+        newFlipped.delete(serviceId);
+      } else {
+        newFlipped.add(serviceId);
+      }
+      return newFlipped;
+    });
     
     // Update selected services
     const newSelectedServices = new Set(selectedServices);
     newSelectedServices.add(serviceId);
     setSelectedServices(newSelectedServices);
-    
+
     // Update service counts
     setServiceCounts(prev => ({
       ...prev,
       [serviceId]: (prev[serviceId] || 0) + 1
     }));
-    
-    // Focus on the input field
-    setTimeout(() => {
-      const inputElement = document.querySelector('input[type="text"]') as HTMLInputElement;
-      if (inputElement) {
-        inputElement.focus();
-      }
-    }, 100);
   };
 
   const handleServiceFollowUp = () => {
@@ -1357,27 +1356,34 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                       transition={{ duration: 0.5, delay: 0.3 }}
                       className="mt-6"
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="grid grid-cols-1 gap-4 mb-6 max-w-4xl">
                         {servicesData.map((service, index) => (
                           <motion.div
                             key={service.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
-                            className="relative w-full h-48 cursor-pointer group"
+                            className="relative w-full h-32 cursor-pointer group"
                             onClick={() => handleServiceClick(service.id)}
                           >
                             <div className="w-full h-full rounded-lg transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:shadow-xl">
                               <div className="bg-gradient-to-br from-[#fbfbfb] to-[#f7efff] rounded-lg p-6 h-full flex flex-col justify-center items-center border border-[#af71f1] hover:border-[#9c5ee0] transition-all duration-300">
-                                <div className="w-16 h-16 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                  <span className="text-white font-bold text-2xl">{service.icon}</span>
-                                </div>
-                                <h3 className="font-semibold text-lg text-center text-[#0c202b] mb-2 group-hover:text-[#af71f1] transition-colors duration-300">
-                                  {service.title}
-                                </h3>
-                                <p className="text-sm text-gray-600 text-center leading-relaxed">
-                                  {service.description}
-                                </p>
+                                {!flippedCards.has(service.id) ? (
+                                  // Front of card - Title and emoji
+                                  <>
+                                    <div className="w-12 h-12 bg-gradient-to-br from-[#af71f1] to-[#9c5ee0] rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                                      <span className="text-white font-bold text-xl">{service.icon}</span>
+                                    </div>
+                                    <h3 className="font-semibold text-lg text-center text-[#0c202b] group-hover:text-[#af71f1] transition-colors duration-300">
+                                      {service.title}
+                                    </h3>
+                                  </>
+                                ) : (
+                                  // Back of card - Description
+                                  <p className="text-sm text-gray-700 text-center leading-relaxed">
+                                    {service.description}
+                                  </p>
+                                )}
                                 {selectedServices.has(service.id) && (
                                   <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                                     <span className="text-white text-xs">✓</span>
