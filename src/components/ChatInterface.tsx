@@ -406,39 +406,39 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       // Clean the text
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
-      // Get ElevenLabs configuration from environment variables or use defaults
-      const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY || 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
+      // Prefer Netlify serverless proxy for TTS to ensure consistent voice across devices
       const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID || 'c1uwEpPUcC16tq1udqxk';
-      
-      console.log('Using ElevenLabs Voice ID:', elevenLabsVoiceId);
-      console.log('API Key available:', !!elevenLabsApiKey);
-      console.log('Environment check - VITE_ELEVENLABS_API_KEY:', import.meta.env.VITE_ELEVENLABS_API_KEY);
-      console.log('Environment check - VITE_ELEVENLABS_VOICE_ID:', import.meta.env.VITE_ELEVENLABS_VOICE_ID);
-      
-      if (!elevenLabsApiKey || !elevenLabsVoiceId) {
-        throw new Error('ElevenLabs API key or voice ID not configured');
-      }
-      
-      // ElevenLabs API call
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
+      const ttsUrl = '/.netlify/functions/tts-elevenlabs';
+
+      let response = await fetch(ttsUrl, {
         method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': elevenLabsApiKey
-        },
-        body: JSON.stringify({
-          text: cleanText,
-          model_id: 'eleven_monolingual_v1',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
-          }
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText, voiceId: elevenLabsVoiceId })
       });
 
       if (!response.ok) {
-        throw new Error(`ElevenLabs API error: ${response.status}`);
+        // As a dev-only fallback, attempt direct ElevenLabs when running locally
+        if (window.location.hostname === 'localhost') {
+          const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+          if (!elevenLabsApiKey) throw new Error(`TTS proxy failed: ${response.status}`);
+          const direct = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'audio/mpeg',
+              'Content-Type': 'application/json',
+              'xi-api-key': elevenLabsApiKey
+            },
+            body: JSON.stringify({
+              text: cleanText,
+              model_id: 'eleven_monolingual_v1',
+              voice_settings: { stability: 0.5, similarity_boost: 0.5 }
+            })
+          });
+          response = direct;
+          if (!response.ok) throw new Error(`ElevenLabs API error: ${response.status}`);
+        } else {
+          throw new Error(`TTS proxy error: ${response.status}`);
+        }
       }
 
       // Get the audio blob
