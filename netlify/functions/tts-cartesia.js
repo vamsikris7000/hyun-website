@@ -19,7 +19,7 @@ function fetchCartesiaAudio(voiceId, apiKey, text) {
     },
     speed: 'normal',
     generation_config: {
-      speed: 1,
+      speed: 1.25,  // 25% faster (1.0 = normal, higher = faster)
       volume: 1
     }
   });
