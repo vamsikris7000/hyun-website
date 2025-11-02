@@ -13,8 +13,8 @@ function fetchCartesiaAudio(voiceId, apiKey, text) {
       id: voiceId
     },
     output_format: {
-      container: 'wav',
-      encoding: 'pcm_f32le',
+      container: 'mp3',
+      encoding: 'mp3',
       sample_rate: 44100
     },
     speed: 'normal',
@@ -167,7 +167,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'audio/wav' },
+      headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
       isBase64Encoded: true,
       body: base64Audio,
     };

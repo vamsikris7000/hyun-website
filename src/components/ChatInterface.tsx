@@ -441,7 +441,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       // Netlify automatically decodes base64 when isBase64Encoded=true
       // So we get binary audio data directly
       const audioBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' });
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       // Create and play audio
