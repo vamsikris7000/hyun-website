@@ -1,25 +1,38 @@
-// Netlify Function: ElevenLabs TTS proxy
+// Netlify Function: Cartesia TTS proxy
 // Accepts POST { text: string, voiceId?: string }
-// Returns audio/mpeg as base64 (isBase64Encoded=true)
+// Returns audio/wav as base64 (isBase64Encoded=true)
 
 const https = require('https');
 
-function fetchElevenLabsAudio(voiceId, apiKey, text) {
+function fetchCartesiaAudio(voiceId, apiKey, text) {
   const payload = JSON.stringify({
-    text,
-    model_id: 'eleven_monolingual_v1',
-    voice_settings: { stability: 0.5, similarity_boost: 0.5 },
+    model_id: 'sonic-3',
+    transcript: text,
+    voice: {
+      mode: 'id',
+      id: voiceId
+    },
+    output_format: {
+      container: 'wav',
+      encoding: 'pcm_f32le',
+      sample_rate: 44100
+    },
+    speed: 'normal',
+    generation_config: {
+      speed: 1,
+      volume: 1
+    }
   });
 
   const options = {
-    hostname: 'api.elevenlabs.io',
-    path: `/v1/text-to-speech/${voiceId}`,
+    hostname: 'api.cartesia.ai',
+    path: '/tts/bytes',
     method: 'POST',
     headers: {
-      Accept: 'audio/mpeg',
+      'Cartesia-Version': '2024-06-10',
+      'X-API-Key': apiKey,
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(payload),
-      'xi-api-key': apiKey,
     },
   };
 
@@ -31,7 +44,7 @@ function fetchElevenLabsAudio(voiceId, apiKey, text) {
         if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
           resolve(Buffer.concat(chunks));
         } else {
-          reject(new Error(`ElevenLabs error ${res.statusCode}: ${Buffer.concat(chunks).toString('utf8')}`));
+          reject(new Error(`Cartesia error ${res.statusCode}: ${Buffer.concat(chunks).toString('utf8')}`));
         }
       });
     });
@@ -79,12 +92,12 @@ exports.handler = async (event) => {
     }
 
     // Prefer Netlify env; fall back to hardcoded values as last resort
-    const envApiKey = process.env.ELEVENLABS_API_KEY || process.env.VITE_ELEVENLABS_API_KEY;
-    const envVoiceId = process.env.ELEVENLABS_VOICE_ID || process.env.VITE_ELEVENLABS_VOICE_ID;
+    const envApiKey = process.env.CARTESIA_API_KEY || process.env.VITE_CARTESIA_API_KEY;
+    const envVoiceId = process.env.CARTESIA_VOICE_ID || process.env.VITE_CARTESIA_VOICE_ID;
     
     // Fallback to known working values if env vars not set or invalid
-    const fallbackApiKey = 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
-    const fallbackVoiceId = 'c1uwEpPUcC16tq1udqxk';
+    const fallbackApiKey = 'sk_car_yymzdoQsN8crzzbRg7bK62';
+    const fallbackVoiceId = '694f9389-aac1-45b6-b726-9d9369183238';
     
     const apiKey = envApiKey || fallbackApiKey;
     const voiceId = requestedVoiceId || envVoiceId || fallbackVoiceId;
@@ -96,7 +109,7 @@ exports.handler = async (event) => {
       hasEnvVoiceId: !!envVoiceId,
       finalVoiceId: voiceId,
       usingFallback: !envApiKey,
-      availableEnvVars: Object.keys(process.env).filter(k => k.includes('ELEVEN') || k.includes('TTS'))
+      availableEnvVars: Object.keys(process.env).filter(k => k.includes('CARTESIA') || k.includes('TTS'))
     });
 
     if (!apiKey || !voiceId) {
@@ -111,29 +124,41 @@ exports.handler = async (event) => {
       };
     }
 
-    console.log('🔊 Calling ElevenLabs API...');
+    console.log('🔊 Calling Cartesia API...');
     let audioBuffer;
     
     try {
-      audioBuffer = await fetchElevenLabsAudio(voiceId, apiKey, text);
+      audioBuffer = await fetchCartesiaAudio(voiceId, apiKey, text);
     } catch (error) {
-      // If API key from env vars fails and we haven't used fallback yet, retry with fallback
-      if (envApiKey && apiKey === envApiKey && error.message.includes('invalid_api_key')) {
-        console.warn('🔊 Env API key failed, retrying with fallback key...');
-        const fallbackApiKey = 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
+      // If API key from env vars fails with any API key error, retry with fallback
+      const isApiKeyError = error.message.includes('invalid') || 
+                           error.message.includes('unauthorized') ||
+                           error.message.includes('forbidden') ||
+                           error.message.includes('401') ||
+                           error.message.includes('403');
+      
+      if (envApiKey && apiKey === envApiKey && isApiKeyError) {
+        console.warn('🔊 Env API key failed, retrying with fallback key...', {
+          error: error.message.substring(0, 100),
+          voiceId: voiceId
+        });
+        const fallbackApiKey = 'sk_car_yymzdoQsN8crzzbRg7bK62';
+        const fallbackVoiceId = '694f9389-aac1-45b6-b726-9d9369183238';
         try {
-          audioBuffer = await fetchElevenLabsAudio(voiceId, fallbackApiKey, text);
+          audioBuffer = await fetchCartesiaAudio(fallbackVoiceId, fallbackApiKey, text);
           console.log('🔊 Fallback API key succeeded');
         } catch (fallbackError) {
           console.error('🔊 Both API keys failed:', fallbackError.message);
           throw fallbackError;
         }
       } else {
+        // If already using fallback or different error, throw as-is
+        console.error('🔊 TTS Error (no retry):', error.message.substring(0, 150));
         throw error;
       }
     }
     
-    console.log('🔊 ElevenLabs Response:', {
+    console.log('🔊 Cartesia Response:', {
       audioSize: audioBuffer.length,
       audioSizeKB: Math.round(audioBuffer.length / 1024)
     });
@@ -142,7 +167,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
+      headers: { ...corsHeaders, 'Content-Type': 'audio/wav' },
       isBase64Encoded: true,
       body: base64Audio,
     };
@@ -158,5 +183,4 @@ exports.handler = async (event) => {
     };
   }
 };
-
 

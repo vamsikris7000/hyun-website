@@ -390,7 +390,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
 
-  // ElevenLabs Text-to-speech function
+  // Cartesia Text-to-speech function
   const speakText = async (text: string) => {
     if (!text.trim()) return;
     
@@ -407,22 +407,22 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
       // ALWAYS use Netlify function for TTS - this ensures consistent voice across all devices
-      const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID || 'c1uwEpPUcC16tq1udqxk';
+      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238';
       const ttsUrl = window.location.hostname === 'localhost' 
-        ? 'http://localhost:8888/.netlify/functions/tts-elevenlabs' // Netlify dev server
-        : '/.netlify/functions/tts-elevenlabs'; // Production
+        ? 'http://localhost:8888/.netlify/functions/tts-cartesia' // Netlify dev server
+        : '/.netlify/functions/tts-cartesia'; // Production
 
       console.log('🔊 TTS Request:', { 
         url: ttsUrl, 
         hostname: window.location.hostname,
         textLength: cleanText.length,
-        voiceId: elevenLabsVoiceId 
+        voiceId: cartesiaVoiceId 
       });
 
       const response = await fetch(ttsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText, voiceId: elevenLabsVoiceId })
+        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId })
       });
 
       console.log('🔊 TTS Response:', { 
@@ -446,7 +446,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
       }
-      const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
+      const audioBlob = new Blob([bytes], { type: 'audio/wav' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       // Create and play audio
@@ -466,10 +466,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       await audio.play();
       
     } catch (error) {
-      console.error('ElevenLabs TTS error:', error);
+      console.error('Cartesia TTS error:', error);
       setIsSpeaking(false);
       
-      // Fallback to browser TTS if ElevenLabs fails (only if mic is listening)
+      // Fallback to browser TTS if Cartesia fails (only if mic is listening)
       if ('speechSynthesis' in window && isListening) {
         console.log('Falling back to browser TTS');
         const utterance = new SpeechSynthesisUtterance(text);
