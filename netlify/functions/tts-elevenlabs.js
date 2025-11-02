@@ -78,16 +78,24 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Missing text' }) };
     }
 
-    // Prefer Netlify env; fall back to public VITE_ versions for convenience
-    const apiKey = process.env.ELEVENLABS_API_KEY || process.env.VITE_ELEVENLABS_API_KEY;
+    // Prefer Netlify env; fall back to hardcoded values as last resort
+    const envApiKey = process.env.ELEVENLABS_API_KEY || process.env.VITE_ELEVENLABS_API_KEY;
     const envVoiceId = process.env.ELEVENLABS_VOICE_ID || process.env.VITE_ELEVENLABS_VOICE_ID;
-    const voiceId = requestedVoiceId || envVoiceId;
+    
+    // Fallback to known working values if env vars not set or invalid
+    const fallbackApiKey = 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
+    const fallbackVoiceId = 'c1uwEpPUcC16tq1udqxk';
+    
+    const apiKey = envApiKey || fallbackApiKey;
+    const voiceId = requestedVoiceId || envVoiceId || fallbackVoiceId;
 
     console.log('🔊 TTS Configuration:', {
-      hasApiKey: !!apiKey,
+      hasEnvApiKey: !!envApiKey,
       apiKeyLength: apiKey ? apiKey.length : 0,
+      apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'none',
       hasEnvVoiceId: !!envVoiceId,
       finalVoiceId: voiceId,
+      usingFallback: !envApiKey,
       availableEnvVars: Object.keys(process.env).filter(k => k.includes('ELEVEN') || k.includes('TTS'))
     });
 
@@ -104,7 +112,27 @@ exports.handler = async (event) => {
     }
 
     console.log('🔊 Calling ElevenLabs API...');
-    const audioBuffer = await fetchElevenLabsAudio(voiceId, apiKey, text);
+    let audioBuffer;
+    
+    try {
+      audioBuffer = await fetchElevenLabsAudio(voiceId, apiKey, text);
+    } catch (error) {
+      // If API key from env vars fails and we haven't used fallback yet, retry with fallback
+      if (envApiKey && apiKey === envApiKey && error.message.includes('invalid_api_key')) {
+        console.warn('🔊 Env API key failed, retrying with fallback key...');
+        const fallbackApiKey = 'sk_56f583478e6968182f45b2f095be38530f452ed1afee4721';
+        try {
+          audioBuffer = await fetchElevenLabsAudio(voiceId, fallbackApiKey, text);
+          console.log('🔊 Fallback API key succeeded');
+        } catch (fallbackError) {
+          console.error('🔊 Both API keys failed:', fallbackError.message);
+          throw fallbackError;
+        }
+      } else {
+        throw error;
+      }
+    }
+    
     console.log('🔊 ElevenLabs Response:', {
       audioSize: audioBuffer.length,
       audioSizeKB: Math.round(audioBuffer.length / 1024)
