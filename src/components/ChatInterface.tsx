@@ -406,43 +406,47 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       // Clean the text
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
-      // Prefer Netlify serverless proxy for TTS to ensure consistent voice across devices
+      // ALWAYS use Netlify function for TTS - this ensures consistent voice across all devices
       const elevenLabsVoiceId = import.meta.env.VITE_ELEVENLABS_VOICE_ID || 'c1uwEpPUcC16tq1udqxk';
-      const ttsUrl = '/.netlify/functions/tts-elevenlabs';
+      const ttsUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:8888/.netlify/functions/tts-elevenlabs' // Netlify dev server
+        : '/.netlify/functions/tts-elevenlabs'; // Production
 
-      let response = await fetch(ttsUrl, {
+      console.log('🔊 TTS Request:', { 
+        url: ttsUrl, 
+        hostname: window.location.hostname,
+        textLength: cleanText.length,
+        voiceId: elevenLabsVoiceId 
+      });
+
+      const response = await fetch(ttsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: cleanText, voiceId: elevenLabsVoiceId })
       });
 
+      console.log('🔊 TTS Response:', { 
+        status: response.status, 
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+        ok: response.ok
+      });
+
       if (!response.ok) {
-        // As a dev-only fallback, attempt direct ElevenLabs when running locally
-        if (window.location.hostname === 'localhost') {
-          const elevenLabsApiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-          if (!elevenLabsApiKey) throw new Error(`TTS proxy failed: ${response.status}`);
-          const direct = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
-            method: 'POST',
-            headers: {
-              'Accept': 'audio/mpeg',
-              'Content-Type': 'application/json',
-              'xi-api-key': elevenLabsApiKey
-            },
-            body: JSON.stringify({
-              text: cleanText,
-              model_id: 'eleven_monolingual_v1',
-              voice_settings: { stability: 0.5, similarity_boost: 0.5 }
-            })
-          });
-          response = direct;
-          if (!response.ok) throw new Error(`ElevenLabs API error: ${response.status}`);
-        } else {
-          throw new Error(`TTS proxy error: ${response.status}`);
-        }
+        const errorText = await response.text();
+        console.error('🔊 TTS Error Response:', errorText);
+        throw new Error(`TTS proxy error: ${response.status} - ${errorText}`);
       }
 
-      // Get the audio blob
-      const audioBlob = await response.blob();
+      // Netlify returns base64-encoded audio, convert to blob
+      const responseText = await response.text();
+      const base64Audio = responseText;
+      const binaryString = atob(base64Audio);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       // Create and play audio

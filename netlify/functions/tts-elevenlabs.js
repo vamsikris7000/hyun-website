@@ -48,6 +48,12 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
+  console.log('🔊 TTS Function Called:', {
+    method: event.httpMethod,
+    path: event.path,
+    hasBody: !!event.body
+  });
+
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: corsHeaders, body: '' };
   }
@@ -61,8 +67,15 @@ exports.handler = async (event) => {
     const text = (body.text || '').toString();
     const requestedVoiceId = (body.voiceId || '').toString();
 
+    console.log('🔊 TTS Request Details:', {
+      textLength: text.length,
+      requestedVoiceId,
+      hasText: !!text.trim()
+    });
+
     if (!text.trim()) {
-      return { statusCode: 400, headers: corsHeaders, body: 'Missing text' };
+      console.error('🔊 TTS Error: Missing text');
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Missing text' }) };
     }
 
     // Prefer Netlify env; fall back to public VITE_ versions for convenience
@@ -70,11 +83,33 @@ exports.handler = async (event) => {
     const envVoiceId = process.env.ELEVENLABS_VOICE_ID || process.env.VITE_ELEVENLABS_VOICE_ID;
     const voiceId = requestedVoiceId || envVoiceId;
 
+    console.log('🔊 TTS Configuration:', {
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey ? apiKey.length : 0,
+      hasEnvVoiceId: !!envVoiceId,
+      finalVoiceId: voiceId,
+      availableEnvVars: Object.keys(process.env).filter(k => k.includes('ELEVEN') || k.includes('TTS'))
+    });
+
     if (!apiKey || !voiceId) {
-      return { statusCode: 500, headers: corsHeaders, body: 'TTS not configured on server' };
+      console.error('🔊 TTS Error: Missing configuration', {
+        hasApiKey: !!apiKey,
+        hasVoiceId: !!voiceId
+      });
+      return { 
+        statusCode: 500, 
+        headers: corsHeaders, 
+        body: JSON.stringify({ error: 'TTS not configured on server', hasApiKey: !!apiKey, hasVoiceId: !!voiceId })
+      };
     }
 
+    console.log('🔊 Calling ElevenLabs API...');
     const audioBuffer = await fetchElevenLabsAudio(voiceId, apiKey, text);
+    console.log('🔊 ElevenLabs Response:', {
+      audioSize: audioBuffer.length,
+      audioSizeKB: Math.round(audioBuffer.length / 1024)
+    });
+
     const base64Audio = audioBuffer.toString('base64');
 
     return {
@@ -84,7 +119,15 @@ exports.handler = async (event) => {
       body: base64Audio,
     };
   } catch (err) {
-    return { statusCode: 500, headers: corsHeaders, body: `Error: ${err.message}` };
+    console.error('🔊 TTS Function Error:', {
+      message: err.message,
+      stack: err.stack
+    });
+    return { 
+      statusCode: 500, 
+      headers: corsHeaders, 
+      body: JSON.stringify({ error: err.message, stack: err.stack })
+    };
   }
 };
 
