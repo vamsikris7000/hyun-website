@@ -101,6 +101,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const manuallyStoppedRef = useRef<boolean>(false);
+  const processedTTSLengthRef = useRef<number>(0); // Track how much text we've already sent to TTS
+  const audioQueueRef = useRef<HTMLAudioElement[]>([]); // Queue for audio chunks
+  const isPlayingAudioRef = useRef<boolean>(false); // Track if we're currently playing audio
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Current playing audio
 
   // Save chat to sessionStorage whenever it changes
   useEffect(() => {
@@ -390,7 +394,146 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   };
 
 
-  // Cartesia Text-to-speech function
+  // Function to process streaming text and send complete sentences to TTS
+  const processStreamingTextForTTS = async (fullText: string) => {
+    if (!isListening) return;
+    
+    const processedLength = processedTTSLengthRef.current;
+    const remainingText = fullText.slice(processedLength);
+    
+    if (!remainingText.trim()) return;
+    
+    // Find complete sentences (ending with . ! ? followed by space/newline, or just newline)
+    const completeSentences: string[] = [];
+    let sentenceBuffer = '';
+    
+    for (let i = 0; i < remainingText.length; i++) {
+      const char = remainingText[i];
+      sentenceBuffer += char;
+      
+      // Check if we've reached a sentence ending
+      // Sentence ends with: . ! ? followed by space, newline, or end of text
+      if (/[.!?]/.test(char)) {
+        // Check if next char is space, newline, or it's the last char
+        const nextChar = i < remainingText.length - 1 ? remainingText[i + 1] : '';
+        if (nextChar === ' ' || nextChar === '\n' || nextChar === '' || nextChar === '\r') {
+          completeSentences.push(sentenceBuffer.trim());
+          sentenceBuffer = '';
+          continue;
+        }
+      }
+      
+      // Also treat standalone newlines as sentence breaks (for paragraphs)
+      if (char === '\n' && sentenceBuffer.trim()) {
+        const trimmedBuffer = sentenceBuffer.trim();
+        if (trimmedBuffer.length > 0) {
+          completeSentences.push(trimmedBuffer);
+        }
+        sentenceBuffer = '';
+      }
+    }
+    
+    // Send all complete sentences to TTS
+    if (completeSentences.length > 0) {
+      const textToSpeak = completeSentences.join(' ').trim();
+      if (textToSpeak) {
+        processedTTSLengthRef.current += textToSpeak.length;
+        await speakTextChunk(textToSpeak);
+      }
+    }
+    
+    // Note: We don't send incomplete sentences here - they'll be sent when complete or at message_end
+  };
+  
+  // Function to speak a text chunk and queue it for playback
+  const speakTextChunk = async (text: string) => {
+    if (!text.trim() || !isListening) return;
+    
+    try {
+      setIsSpeaking(true);
+      const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
+      
+      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238';
+      const ttsUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:8888/.netlify/functions/tts-cartesia'
+        : '/.netlify/functions/tts-cartesia';
+
+      const response = await fetch(ttsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`TTS proxy error: ${response.status} - ${errorText}`);
+      }
+
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      
+      // Add to queue and play
+      audioQueueRef.current.push(audio);
+      playNextAudioChunk();
+      
+    } catch (error: any) {
+      console.error('Chunked TTS error:', error);
+      // Don't set isSpeaking to false on individual chunk errors
+    }
+  };
+  
+  // Function to play audio chunks sequentially
+  const playNextAudioChunk = async () => {
+    if (isPlayingAudioRef.current || audioQueueRef.current.length === 0) return;
+    
+    isPlayingAudioRef.current = true;
+    const audio = audioQueueRef.current.shift();
+    
+    if (!audio) {
+      isPlayingAudioRef.current = false;
+      return;
+    }
+    
+    currentAudioRef.current = audio;
+    
+    audio.onended = () => {
+      URL.revokeObjectURL(audio.src);
+      currentAudioRef.current = null;
+      isPlayingAudioRef.current = false;
+      
+      // Play next chunk if available
+      if (audioQueueRef.current.length > 0) {
+        playNextAudioChunk();
+      } else {
+        setIsSpeaking(false);
+      }
+    };
+    
+    audio.onerror = () => {
+      URL.revokeObjectURL(audio.src);
+      currentAudioRef.current = null;
+      isPlayingAudioRef.current = false;
+      setIsSpeaking(false);
+      
+      // Continue with next chunk if available
+      if (audioQueueRef.current.length > 0) {
+        playNextAudioChunk();
+      }
+    };
+    
+    try {
+      await audio.play();
+    } catch (error) {
+      console.error('Audio play error:', error);
+      isPlayingAudioRef.current = false;
+      setIsSpeaking(false);
+    }
+  };
+
+  // Cartesia Text-to-speech function (for full text - used for pre-built responses)
   const speakText = async (text: string) => {
     if (!text.trim()) return;
     
@@ -479,17 +622,38 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   // Stop speaking function
   const stopSpeaking = () => {
     // Stop any audio playback (Cartesia TTS is handled by Audio element)
-      setIsSpeaking(false);
+    setIsSpeaking(false);
     // Note: No browser TTS fallback, only Cartesia TTS is used
     
-    // Stop any playing audio elements
+    // Stop current playing audio
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      if (currentAudioRef.current.src.startsWith('blob:')) {
+        URL.revokeObjectURL(currentAudioRef.current.src);
+      }
+      currentAudioRef.current = null;
+    }
+    
+    // Clear audio queue
+    audioQueueRef.current.forEach(audio => {
+      audio.pause();
+      if (audio.src.startsWith('blob:')) {
+        URL.revokeObjectURL(audio.src);
+      }
+    });
+    audioQueueRef.current = [];
+    isPlayingAudioRef.current = false;
+    
+    // Stop any other playing audio elements (fallback)
     const audioElements = document.querySelectorAll('audio');
     audioElements.forEach(audio => {
       audio.pause();
       audio.currentTime = 0;
+      if (audio.src.startsWith('blob:')) {
+        URL.revokeObjectURL(audio.src);
+      }
     });
-    
-      setIsSpeaking(false);
   };
 
   // Speech-to-text functions
@@ -687,8 +851,13 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
     
-    // Stop any ongoing TTS before processing new request
+      // Stop any ongoing TTS before processing new request
     stopSpeaking();
+    
+    // Reset TTS processing counter for new message
+    processedTTSLengthRef.current = 0;
+    audioQueueRef.current = [];
+    isPlayingAudioRef.current = false;
     
     const userMsg = message;
     
@@ -805,15 +974,25 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               fullText += data.answer;
               setStreamedText(fullText);
               console.log('Streaming text updated:', fullText);
+              
+              // Process text chunks for streaming TTS
+              await processStreamingTextForTTS(fullText);
             }
             if (data.event === 'message_end') {
               console.log('Message ended, adding to chat:', fullText);
               
-                // Add full text as normal bot response
-                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-              speakText(fullText);
+              // Add full text as normal bot response
+              setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+              
+              // Process any remaining text that wasn't sent to TTS yet
+              const remainingText = fullText.slice(processedTTSLengthRef.current);
+              if (remainingText.trim()) {
+                await speakTextChunk(remainingText);
+              }
                 
-                setStreamedText('');
+              setStreamedText('');
+              // Reset processed length for next message
+              processedTTSLengthRef.current = 0;
             }
           } catch (err) {
             console.log('Error parsing line:', line, err);
