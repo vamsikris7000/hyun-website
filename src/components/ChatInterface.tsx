@@ -619,41 +619,75 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }
   };
 
-  // Stop speaking function
+  // Stop speaking function - forcefully stops ALL audio playback
   const stopSpeaking = () => {
-    // Stop any audio playback (Cartesia TTS is handled by Audio element)
-    setIsSpeaking(false);
-    // Note: No browser TTS fallback, only Cartesia TTS is used
+    console.log('🛑 Forcefully stopping all TTS audio...');
     
-    // Stop current playing audio
+    // Set state immediately
+      setIsSpeaking(false);
+    isPlayingAudioRef.current = false;
+    
+    // Stop and destroy current playing audio
     if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current.currentTime = 0;
-      if (currentAudioRef.current.src.startsWith('blob:')) {
-        URL.revokeObjectURL(currentAudioRef.current.src);
+      try {
+        currentAudioRef.current.pause();
+        currentAudioRef.current.currentTime = 0;
+        currentAudioRef.current.load(); // Reset audio element completely
+        // Remove all event listeners
+        currentAudioRef.current.onended = null;
+        currentAudioRef.current.onerror = null;
+        currentAudioRef.current.onpause = null;
+        if (currentAudioRef.current.src.startsWith('blob:')) {
+          URL.revokeObjectURL(currentAudioRef.current.src);
+        }
+      } catch (e) {
+        console.error('Error stopping current audio:', e);
       }
       currentAudioRef.current = null;
     }
     
-    // Clear audio queue
+    // Stop and destroy all queued audio
     audioQueueRef.current.forEach(audio => {
-      audio.pause();
-      if (audio.src.startsWith('blob:')) {
-        URL.revokeObjectURL(audio.src);
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.load(); // Reset audio element completely
+        // Remove all event listeners
+        audio.onended = null;
+        audio.onerror = null;
+        audio.onpause = null;
+        if (audio.src.startsWith('blob:')) {
+          URL.revokeObjectURL(audio.src);
+        }
+      } catch (e) {
+        console.error('Error stopping queued audio:', e);
       }
     });
     audioQueueRef.current = [];
-    isPlayingAudioRef.current = false;
     
-    // Stop any other playing audio elements (fallback)
-    const audioElements = document.querySelectorAll('audio');
-    audioElements.forEach(audio => {
-      audio.pause();
-      audio.currentTime = 0;
-      if (audio.src.startsWith('blob:')) {
-        URL.revokeObjectURL(audio.src);
-      }
-    });
+    // Stop ALL audio elements on the page (nuclear option)
+    try {
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.load(); // Force reload to stop
+          if (audio.src.startsWith('blob:')) {
+            URL.revokeObjectURL(audio.src);
+          }
+        } catch (e) {
+          // Ignore errors for individual audio elements
+        }
+      });
+    } catch (e) {
+      console.error('Error stopping all audio elements:', e);
+    }
+    
+    // Reset TTS processing counter
+    processedTTSLengthRef.current = 0;
+    
+    console.log('🛑 All TTS audio stopped');
   };
 
   // Speech-to-text functions
