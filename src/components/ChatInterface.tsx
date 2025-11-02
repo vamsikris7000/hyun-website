@@ -686,6 +686,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
+    
+    // Stop any ongoing TTS before processing new request
+    stopSpeaking();
+    
     const userMsg = message;
     
     // Check if user is introducing themselves (only if we don't know them yet)
@@ -1313,12 +1317,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                         <Mic className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />
                       </button>
                     </div>
-                    {/* Stop Speaking Button */}
-                    {isSpeaking && (
+                    {/* Stop Speaking / Clear Button */}
+                    {(isSpeaking || message.trim()) && (
                       <button
                         className="w-12 h-12 flex items-center justify-center bg-red-500 rounded-full hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                        onClick={stopSpeaking}
-                        aria-label="Stop speaking"
+                        onClick={() => {
+                          stopSpeaking();
+                          setMessage("");
+                        }}
+                        aria-label="Stop speaking and clear message"
                         type="button"
                       >
                         <X className="w-5 h-5 text-white" />
