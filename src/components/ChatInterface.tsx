@@ -1068,14 +1068,20 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       .replace(/\*\*([^*]+)\*\*/g, '$1')
       // Remove numbered lists (1. 2. 3. 4. 5. 6.)
       .replace(/\d+\.\s*/g, '')
-      // Remove colons at the end of sentences
-      .replace(/:\s*$/gm, '')
-      // Remove colons followed by newlines
-      .replace(/:\s*\n/g, '\n')
-      // Clean up multiple spaces
-      .replace(/\s+/g, ' ')
-      // Clean up multiple newlines
-      .replace(/\n\s*\n/g, '\n')
+      .trim();
+    
+    // Format list items and topics to appear on separate lines
+    // Pattern: " - Topic: description" -> convert to bullet list with line breaks
+    cleanedText = cleanedText
+      // Match patterns like " - Agentic AI: Enhancing decision-making and efficiency."
+      // Convert " - Topic: Description." to "\n\n• Topic: Description."
+      .replace(/\s*-\s+([A-Z][^:]+?):\s*([^-\n]+?)(?=\s*-\s+[A-Z]|\.\s*[A-Z]|$)/g, '\n\n• **$1:** $2')
+      // Also handle patterns like "Topic: description." when multiple topics appear in sequence
+      .replace(/([.!?])\s+([A-Z][A-Za-z\s&]+?):\s*([^.!?]+?)(?=\s*-\s+[A-Z]|\.\s+[A-Z][A-Za-z\s&]+?:|$)/g, '$1\n\n• **$2:** $3')
+      // Clean up multiple spaces (but preserve line breaks)
+      .replace(/[ \t]+/g, ' ')
+      // Clean up excessive newlines (max 2 consecutive)
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
     
     // Configure marked to disable math rendering to avoid KaTeX quirks mode warning
