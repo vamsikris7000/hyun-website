@@ -465,36 +465,27 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       
       await audio.play();
       
-    } catch (error) {
+    } catch (error: any) {
+      // In local dev, if Netlify Dev isn't running, skip TTS gracefully
+      if (window.location.hostname === 'localhost' && 
+          (error?.message?.includes('ERR_CONNECTION_REFUSED') || 
+           error?.message?.includes('Failed to fetch'))) {
+        console.warn('🔊 TTS skipped in local dev. Run "netlify dev" for TTS support.');
+        setIsSpeaking(false);
+        return;
+      }
+      
       console.error('Cartesia TTS error:', error);
       setIsSpeaking(false);
-      
-      // Fallback to browser TTS if Cartesia fails (only if mic is listening)
-      if ('speechSynthesis' in window && isListening) {
-        console.log('Falling back to browser TTS');
-        const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-        
-        // Try to use Google US English voice (index 181)
-        const voices = speechSynthesis.getVoices();
-        if (voices.length > 181) {
-          utterance.voice = voices[181];
-          console.log('Using Google US English voice');
-        }
-      
-      window.speechSynthesis.speak(utterance);
-      }
+      // No fallback - TTS only works through Cartesia
     }
   };
 
   // Stop speaking function
   const stopSpeaking = () => {
-    // Stop browser TTS
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    // Stop any audio playback (Cartesia TTS is handled by Audio element)
+      setIsSpeaking(false);
+    // Note: No browser TTS fallback, only Cartesia TTS is used
     
     // Stop any playing audio elements
     const audioElements = document.querySelectorAll('audio');
@@ -639,19 +630,6 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     }
   }, [isOpen]);
 
-  // Preload voices when component mounts
-  useEffect(() => {
-    if ('speechSynthesis' in window) {
-      // Force voice loading
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) {
-        // Create a temporary utterance to trigger voice loading
-        const tempUtterance = new SpeechSynthesisUtterance('');
-        window.speechSynthesis.speak(tempUtterance);
-        window.speechSynthesis.cancel();
-      }
-    }
-  }, []);
 
   useEffect(() => {
     // Prevent background scroll when chat is open
