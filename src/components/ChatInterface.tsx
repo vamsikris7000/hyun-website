@@ -438,15 +438,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         throw new Error(`TTS proxy error: ${response.status} - ${errorText}`);
       }
 
-      // Netlify returns base64-encoded audio, convert to blob
-      const responseText = await response.text();
-      const base64Audio = responseText;
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const audioBlob = new Blob([bytes], { type: 'audio/wav' });
+      // Netlify automatically decodes base64 when isBase64Encoded=true
+      // So we get binary audio data directly
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       // Create and play audio
