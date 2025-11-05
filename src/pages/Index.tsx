@@ -342,7 +342,7 @@ const Index = () => {
                   className="h-16 mb-4 object-contain mix-blend-darken"
                 />
                 <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
-                  Intelligent VOIP AI &amp; Workflow Automation
+                  we architect enterprise-grade agentic systems that handle complex business logic and scale across global operations.
                 </p>
               </div>
             </div>
