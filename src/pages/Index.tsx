@@ -82,19 +82,6 @@ const Index = () => {
                 <span className="text-xl">»</span>
                 GET STARTED
               </Button>
-
-              <button 
-                className="inline-flex flex-col items-start gap-0.5 relative flex-[0_0_auto] bg-transparent border-none cursor-pointer"
-                onClick={() => window.open('https://outlook.office.com/bookwithme/user/719f78311287410ab589cb1be4871a00@hyunandassociatesllc.com?anonymous&ismsaljsauthenabled&ep=bwmEmailSignature', '_blank')}
-              >
-                <div className="flex items-center gap-1 relative self-stretch w-full flex-[0_0_auto]">
-                  <span className="relative w-3.5 h-6 text-[#0c202b] text-xl">▶</span>
-                  <div className="relative w-fit font-semibold text-[#0c202b] text-[15px] tracking-[0] leading-[normal] whitespace-nowrap">
-                    VIEW DEMO
-                  </div>
-                </div>
-                <div className="relative self-stretch w-full h-px mb-[-0.50px] bg-[#0c202b] opacity-30" />
-              </button>
             </div>
           </div>
         </section>
