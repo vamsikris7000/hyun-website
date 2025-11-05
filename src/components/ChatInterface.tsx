@@ -183,20 +183,35 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   const saveUserInfo = (name: string) => {
     const userIdentifier = getUserIdentifier();
-    const userData = {
-      name: name,
-      firstVisit: new Date().toISOString(),
-      lastVisit: new Date().toISOString(),
-      visitCount: 1,
-      identifier: userIdentifier
-    };
-    
-    // Check if user exists
     const existingUser = localStorage.getItem(`hyun_user_${userIdentifier}`);
+    
+    let userData;
     if (existingUser) {
+      // User exists - update name and last visit, preserve visit count and first visit
       const existingData = JSON.parse(existingUser);
-      userData.visitCount = existingData.visitCount + 1;
-      userData.firstVisit = existingData.firstVisit;
+      const isNameChange = existingData.name && existingData.name.toLowerCase() !== name.toLowerCase();
+      
+      userData = {
+        name: name, // Always update to new name
+        firstVisit: existingData.firstVisit, // Preserve first visit
+        lastVisit: new Date().toISOString(), // Update last visit
+        visitCount: existingData.visitCount, // Preserve visit count
+        identifier: userIdentifier
+      };
+      
+      // If name changed, log it
+      if (isNameChange) {
+        console.log(`🔄 Name updated from "${existingData.name}" to "${name}"`);
+      }
+    } else {
+      // New user - create new entry
+      userData = {
+        name: name,
+        firstVisit: new Date().toISOString(),
+        lastVisit: new Date().toISOString(),
+        visitCount: 1,
+        identifier: userIdentifier
+      };
     }
     
     localStorage.setItem(`hyun_user_${userIdentifier}`, JSON.stringify(userData));
@@ -226,17 +241,27 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     setShowNameResponse(true);
     setShowWelcome(false);
     
+    // Check if this is a name update
+    const userIdentifier = getUserIdentifier();
+    const existingUser = localStorage.getItem(`hyun_user_${userIdentifier}`);
+    const isNameUpdate = existingUser && userInfo && userInfo.name && userInfo.name.toLowerCase() !== name.toLowerCase();
+    
     // Add user message to chat
     setChat(prev => [...prev, { role: 'user', text: `My name is ${name}` }]);
     
-    // Add pre-built response
-    const response = `It's a pleasure to meet with you ${name}. Would you like to learn more about our company, our services, schedule an appointment, or would you like to explore the website?`;
+    // Add pre-built response - different message for name updates
+    let response;
+    if (isNameUpdate) {
+      response = `Got it, ${name}! I've updated your name. Would you like to learn more about our company, our services, schedule an appointment, or would you like to explore the website?`;
+    } else {
+      response = `It's a pleasure to meet with you ${name}. Would you like to learn more about our company, our services, schedule an appointment, or would you like to explore the website?`;
+    }
     setChat(prev => [...prev, { role: 'bot', text: response }]);
     
     // Speak the response
     speakText(response);
     
-    // Save user info
+    // Save user info (will update name if user exists)
     saveUserInfo(name);
     
     // Scroll to bottom after adding messages
@@ -665,7 +690,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     ttsStoppedRef.current = true;
     
     // Set state immediately
-    setIsSpeaking(false);
+      setIsSpeaking(false);
     isPlayingAudioRef.current = false;
     
     // Stop and destroy current playing audio
@@ -937,16 +962,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     
     const userMsg = message;
     
-    // Check if user is introducing themselves (only if we don't know them yet)
-    if (!userInfo && !showWelcome) {
-      const namePattern = /(?:my name is|i'm|i am|call me|i go by)\s+([a-zA-Z]+)/i;
-      const nameMatch = userMsg.match(namePattern);
-      if (nameMatch) {
-        const name = nameMatch[1];
-        handleNameIntroduction(name);
-        setMessage("");
-        return; // Don't proceed with normal chat flow
-      }
+    // Check if user is introducing themselves or updating their name
+    const namePattern = /(?:my name is|i'm|i am|call me|i go by|my name's)\s+([a-zA-Z]+)/i;
+    const nameMatch = userMsg.match(namePattern);
+    if (nameMatch) {
+      const name = nameMatch[1];
+      // Always allow name updates, even for existing users
+      handleNameIntroduction(name);
+      setMessage("");
+      return; // Don't proceed with normal chat flow
     }
 
     // Check for pre-built responses first (works for both known and unknown users)
