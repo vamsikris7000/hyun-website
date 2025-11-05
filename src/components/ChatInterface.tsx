@@ -105,6 +105,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const audioQueueRef = useRef<HTMLAudioElement[]>([]); // Queue for audio chunks
   const isPlayingAudioRef = useRef<boolean>(false); // Track if we're currently playing audio
   const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Current playing audio
+  const ttsStoppedRef = useRef<boolean>(false); // Track if TTS was manually stopped
 
   // Save chat to sessionStorage whenever it changes
   useEffect(() => {
@@ -396,7 +397,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
 
   // Function to process streaming text and send complete sentences to TTS
   const processStreamingTextForTTS = async (fullText: string) => {
-    if (!isListening) return;
+    if (!isListening || ttsStoppedRef.current) return;
     
     const processedLength = processedTTSLengthRef.current;
     const remainingText = fullText.slice(processedLength);
@@ -461,6 +462,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const speakTextChunk = async (text: string) => {
     if (!text.trim() || !isListening) return;
     
+    // Check if TTS was manually stopped - if so, don't process this chunk
+    if (ttsStoppedRef.current) {
+      console.log('🛑 TTS stopped - ignoring chunk');
+      return;
+    }
+    
     try {
       setIsSpeaking(true);
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
@@ -481,11 +488,24 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         throw new Error(`TTS proxy error: ${response.status} - ${errorText}`);
       }
 
+      // Check again if TTS was stopped during fetch
+      if (ttsStoppedRef.current) {
+        console.log('🛑 TTS stopped during fetch - discarding audio');
+        return;
+      }
+      
       const audioBuffer = await response.arrayBuffer();
       const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
+      
+      // Check one more time before adding to queue
+      if (ttsStoppedRef.current) {
+        console.log('🛑 TTS stopped before queueing - discarding audio');
+        URL.revokeObjectURL(audioUrl);
+        return;
+      }
       
       // Add to queue and play
       audioQueueRef.current.push(audio);
@@ -499,6 +519,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   
   // Function to play audio chunks sequentially
   const playNextAudioChunk = async () => {
+    // Check if TTS was manually stopped
+    if (ttsStoppedRef.current) {
+      console.log('🛑 TTS stopped - not playing next chunk');
+      return;
+    }
+    
     if (isPlayingAudioRef.current || audioQueueRef.current.length === 0) return;
     
     isPlayingAudioRef.current = true;
@@ -516,8 +542,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       currentAudioRef.current = null;
       isPlayingAudioRef.current = false;
       
-      // Play next chunk if available
-      if (audioQueueRef.current.length > 0) {
+      // Only play next chunk if TTS wasn't stopped
+      if (!ttsStoppedRef.current && audioQueueRef.current.length > 0) {
         playNextAudioChunk();
       } else {
         setIsSpeaking(false);
@@ -530,8 +556,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       isPlayingAudioRef.current = false;
       setIsSpeaking(false);
       
-      // Continue with next chunk if available
-      if (audioQueueRef.current.length > 0) {
+      // Only continue with next chunk if TTS wasn't stopped
+      if (!ttsStoppedRef.current && audioQueueRef.current.length > 0) {
         playNextAudioChunk();
       }
     };
@@ -635,8 +661,11 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const stopSpeaking = () => {
     console.log('🛑 Forcefully stopping all TTS audio...');
     
+    // Set stop flag to prevent new chunks from being processed
+    ttsStoppedRef.current = true;
+    
     // Set state immediately
-      setIsSpeaking(false);
+    setIsSpeaking(false);
     isPlayingAudioRef.current = false;
     
     // Stop and destroy current playing audio
@@ -904,6 +933,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     processedTTSLengthRef.current = 0;
     audioQueueRef.current = [];
     isPlayingAudioRef.current = false;
+    ttsStoppedRef.current = false; // Reset stop flag for new message
     
     const userMsg = message;
     
@@ -1039,6 +1069,8 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               setStreamedText('');
               // Reset processed length for next message
               processedTTSLengthRef.current = 0;
+              // Reset stop flag for next message
+              ttsStoppedRef.current = false;
             }
           } catch (err) {
             console.log('Error parsing line:', line, err);
