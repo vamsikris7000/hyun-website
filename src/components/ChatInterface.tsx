@@ -405,7 +405,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     
     // Find complete sentences (ending with . ! ? followed by space/newline, or just newline)
     const completeSentences: string[] = [];
+    const sentenceEndPositions: number[] = []; // Track where each sentence ends in remainingText
     let sentenceBuffer = '';
+    let sentenceStartIndex = 0;
     
     for (let i = 0; i < remainingText.length; i++) {
       const char = remainingText[i];
@@ -417,8 +419,14 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         // Check if next char is space, newline, or it's the last char
         const nextChar = i < remainingText.length - 1 ? remainingText[i + 1] : '';
         if (nextChar === ' ' || nextChar === '\n' || nextChar === '' || nextChar === '\r') {
-          completeSentences.push(sentenceBuffer.trim());
+          const trimmedSentence = sentenceBuffer.trim();
+          if (trimmedSentence) {
+            completeSentences.push(trimmedSentence);
+            // Track the actual end position (i + 1 to include the ending char)
+            sentenceEndPositions.push(i + 1);
+          }
           sentenceBuffer = '';
+          sentenceStartIndex = i + 1;
           continue;
         }
       }
@@ -428,8 +436,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         const trimmedBuffer = sentenceBuffer.trim();
         if (trimmedBuffer.length > 0) {
           completeSentences.push(trimmedBuffer);
+          sentenceEndPositions.push(i + 1);
         }
         sentenceBuffer = '';
+        sentenceStartIndex = i + 1;
       }
     }
     
@@ -437,7 +447,9 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     if (completeSentences.length > 0) {
       const textToSpeak = completeSentences.join(' ').trim();
       if (textToSpeak) {
-        processedTTSLengthRef.current += textToSpeak.length;
+        // Use the last sentence end position to know how much we've processed
+        const lastProcessedIndex = sentenceEndPositions[sentenceEndPositions.length - 1];
+        processedTTSLengthRef.current += lastProcessedIndex;
         await speakTextChunk(textToSpeak);
       }
     }
