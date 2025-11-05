@@ -453,7 +453,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       setIsSpeaking(true);
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
-      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238';
+      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc';
       const ttsUrl = window.location.hostname === 'localhost' 
         ? 'http://localhost:8888/.netlify/functions/tts-cartesia'
         : '/.netlify/functions/tts-cartesia';
@@ -550,7 +550,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
       
       // ALWAYS use Netlify function for TTS - this ensures consistent voice across all devices
-      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '694f9389-aac1-45b6-b726-9d9369183238';
+      const cartesiaVoiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc';
       const ttsUrl = window.location.hostname === 'localhost' 
         ? 'http://localhost:8888/.netlify/functions/tts-cartesia' // Netlify dev server
         : '/.netlify/functions/tts-cartesia'; // Production
