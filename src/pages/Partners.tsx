@@ -34,21 +34,52 @@ const Partners = () => {
               Partners
             </h1>
 
-            {/* Partners Grid */}
-            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-16">
-              {/* Partner 1 - Spectrum AI */}
+            {/* Partners Content */}
+            <div className="w-full max-w-[1000px]">
+              {/* Partner 1 - Xpectrum AI */}
               <div className="flex flex-col">
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-4 mb-8">
                   <img
                     src={spectrumAiLogo}
-                    alt="Spectrum AI"
+                    alt="Xpectrum AI"
                     className="h-12 object-contain mix-blend-darken"
                   />
                   <div className="flex-1 h-0.5 bg-gradient-to-r from-[#c0e9ef] to-[#d0a4ff]"></div>
                 </div>
-                <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-6">
-                  Xpectrum AI builds a 24/7 Digital Workforce that engages customers across phone, SMS, email, chat, and more — in a more human way. We ensure you never lose leads due to limited working hours and help you generate more revenue. Your growth is our mission.
-                </p>
+
+                {/* About Xpectrum AI Section */}
+                <div className="mb-8">
+                  <h2 className="font-semibold text-black text-2xl md:text-3xl tracking-[0] leading-tight mb-4 font-serif">
+                    About Xpectrum AI
+                  </h2>
+                  <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px] mb-4">
+                    Xpectrum AI was founded with a bold vision: to tackle the increasingly complex and dynamic challenges that modern organizations face. As workplace demands escalate—driven by a surge in meetings, administrative tasks, and data overload—teams are stretched thin, and productivity suffers. Xpectrum AI addresses this head-on with Agentic AI solutions designed to act as intelligent virtual assistants that streamline operations and elevate both employee and customer experiences.
+                  </p>
+                  <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
+                    Whether it's locating critical information across systems, automating sales processes, enhancing customer service, or sending personalized messages like a simple "Happy Birthday" to clients, Xpectrum's AI agents are built to handle it all—seamlessly and intelligently.
+                  </p>
+                </div>
+
+                {/* The Team & Technology Section */}
+                <div className="mb-8">
+                  <h2 className="font-semibold text-black text-2xl md:text-3xl tracking-[0] leading-tight mb-4 font-serif">
+                    The Team & Technology
+                  </h2>
+                  <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
+                    With over five years of hands-on experience in the AI domain, co-founder Subhankar Ghosh has pioneered practical frameworks for deploying AI solutions that deliver measurable impact. Partnering with Jiayun Chen—a former lead engineer at Google with more than 15 years of experience—they've developed a suite of high-performance AI agents capable of executing tasks with precision and reliability.
+                  </p>
+                </div>
+
+                {/* Tailored Solutions Section */}
+                <div className="mb-8">
+                  <h2 className="font-semibold text-black text-2xl md:text-3xl tracking-[0] leading-tight mb-4 font-serif">
+                    Tailored Solutions
+                  </h2>
+                  <p className="font-normal text-black text-lg tracking-[0] leading-[28.8px]">
+                    Every solution they deliver is custom-built to align with your organization's unique workflows and goals. The agents undergo rigorous training and testing to ensure they perform with exceptional accuracy from day one—so you can implement with confidence and scale with ease.
+                  </p>
+                </div>
+
                 <button 
                   onClick={() => window.open('https://xpectrum-ai.com/', '_blank')}
                   className="px-7 py-[15px] border border-solid border-[#0c202b] inline-flex items-center justify-center gap-2.5 rounded font-semibold text-[#0c202b] text-[15px] hover:bg-[#0c202b]/5 w-fit cursor-pointer transition-colors relative z-10"
@@ -58,7 +89,6 @@ const Partners = () => {
                   VISIT WEBSITE
                 </button>
               </div>
-
             </div>
           </div>
         </section>
