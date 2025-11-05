@@ -6,7 +6,7 @@ echo "Setting up environment variables for Hyun and Associates website..."
 # Create .env file with the required variables
 cat > .env << EOF
 # Cartesia TTS Configuration
-VITE_CARTESIA_API_KEY=sk_car_yymzdoQsN8crzzbRg7bK62
+VITE_CARTESIA_API_KEY=sk_car_uDYkY7f1JYTE5eB3AKqfEV
 VITE_CARTESIA_VOICE_ID=9626c31c-bec5-4cca-baa8-f8ba9e84c8bc
 
 # Voice API Configuration
@@ -24,7 +24,7 @@ EOF
 echo "✅ .env file created successfully!"
 echo ""
 echo "Environment variables configured:"
-echo "- VITE_CARTESIA_API_KEY: sk_car_yymzdoQsN8crzzbRg7bK62"
+echo "- VITE_CARTESIA_API_KEY: sk_car_uDYkY7f1JYTE5eB3AKqfEV"
 echo "- VITE_CARTESIA_VOICE_ID: 9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"
 echo "- VOICE_API_BASE_URL: https://d3sgivh2kmd3c8.cloudfront.net"
 echo "- VOICE_API_KEY: xpectrum-ai@123"

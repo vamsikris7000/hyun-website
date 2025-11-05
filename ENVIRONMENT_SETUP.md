@@ -6,7 +6,7 @@ Create a `.env` file in the project root directory with the following variables:
 
 ```env
 # Cartesia TTS Configuration
-VITE_CARTESIA_API_KEY=sk_car_yymzdoQsN8crzzbRg7bK62
+VITE_CARTESIA_API_KEY=sk_car_uDYkY7f1JYTE5eB3AKqfEV
 VITE_CARTESIA_VOICE_ID=9626c31c-bec5-4cca-baa8-f8ba9e84c8bc
 
 # Voice API Configuration

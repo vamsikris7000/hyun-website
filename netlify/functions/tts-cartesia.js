@@ -96,7 +96,7 @@ exports.handler = async (event) => {
     const envVoiceId = process.env.CARTESIA_VOICE_ID || process.env.VITE_CARTESIA_VOICE_ID;
     
     // Fallback to known working values if env vars not set or invalid
-    const fallbackApiKey = 'sk_car_yymzdoQsN8crzzbRg7bK62';
+    const fallbackApiKey = 'sk_car_uDYkY7f1JYTE5eB3AKqfEV';
     const fallbackVoiceId = '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc';
     
     const apiKey = envApiKey || fallbackApiKey;
@@ -142,7 +142,7 @@ exports.handler = async (event) => {
           error: error.message.substring(0, 100),
           voiceId: voiceId
         });
-        const fallbackApiKey = 'sk_car_yymzdoQsN8crzzbRg7bK62';
+        const fallbackApiKey = 'sk_car_uDYkY7f1JYTE5eB3AKqfEV';
         const fallbackVoiceId = '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc';
         try {
           audioBuffer = await fetchCartesiaAudio(fallbackVoiceId, fallbackApiKey, text);
