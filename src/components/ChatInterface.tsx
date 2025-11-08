@@ -360,27 +360,44 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const service = servicesData.find(s => s.id === serviceId);
     if (!service) return;
 
-    // Toggle flip state for the card
-    setFlippedCards(prev => {
-      const newFlipped = new Set(prev);
-      if (newFlipped.has(serviceId)) {
-        newFlipped.delete(serviceId);
-      } else {
-        newFlipped.add(serviceId);
-      }
-      return newFlipped;
-    });
+    // Stop any current TTS before playing new card information
+    stopSpeaking();
     
-    // Update selected services
-    const newSelectedServices = new Set(selectedServices);
-    newSelectedServices.add(serviceId);
-    setSelectedServices(newSelectedServices);
+    // Wait a brief moment to ensure cleanup is complete
+    setTimeout(() => {
+      // Reset TTS state for new message
+      processedTTSLengthRef.current = 0;
+      audioQueueRef.current = [];
+      isPlayingAudioRef.current = false;
+      activeTTSControllersRef.current = [];
+      ttsStoppedRef.current = false;
+      
+      // Toggle flip state for the card
+      setFlippedCards(prev => {
+        const newFlipped = new Set(prev);
+        if (newFlipped.has(serviceId)) {
+          newFlipped.delete(serviceId);
+        } else {
+          newFlipped.add(serviceId);
+        }
+        return newFlipped;
+      });
+      
+      // Update selected services
+      const newSelectedServices = new Set(selectedServices);
+      newSelectedServices.add(serviceId);
+      setSelectedServices(newSelectedServices);
 
-    // Update service counts
-    setServiceCounts(prev => ({
-      ...prev,
-      [serviceId]: (prev[serviceId] || 0) + 1
-    }));
+      // Update service counts
+      setServiceCounts(prev => ({
+        ...prev,
+        [serviceId]: (prev[serviceId] || 0) + 1
+      }));
+      
+      // Speak the card's information
+      const cardInfo = `${service.title}. ${service.description}`;
+      speakText(cardInfo);
+    }, 50);
   };
 
   const handleServiceFollowUp = () => {
