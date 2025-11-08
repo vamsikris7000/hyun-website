@@ -107,6 +107,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Current playing audio
   const ttsStoppedRef = useRef<boolean>(false); // Track if TTS was manually stopped
   const activeTTSControllersRef = useRef<AbortController[]>([]); // Track active TTS fetch requests
+  const cardClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Track card click timeout
 
   // Save chat to sessionStorage whenever it changes
   useEffect(() => {
@@ -360,41 +361,47 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     const service = servicesData.find(s => s.id === serviceId);
     if (!service) return;
 
+    // Clear any pending card click timeout (in case user clicks multiple cards quickly)
+    if (cardClickTimeoutRef.current) {
+      clearTimeout(cardClickTimeoutRef.current);
+      cardClickTimeoutRef.current = null;
+    }
+
     // Stop any current TTS before playing new card information
     stopSpeaking();
     
-    // Wait a brief moment to ensure cleanup is complete
-    setTimeout(() => {
-      // Reset TTS state for new message
-      processedTTSLengthRef.current = 0;
-      audioQueueRef.current = [];
-      isPlayingAudioRef.current = false;
-      activeTTSControllersRef.current = [];
-      ttsStoppedRef.current = false;
-      
-      // Toggle flip state for the card
-      setFlippedCards(prev => {
-        const newFlipped = new Set(prev);
-        if (newFlipped.has(serviceId)) {
-          newFlipped.delete(serviceId);
-        } else {
-          newFlipped.add(serviceId);
-        }
-        return newFlipped;
-      });
-      
-      // Update selected services
-      const newSelectedServices = new Set(selectedServices);
-      newSelectedServices.add(serviceId);
-      setSelectedServices(newSelectedServices);
+    // Reset TTS state immediately (synchronously)
+    processedTTSLengthRef.current = 0;
+    audioQueueRef.current = [];
+    isPlayingAudioRef.current = false;
+    activeTTSControllersRef.current = [];
+    ttsStoppedRef.current = false;
+    
+    // Toggle flip state for the card
+    setFlippedCards(prev => {
+      const newFlipped = new Set(prev);
+      if (newFlipped.has(serviceId)) {
+        newFlipped.delete(serviceId);
+      } else {
+        newFlipped.add(serviceId);
+      }
+      return newFlipped;
+    });
+    
+    // Update selected services
+    const newSelectedServices = new Set(selectedServices);
+    newSelectedServices.add(serviceId);
+    setSelectedServices(newSelectedServices);
 
-      // Update service counts
-      setServiceCounts(prev => ({
-        ...prev,
-        [serviceId]: (prev[serviceId] || 0) + 1
-      }));
-      
-      // Speak the card's information
+    // Update service counts
+    setServiceCounts(prev => ({
+      ...prev,
+      [serviceId]: (prev[serviceId] || 0) + 1
+    }));
+    
+    // Wait a brief moment to ensure cleanup is complete, then speak the card's information
+    cardClickTimeoutRef.current = setTimeout(() => {
+      cardClickTimeoutRef.current = null;
       const cardInfo = `${service.title}. ${service.description}`;
       speakText(cardInfo);
     }, 50);
@@ -780,7 +787,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     activeTTSControllersRef.current = [];
     
     // Set state immediately
-    setIsSpeaking(false);
+      setIsSpeaking(false);
     isPlayingAudioRef.current = false;
     
     // Stop and destroy current playing audio
