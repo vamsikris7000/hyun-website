@@ -106,6 +106,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const isPlayingAudioRef = useRef<boolean>(false); // Track if we're currently playing audio
   const currentAudioRef = useRef<HTMLAudioElement | null>(null); // Current playing audio
   const ttsStoppedRef = useRef<boolean>(false); // Track if TTS was manually stopped
+  const activeTTSControllersRef = useRef<AbortController[]>([]); // Track active TTS fetch requests
 
   // Save chat to sessionStorage whenever it changes
   useEffect(() => {
@@ -493,6 +494,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       return;
     }
     
+    // Create AbortController for this TTS request
+    const controller = new AbortController();
+    activeTTSControllersRef.current.push(controller);
+    
     try {
       setIsSpeaking(true);
       const cleanText = text.replace(/<[^>]*>/g, '').replace(/[^\w\s.,!?]/g, '');
@@ -505,8 +510,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const response = await fetch(ttsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId })
+        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId }),
+        signal: controller.signal
       });
+
+      // Remove controller from active list after fetch completes
+      activeTTSControllersRef.current = activeTTSControllersRef.current.filter(c => c !== controller);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -537,6 +546,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       playNextAudioChunk();
       
     } catch (error: any) {
+      // Remove controller from active list on error
+      activeTTSControllersRef.current = activeTTSControllersRef.current.filter(c => c !== controller);
+      
+      // Ignore abort errors (they're expected when cancelling)
+      if (error.name === 'AbortError') {
+        console.log('🛑 TTS request cancelled');
+        return;
+      }
+      
       console.error('Chunked TTS error:', error);
       // Don't set isSpeaking to false on individual chunk errors
     }
@@ -606,6 +624,16 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       return;
     }
     
+    // Check if TTS was stopped
+    if (ttsStoppedRef.current) {
+      console.log('🛑 TTS stopped - ignoring speakText');
+      return;
+    }
+    
+    // Create AbortController for this TTS request
+    const controller = new AbortController();
+    activeTTSControllersRef.current.push(controller);
+    
     try {
       setIsSpeaking(true);
       
@@ -628,8 +656,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const response = await fetch(ttsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId })
+        body: JSON.stringify({ text: cleanText, voiceId: cartesiaVoiceId }),
+        signal: controller.signal
       });
+
+      // Remove controller from active list after fetch completes
+      activeTTSControllersRef.current = activeTTSControllersRef.current.filter(c => c !== controller);
+
+      // Check again if TTS was stopped during fetch
+      if (ttsStoppedRef.current) {
+        console.log('🛑 TTS stopped during fetch - discarding audio');
+        return;
+      }
 
       console.log('🔊 TTS Response:', { 
         status: response.status, 
@@ -650,23 +688,48 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
+      // Check one more time before playing
+      if (ttsStoppedRef.current) {
+        console.log('🛑 TTS stopped before playing - discarding audio');
+        URL.revokeObjectURL(audioUrl);
+        return;
+      }
+      
       // Create and play audio
       const audio = new Audio(audioUrl);
+      
+      // Store reference so we can stop it if needed
+      currentAudioRef.current = audio;
       
       audio.onended = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl); // Clean up
+        if (currentAudioRef.current === audio) {
+          currentAudioRef.current = null;
+        }
       };
       
       audio.onerror = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl); // Clean up
         console.error('Audio playback error');
+        if (currentAudioRef.current === audio) {
+          currentAudioRef.current = null;
+        }
       };
       
       await audio.play();
       
     } catch (error: any) {
+      // Remove controller from active list on error
+      activeTTSControllersRef.current = activeTTSControllersRef.current.filter(c => c !== controller);
+      
+      // Ignore abort errors (they're expected when cancelling)
+      if (error.name === 'AbortError') {
+        console.log('🛑 TTS request cancelled');
+        return;
+      }
+      
       // In local dev, if Netlify Dev isn't running, skip TTS gracefully
       if (window.location.hostname === 'localhost' && 
           (error?.message?.includes('ERR_CONNECTION_REFUSED') || 
@@ -689,8 +752,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
     // Set stop flag to prevent new chunks from being processed
     ttsStoppedRef.current = true;
     
+    // Cancel all active TTS fetch requests
+    activeTTSControllersRef.current.forEach(controller => {
+      try {
+        controller.abort();
+      } catch (e) {
+        console.error('Error aborting TTS request:', e);
+      }
+    });
+    activeTTSControllersRef.current = [];
+    
     // Set state immediately
-      setIsSpeaking(false);
+    setIsSpeaking(false);
     isPlayingAudioRef.current = false;
     
     // Stop and destroy current playing audio
@@ -951,13 +1024,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
   const handleSend = async () => {
     if (!message.trim() || message.length > 2000) return;
     
-      // Stop any ongoing TTS before processing new request
+    // Stop any ongoing TTS before processing new request
+    // This will cancel all active TTS requests, stop playing audio, and clear the queue
     stopSpeaking();
+    
+    // Wait a brief moment to ensure all cleanup is complete
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Reset TTS processing counter for new message
     processedTTSLengthRef.current = 0;
     audioQueueRef.current = [];
     isPlayingAudioRef.current = false;
+    activeTTSControllersRef.current = []; // Clear any remaining controllers
     ttsStoppedRef.current = false; // Reset stop flag for new message
     
     const userMsg = message;
