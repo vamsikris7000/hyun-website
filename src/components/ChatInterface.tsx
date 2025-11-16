@@ -1154,6 +1154,7 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       let fullText = '';
       let buffer = '';
       let hasReceivedData = false;
+      let messageAddedToChat = false; // Track if message has been added to prevent duplicates
       
       while (true) {
         const { value, done } = await reader.read();
@@ -1177,9 +1178,10 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
                 fullText = jsonData.data.answer;
               }
               
-              if (fullText) {
+              if (fullText && !messageAddedToChat) {
                 setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
                 speakText(fullText);
+                messageAddedToChat = true;
               }
             } catch (err) {
               console.log('Error parsing final buffer:', err);
@@ -1241,13 +1243,15 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             }
             
             // Handle message end events
-            if (data.event === 'message_end' || data.event === 'message' || (data.message && !data.event && fullText.trim())) {
-              // If we have accumulated text, finalize it
-              if (fullText.trim()) {
+            // Only trigger on explicit end events, not on every message field
+            if (data.event === 'message_end') {
+              // If we have accumulated text, finalize it (only if not already added)
+              if (fullText.trim() && !messageAddedToChat) {
                 console.log('Message ended, adding to chat:', fullText);
                 
                 // Add full text as normal bot response
                 setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                messageAddedToChat = true;
                 
                 // Process any remaining text that wasn't sent to TTS yet
                 const remainingText = fullText.slice(processedTTSLengthRef.current);
@@ -1268,9 +1272,12 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
         }
       }
       
-      // Finalize any remaining text when stream ends
-      if (fullText.trim() && !chat.some(msg => msg.role === 'bot' && msg.text === fullText)) {
+      // Finalize any remaining text when stream ends (only if not already added)
+      if (fullText.trim() && !messageAddedToChat) {
+        console.log('Stream ended, adding final message to chat:', fullText);
         setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+        messageAddedToChat = true;
+        
         const remainingText = fullText.slice(processedTTSLengthRef.current);
         if (remainingText.trim()) {
           await speakTextChunk(remainingText);
