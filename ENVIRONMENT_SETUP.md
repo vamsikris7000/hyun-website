@@ -16,9 +16,9 @@ VOICE_API_KEY=xpectrum-ai@123
 # Frontend Voice API (Vite requires VITE_ prefix)
 VITE_VOICE_API_KEY=xpectrum-ai@123
 
-# Dify Chatbot Configuration
-DIFY_API_BASE_URL=https://demos.xpectrum-ai.com/v1
-DIFY_API_KEY=app-qXbGcG3BX32wyKAIQP9Vlnol
+# Xpectrum AI Chatbot Configuration
+XPECTRUM_API_BASE_URL=https://xpectrum-main-app-prod-cocfr.ondigitalocean.app/api/v1
+XPECTRUM_API_KEY=app-WxAWGosGXvslDCmQdLg2wlHz
 ```
 
 ## File Structure
@@ -27,7 +27,7 @@ DIFY_API_KEY=app-qXbGcG3BX32wyKAIQP9Vlnol
 /Users/vamsikrishna/Desktop/HYUN/
 ├── .env                    # Create this file with the variables above
 ├── backend/
-│   ├── index.js           # Uses DIFY_API_BASE_URL and DIFY_API_KEY
+│   ├── index.js           # Uses XPECTRUM_API_BASE_URL and XPECTRUM_API_KEY
 │   └── voice.js           # Uses VOICE_API_BASE_URL and VOICE_API_KEY
 └── src/
     └── components/
@@ -51,8 +51,8 @@ DIFY_API_KEY=app-qXbGcG3BX32wyKAIQP9Vlnol
    echo "VOICE_API_BASE_URL=https://d3sgivh2kmd3c8.cloudfront.net" >> .env
    echo "VOICE_API_KEY=xpectrum-ai@123" >> .env
    echo "VITE_VOICE_API_KEY=xpectrum-ai@123" >> .env
-   echo "DIFY_API_BASE_URL=https://demos.xpectrum-ai.com/v1" >> .env
-   echo "DIFY_API_KEY=app-qXbGcG3BX32wyKAIQP9Vlnol" >> .env
+   echo "XPECTRUM_API_BASE_URL=https://xpectrum-main-app-prod-cocfr.ondigitalocean.app/api/v1" >> .env
+   echo "XPECTRUM_API_KEY=app-WxAWGosGXvslDCmQdLg2wlHz" >> .env
    ```
 
 ## Verification

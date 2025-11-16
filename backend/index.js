@@ -8,8 +8,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_URL = process.env.DIFY_API_BASE_URL ? `${process.env.DIFY_API_BASE_URL}/chat-messages` : 'https://demos.xpectrum-ai.com/v1/chat-messages';
-const API_KEY = process.env.DIFY_API_KEY || 'app-qXbGcG3BX32wyKAIQP9Vlnol';
+const API_URL = process.env.XPECTRUM_API_BASE_URL 
+  ? `${process.env.XPECTRUM_API_BASE_URL}/chat-messages` 
+  : process.env.DIFY_API_BASE_URL 
+    ? `${process.env.DIFY_API_BASE_URL}/chat-messages` 
+    : 'https://xpectrum-main-app-prod-cocfr.ondigitalocean.app/api/v1/chat-messages';
+const API_KEY = process.env.XPECTRUM_API_KEY || process.env.DIFY_API_KEY || 'app-WxAWGosGXvslDCmQdLg2wlHz';
 
 app.post('/chat', async (req, res) => {
   try {

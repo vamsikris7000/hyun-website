@@ -77,19 +77,19 @@ exports.handler = async (event, context) => {
     console.log('Body:', body);
 
     // Get environment variables
-    const apiKey = process.env.DIFY_API_KEY;
-    const apiUrl = process.env.DIFY_API_BASE_URL;
+    const apiKey = process.env.XPECTRUM_API_KEY || process.env.DIFY_API_KEY;
+    const apiUrl = process.env.XPECTRUM_API_BASE_URL || process.env.DIFY_API_BASE_URL;
     
     console.log('API Key present:', !!apiKey);
     console.log('API URL present:', !!apiUrl);
 
     if (!apiKey || !apiUrl) {
       console.error('Missing environment variables for chatbot');
-      console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('DIFY') || key.includes('API')));
+      console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('DIFY') || key.includes('API') || key.includes('XPECTRUM')));
       
       // Use fallback values if environment variables are not set
-      const fallbackApiKey = 'app-qXbGcG3BX32wyKAIQP9Vlnol';
-      const fallbackApiUrl = 'https://demos.xpectrum-ai.com/v1';
+      const fallbackApiKey = 'app-WxAWGosGXvslDCmQdLg2wlHz';
+      const fallbackApiUrl = 'https://xpectrum-main-app-prod-cocfr.ondigitalocean.app/api/v1';
       
       console.log('Using fallback API configuration');
       console.log('Fallback API Key:', fallbackApiKey);
@@ -105,11 +105,11 @@ exports.handler = async (event, context) => {
 
     if (httpMethod === 'POST') {
       const requestBody = JSON.parse(body || '{}');
-      const finalApiKey = apiKey || 'app-qXbGcG3BX32wyKAIQP9Vlnol';
-      const finalApiUrl = apiUrl || 'https://demos.xpectrum-ai.com/v1';
+      const finalApiKey = apiKey || 'app-WxAWGosGXvslDCmQdLg2wlHz';
+      const finalApiUrl = apiUrl || 'https://xpectrum-main-app-prod-cocfr.ondigitalocean.app/api/v1';
       const requestUrl = `${finalApiUrl}/chat-messages`;
       
-      console.log(`Calling Dify API: ${requestUrl}`);
+      console.log(`Calling Xpectrum AI API: ${requestUrl}`);
       
       try {
         console.log('Request details:', {
@@ -131,8 +131,8 @@ exports.handler = async (event, context) => {
           body: JSON.stringify(requestBody)
         });
 
-        console.log(`Dify API response status: ${response.status}`);
-        console.log(`Dify API response data: ${response.data.substring(0, 200)}...`);
+        console.log(`Xpectrum AI API response status: ${response.status}`);
+        console.log(`Xpectrum AI API response data: ${response.data.substring(0, 200)}...`);
 
         if (response.status >= 200 && response.status < 300) {
           return {
@@ -144,7 +144,7 @@ exports.handler = async (event, context) => {
             body: response.data,
           };
         } else {
-          console.error(`Dify API error: ${response.status} - ${response.data}`);
+          console.error(`Xpectrum AI API error: ${response.status} - ${response.data}`);
           // Return a proper error response instead of the API error
           return {
             statusCode: 200,
