@@ -1147,20 +1147,58 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
       }
       
       if (!response.body) throw new Error('No response body');
+      
+      // Handle both streaming and non-streaming responses
       const reader = response.body.getReader();
-      let fullText = '';
       let decoder = new TextDecoder();
+      let fullText = '';
+      let buffer = '';
       let hasReceivedData = false;
       
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
+        if (done) {
+          // Try to parse any remaining buffer as a single JSON object if we haven't processed any streaming data
+          if (buffer.trim() && !fullText) {
+            try {
+              const jsonData = JSON.parse(buffer.trim());
+              console.log('Non-streaming JSON response:', jsonData);
+              
+              // Extract message from various possible formats
+              if (jsonData.message) {
+                fullText = jsonData.message;
+              } else if (jsonData.answer) {
+                fullText = jsonData.answer;
+              } else if (jsonData.text) {
+                fullText = jsonData.text;
+              } else if (jsonData.data && jsonData.data.message) {
+                fullText = jsonData.data.message;
+              } else if (jsonData.data && jsonData.data.answer) {
+                fullText = jsonData.data.answer;
+              }
+              
+              if (fullText) {
+                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                speakText(fullText);
+              }
+            } catch (err) {
+              console.log('Error parsing final buffer:', err);
+            }
+          }
+          break;
+        }
+        
         const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
         console.log('Received chunk:', chunk);
         hasReceivedData = true;
         
-        const lines = chunk.split('\n').filter(Boolean);
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+        
         for (const line of lines) {
+          if (!line.trim()) continue;
+          
           try {
             // Remove 'data: ' prefix if present
             const cleanLine = line.startsWith('data: ') ? line.slice(6) : line;
@@ -1172,26 +1210,52 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
               setConversationId(data.conversation_id);
             }
             
+            // Handle different response formats
+            let messageText = null;
+            
+            // Format 1: Standard Dify/Xpectrum format with event and answer
             if (data.event === 'agent_message' && data.answer) {
-              fullText += data.answer;
+              messageText = data.answer;
+            }
+            // Format 2: Simple message format { "message": "..." }
+            else if (data.message && typeof data.message === 'string') {
+              messageText = data.message;
+            }
+            // Format 3: Direct answer field
+            else if (data.answer && typeof data.answer === 'string') {
+              messageText = data.answer;
+            }
+            // Format 4: Text field
+            else if (data.text && typeof data.text === 'string') {
+              messageText = data.text;
+            }
+            
+            // If we found message text, add it to the stream
+            if (messageText) {
+              fullText += messageText;
               setStreamedText(fullText);
               console.log('Streaming text updated:', fullText);
               
               // Process text chunks for streaming TTS
               await processStreamingTextForTTS(fullText);
             }
-            if (data.event === 'message_end') {
-              console.log('Message ended, adding to chat:', fullText);
-              
-              // Add full text as normal bot response
-              setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
-              
-              // Process any remaining text that wasn't sent to TTS yet
-              const remainingText = fullText.slice(processedTTSLengthRef.current);
-              if (remainingText.trim()) {
-                await speakTextChunk(remainingText);
-              }
+            
+            // Handle message end events
+            if (data.event === 'message_end' || data.event === 'message' || (data.message && !data.event && fullText.trim())) {
+              // If we have accumulated text, finalize it
+              if (fullText.trim()) {
+                console.log('Message ended, adding to chat:', fullText);
                 
+                // Add full text as normal bot response
+                setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+                
+                // Process any remaining text that wasn't sent to TTS yet
+                const remainingText = fullText.slice(processedTTSLengthRef.current);
+                if (remainingText.trim()) {
+                  await speakTextChunk(remainingText);
+                }
+              }
+              
               setStreamedText('');
               // Reset processed length for next message
               processedTTSLengthRef.current = 0;
@@ -1202,6 +1266,18 @@ const ChatInterface = ({ isOpen, onClose }: ChatInterfaceProps) => {
             console.log('Error parsing line:', line, err);
           }
         }
+      }
+      
+      // Finalize any remaining text when stream ends
+      if (fullText.trim() && !chat.some(msg => msg.role === 'bot' && msg.text === fullText)) {
+        setChat((prev) => [...prev, { role: 'bot', text: fullText }]);
+        const remainingText = fullText.slice(processedTTSLengthRef.current);
+        if (remainingText.trim()) {
+          await speakTextChunk(remainingText);
+        }
+        setStreamedText('');
+        processedTTSLengthRef.current = 0;
+        ttsStoppedRef.current = false;
       }
       
       // Don't show error messages - let the Dify API handle responses
